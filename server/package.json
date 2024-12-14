@@ -21,7 +21,11 @@
     "mongodb": "^3.5.9",
     "redis": "^2.8.0",
     "sha1": "^1.1.1",
-    "uuid": "^8.2.0"
+    "socket.io": "^4.8.1",
+    "uuid": "^8.2.0",
+    "ws": "^8.18.0",
+    "y-websocket": "^2.0.4",
+    "yjs": "^13.6.20"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.0",
