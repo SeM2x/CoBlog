@@ -11,6 +11,8 @@ import { useParams } from 'next/navigation';
 
 // Mock function to fetch blog data
 const fetchBlog = async (id: string) => {
+  console.log(id);
+  
   // In a real app, this would be an API call
   return {
     title: 'Sample Blog Post',
