@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 // import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
+//import 'react-quill/dist/quill.snow.css';
 
 // const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
