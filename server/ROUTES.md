@@ -134,6 +134,7 @@ This error occurs if the provided email is not found in the database, indicating
   "status": "error",
   "message": "Email or Password incorrect"
 }
+```
 
 This error occurs if the password or email is incorrect
 
