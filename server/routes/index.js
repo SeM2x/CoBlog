@@ -1,36 +1,16 @@
 import { getStatus, getStats } from '../controllers/AppController';
 import { createUserAccount, userSignIn } from '../controllers/AuthController';
 import { getUserById } from '../controllers/UsersController';
+import { authenticate } from '../middlewares/authenticate';
 
-const jwt = require('jsonwebtoken');
+const { Router } = require('express');
 
-export const router = require('express').Router();
-export const authRouter = require('express').Router();
-export const userRouter = require('express').Router();
+export const router = Router();
+export const authRouter = Router();
+export const userRouter = Router();
 
-require('dotenv').config();
 
-const authenticate = (req, res, next) => {
-  const { authorization } = req.headers;
-  if (!authorization) {
-    return res.status(401).json({ status: 'error', message: 'Unauthorized' });
-  }
-  const token = authorization.split(' ')[1];
-  if (!token) {
-    return res.status(403).json({ status: 'error', message: 'Access Denied. Token missing' });
-  }
-
-  const secretKey = process.env.JWT_SECRET_KEY
-  jwt.verify(token, secretKey, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ status: 'error', message: 'Invalid Token' });
-    }
-    req.user = decoded;
-    next();
-  });
-};
-
-// Protected routes
+// Protect routes
 userRouter.use(authenticate);
 
 router.get('/status', getStatus);
