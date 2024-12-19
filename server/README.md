@@ -24,7 +24,6 @@ This repository contains the server-side code for the CoBlog application. It pro
 - **Express.js**: Web framework for handling HTTP requests.
 - **Socket.io**: Real-time, bidirectional communication between the client and the server.
 - **MongoDB**: NoSQL database for storing user data, blog posts, and other related information.
-- **Mongoose**: ODM (Object Data Modeling) library for MongoDB and Node.js.
 - **Passport.js**: Authentication middleware for handling user login and registration.
 - **JSON Web Tokens (JWT)**: Token-based authentication for securing API routes.
 
