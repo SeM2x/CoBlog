@@ -177,7 +177,7 @@ This route allows you to retrieve the details of a user based on their unique us
       "followerCount": 10,
       "followingCount": 5,
       "postCount": 3,
-      "relationship": "follows you"  // Possible values: "me", "follows you", "following", null
+      "relationship": "follows you"
     }
   }
     ```
