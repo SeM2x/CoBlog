@@ -66,4 +66,4 @@ Follow the steps below to set up and run the CoBlog server:
 
 - Checkout [routes.md](./ROUTES.md) for all app routes.
 
-Happy blogging! 🎉
+**Happy blogging! 🎉**
