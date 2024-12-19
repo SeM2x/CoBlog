@@ -60,7 +60,7 @@ export async function createUserAccount(req, res) {
 
   try {
     const newUser = await dbClient.insertData('users', newUserData);
-    await dbClient.insertData('userFollows', { userId: newUser.insertedId });
+    await dbClient.insertData('userFollows', { userId: newUser.insertedId, followers: [], following:[] });
 
     return res.status(201).json({ status: 'success', message: 'User created' });
   } catch (err) {
