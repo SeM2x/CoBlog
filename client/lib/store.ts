@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 
 interface BlogState {
-  blogs: any[]
-  addBlog: (blog: any) => void
-  updateBlog: (id: string, blog: any) => void
+  blogs: { id: string; title: string }[]
+  addBlog: (blog: { id: string; title: string }) => void
+  updateBlog: (id: string, blog: { id: string; title: string }) => void
   deleteBlog: (id: string) => void
 }
 
@@ -22,9 +22,19 @@ export const useBlogStore = create<BlogState>((set) => ({
     })),
 }))
 
+type Profile = {
+  id: string;
+  name: string;
+  bio: string;
+  avatar: string;
+  followers: number;
+  following: number;
+  blogs: { id: number; title: string }[];
+};
+
 interface UserState {
-  user: any | null
-  setUser: (user: any) => void
+  user: Profile | null
+  setUser: (user: Profile) => void
   clearUser: () => void
 }
 
