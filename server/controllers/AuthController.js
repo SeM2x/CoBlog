@@ -1,26 +1,8 @@
 import dbClient from '../utils/db';
+import { hashPassword, isPassword } from '../utils/hashUtils';
 
-const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-
-function hashPassword(password) {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const newPassword = salt + password;
-  const hash = crypto.createHash('sha256');
-  hash.update(newPassword);
-  return { hash: hash.digest('hex'), salt };
-}
-
-function isPassword(plainPassword, salt, hashedPassword) {
-  const newPassword = salt + plainPassword;
-  const hash = crypto.createHash('sha256');
-  hash.update(newPassword);
-  if (hash.digest('hex') === hashedPassword) {
-    return true;
-  }
-  return false;
-}
 
 export async function createUserAccount(req, res) {
   const {
@@ -43,7 +25,7 @@ export async function createUserAccount(req, res) {
     return res.status(409).json({ status: 'error', message: 'Username already exists' });
   }
 
-  const hashData = hashPassword(password)
+  const hashData = hashPassword(password);
   const newUserData = {
     email,
     firstName,
@@ -54,13 +36,15 @@ export async function createUserAccount(req, res) {
     followingCount: 0,
     postCount: 0,
     viewsCount: 0,
-    metadata: { status: 'active', modeOfAuth: 'password', isVerified: true, salt: hashData.salt },
+    metadata: {
+      status: 'active', modeOfAuth: 'password', isVerified: true, salt: hashData.salt,
+    },
     preference: {},
   };
 
   try {
     const newUser = await dbClient.insertData('users', newUserData);
-    await dbClient.insertData('userFollows', { userId: newUser.insertedId, followers: [], following:[] });
+    await dbClient.insertData('userFollows', { userId: newUser.insertedId, followers: [], following: [] });
 
     return res.status(201).json({ status: 'success', message: 'User created' });
   } catch (err) {
@@ -70,30 +54,34 @@ export async function createUserAccount(req, res) {
 }
 
 export async function userSignIn(req, res) {
-  const { email, password } = req.body
+  const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ status: 'error', message: 'Email and Password is required' });
   }
 
   try {
-    const user = await dbClient.findData('users', { email })
+    const user = await dbClient.findData('users', { email });
     if (!user) {
-      return res.status(404).json({ status: 'error', message: 'User not yet exist, Try Signing up' })
+      return res.status(404).json({ status: 'error', message: 'User not yet exist, Try Signing up' });
     }
 
-    const isMatch = isPassword(password, user.metadata.salt, user.Password)
+    const isMatch = isPassword(password, user.metadata.salt, user.Password);
     if (!isMatch) {
       return res.status(404).json({ status: 'error', message: 'Email or Password incorrect' });
     }
 
     // Create JWT Token
-    const secretKey = process.env.JWT_SECRET_KEY
-    const payload = { userId: user._id.toString(), userEmail: user.email};
-    const plOptions = { expiresIn: '24h'};
+    const secretKey = process.env.JWT_SECRET_KEY;
+    const payload = { userId: user._id.toString(), userEmail: user.email };
+    const plOptions = { expiresIn: '24h' };
     const token = jwt.sign(payload, secretKey, plOptions);
-    let { metadata, _id, Password, ...data } = user;
+    const {
+      metadata, _id, Password, ...data
+    } = user;
     data.id = _id.toString();
-    return res.status(200).json({ status: 'success', message: 'Authentication successful', token, data });
+    return res.status(200).json({
+      status: 'success', message: 'Authentication successful', token, data,
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
