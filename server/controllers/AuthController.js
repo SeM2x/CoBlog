@@ -32,6 +32,7 @@ export async function createUserAccount(req, res) {
     lastName,
     Password: hashData.hash,
     username,
+    bio: null,
     followerCount: 0,
     followingCount: 0,
     postCount: 0,
@@ -44,7 +45,8 @@ export async function createUserAccount(req, res) {
 
   try {
     const newUser = await dbClient.insertData('users', newUserData);
-    await dbClient.insertData('userFollows', { userId: newUser.insertedId, followers: [], following: [] });
+    await dbClient.insertData('followings', { userId: newUser.insertedId, followings: [] });
+    await dbClient.insertData('followers', { userId: newUser.insertedId, followers: [] });
 
     return res.status(201).json({ status: 'success', message: 'User created' });
   } catch (err) {
