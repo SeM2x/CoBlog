@@ -14,18 +14,138 @@ export async function getUserById(req, res) {
   } = user;
 
   resp.id = _id.toString();
+  resp.relationship = null;
 
   if (id === req.user.userId) {
     resp.relationship = 'me';
-  } else {
-    const followSys = await dbClient.findData('userFollows', { userId: new ObjectId(req.user.userId) });
-    if (followSys.followers.includes(new ObjectId(id))) {
+  }
+
+  if (!resp.relationship) {
+    const userFollowers = await dbClient.findData('followers', { userId: new ObjectId(req.user.userId) });
+    if (userFollowers.followers.some((follower) => follower.equals(new ObjectId(id)))) {
       resp.relationship = 'follows you';
-    } else if (followSys.following.includes(new ObjectId(id))) {
+    }
+  }
+
+  if (!resp.relationship) {
+    const userFollowings = await dbClient.findData('followings', { userId: new ObjectId(req.user.userId) });
+    if (userFollowings.followings.some((following) => following.equals(new ObjectId(id)))) {
       resp.relationship = 'following';
-    } else {
-      resp.relationship = null;
     }
   }
   return res.status(200).json({ status: 'success', data: resp });
+}
+
+export async function followUser(req, res) {
+  const { id } = req.params;
+  if (id === req.user.userId) {
+    return res.status(409).json({ status: 'error', message: "You can't follow yourself" });
+  }
+  // Update target user followers
+  try {
+    const result = await dbClient.updateData(
+      'followers',
+      { userId: new ObjectId(id) },
+      { $addToSet: { followers: new ObjectId(req.user.userId) } },
+    );
+
+    // Stop process if user does not exist
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ status: 'error', message: 'User does not exist' });
+    }
+
+    // Stop process if targetUser already exist in currentUser followers
+    if (result.modifiedCount === 0) {
+      return res.status(409).json(
+        { status: 'error', message: 'You are already following this user.' },
+      );
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  }
+
+  try {
+    // Update Current user followings
+    await dbClient.updateData(
+      'followings',
+      { userId: new ObjectId(req.user.userId) },
+      { $addToSet: { followings: new ObjectId(id) } },
+    );
+
+    // Update target User follower count
+    await dbClient.updateData(
+      'users',
+      { _id: new ObjectId(req.user.userId) },
+      { $inc: { followingCount: 1 } },
+    );
+
+// Update target user following count
+    await dbClient.updateData(
+      'users',
+      { _id: new ObjectId(id) },
+      { $inc: { followerCount: 1 } },
+    );
+    res.status(200).json({ status: 'success', message: 'user followed successfully' });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  }
+}
+
+export async function unfollowUser(req, res) {
+  const { id } = req.params;
+  if (id === req.user.userId) {
+    return res.status(409).json({ status: 'error', message: "You can't unfollow yourself" });
+  }
+  // Update target user followers
+  try {
+    const result = await dbClient.updateData(
+      'followers',
+      { userId: new ObjectId(id) },
+      { $pull: { followers: new ObjectId(req.user.userId) } },
+    );
+
+    // Stop process if user does not exist
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ status: 'error', message: 'User does not exist' });
+    }
+
+    // Stop process if targetUser already exist in currentUser followers
+    if (result.modifiedCount === 0) {
+      return res.status(409).json(
+        { status: 'error', message: 'You are not following this user.' },
+      );
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  }
+
+  try {
+    // Update Current user followings
+    await dbClient.updateData(
+      'followings',
+      { userId: new ObjectId(req.user.userId) },
+      { $pull: { followings: new ObjectId(id) } },
+    );
+
+    // Update target User follower count
+    await dbClient.updateData(
+      'users',
+      { _id: new ObjectId(req.user.userId) },
+      { $inc: { followingCount: -1 } },
+    );
+
+// Update target user following count
+    await dbClient.updateData(
+      'users',
+      { _id: new ObjectId(id) },
+      { $inc: { followerCount: -1 } },
+    );
+    res.status(200).json({ status: 'success', message: 'user unfollowed successfully' });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  }
 }
