@@ -55,7 +55,7 @@ Follow the steps below to set up and run the CoBlog server:
 
 3. **Set up environment variables:** Create a .env file in the root directory and add the following environment variables:
     ```env
-    JWT_SECRET=your-secret-key
+    JWT_SECRET_KEY=your-secret-key
     ```
 
 4. **Start the server:** To run the server in development mode, use the following command:
