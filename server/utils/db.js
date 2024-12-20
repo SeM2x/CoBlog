@@ -11,7 +11,7 @@ class DBClient {
     this.dbClient = null;
     this.db = null;
     this.verifyConnection = false;
-    this.DBCollections = ['users', 'userFollows', 'blogs', 'conversations', 'notifications'];
+    this.DBCollections = ['users', 'followers', 'followings', 'blogs', 'conversations', 'notifications'];
   }
 
   async init() {
@@ -37,7 +37,7 @@ class DBClient {
   async insertData(collectionType, details) {
     if (this.db) {
       if (!this.DBCollections.includes(collectionType)) {
-        return new Error('Unkown collection type');
+        throw new Error('Collection type does not exist');
       }
       const collection = this.db.collection(collectionType);
       try {
@@ -55,14 +55,13 @@ class DBClient {
   async countCollection(collectionType) {
     if (this.db) {
       if (!collectionType) {
-        return new Error('Collection type not specified');
+        throw new Error('Collection type not specified');
       }
 
+      if (!this.DBCollections.includes(collectionType)) {
+        throw new Error('Collection type does not exist');
+      }
       const collection = this.db.collection(collectionType);
-      if (!collection) {
-        return new Error('Collection type does not exist');
-      }
-
       const collectionCount = await collection.countDocuments();
       return collectionCount;
     }
@@ -70,11 +69,22 @@ class DBClient {
 
   async findData(collectionType, details) {
     if (this.db) {
-      const collection = this.db.collection(collectionType);
-      if (!collection) {
-        return new Error('Collection type does not exist');
+      if (!this.DBCollections.includes(collectionType)) {
+        throw new Error('Collection type does not exist');
       }
+      const collection = this.db.collection(collectionType);
       const result = collection.findOne(details);
+      return result;
+    }
+  }
+
+  async updateData(collectionType, filter, update) {
+    if (this.db) {
+      if (!this.DBCollections.includes(collectionType)) {
+        throw new Error('Collection type does not exist');
+      }
+      const collection = this.db.collection(collectionType);
+      const result = await collection.updateOne(filter, update);
       return result;
     }
   }
