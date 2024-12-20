@@ -73,19 +73,22 @@ export async function followUser(req, res) {
       { $addToSet: { followings: new ObjectId(id) } },
     );
 
-    // Update target User follower count
+    // Update Current User follower count
     await dbClient.updateData(
       'users',
       { _id: new ObjectId(req.user.userId) },
       { $inc: { followingCount: 1 } },
     );
 
-// Update target user following count
+    // Update target user following count
     await dbClient.updateData(
       'users',
       { _id: new ObjectId(id) },
       { $inc: { followerCount: 1 } },
     );
+
+    // Create Notification
+
     res.status(200).json({ status: 'success', message: 'user followed successfully' });
   } catch (err) {
     console.log(err);
@@ -130,19 +133,22 @@ export async function unfollowUser(req, res) {
       { $pull: { followings: new ObjectId(id) } },
     );
 
-    // Update target User follower count
+    // Update current User following count
     await dbClient.updateData(
       'users',
       { _id: new ObjectId(req.user.userId) },
       { $inc: { followingCount: -1 } },
     );
 
-// Update target user following count
+    // Update target user follower count
     await dbClient.updateData(
       'users',
       { _id: new ObjectId(id) },
       { $inc: { followerCount: -1 } },
     );
+
+    // Create Notification
+
     res.status(200).json({ status: 'success', message: 'user unfollowed successfully' });
   } catch (err) {
     console.log(err);
