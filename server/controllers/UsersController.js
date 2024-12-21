@@ -89,7 +89,7 @@ export async function followUser(req, res) {
 
     // Create Notification
 
-    res.status(200).json({ status: 'success', message: 'user followed successfully' });
+    return res.status(200).json({ status: 'success', message: 'user followed successfully' });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ status: 'error', message: 'Something went wrong' });
@@ -149,9 +149,79 @@ export async function unfollowUser(req, res) {
 
     // Create Notification
 
-    res.status(200).json({ status: 'success', message: 'user unfollowed successfully' });
+    return res.status(200).json({ status: 'success', message: 'user unfollowed successfully' });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
+}
+
+export async function getUserFollowers(req, res) {
+  const { id } = req.params;
+  const cursor = req.query.cursor || 0;
+  const limit = req.query.limit || 10;
+
+  const result = await dbClient.findData('followers', { userId: new ObjectId(id) });
+  if (!result) {
+    return res.status(404).json({ status: 'error', message: 'User does not exist' });
+  }
+  // Paginate resp
+  const endIdx = cursor + limit;
+  const paginatedFollowerId = result.followers.slice(cursor, endIdx);
+  const pageInfo = {
+    cursor: result.followers[endIdx] ? endIdx : null,
+    hasNext: !!result.followers[endIdx],
+  };
+  if (!paginatedFollowerId[0]) {
+    return res.status(200).json({ status: 'success', data: [], pageInfo });
+  }
+  const getFollowerPromise = paginatedFollowerId.map((follower) => dbClient.findData('users', { _id: follower }));
+  Promise.all(getFollowerPromise)
+    .then((results) => {
+      const resp = results.map((result) => ({
+        id: result._id,
+        username: result.username,
+        bio: result.bio,
+      }));
+      return res.status(200).json({ status: 'success', data: resp, pageInfo });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    });
+}
+
+export async function getUserFollowings(req, res) {
+  const { id } = req.params;
+  const cursor = req.query.cursor || 0;
+  const limit = req.query.limit || 10;
+
+  const result = await dbClient.findData('followings', { userId: new ObjectId(id) });
+  if (!result) {
+    return res.status(404).json({ status: 'error', message: 'User does not exist' });
+  }
+  // Paginate resp
+  const endIdx = cursor + limit;
+  const paginatedFollowingId = result.followings.slice(cursor, endIdx);
+  const pageInfo = {
+    cursor: result.followings[endIdx] ? endIdx : null,
+    hasNext: !!result.followings[endIdx],
+  };
+  if (!paginatedFollowingId[0]) {
+    return res.status(200).json({ status: 'success', data: [], pageInfo });
+  }
+  const getFollowingPromise = paginatedFollowingId.map((following) => dbClient.findData('users', { _id: following }));
+  Promise.all(getFollowingPromise)
+    .then((results) => {
+      const resp = results.map((result) => ({
+        id: result._id,
+        username: result.username,
+        bio: result.bio,
+      }));
+      return res.status(200).json({ status: 'success', data: resp, pageInfo });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    });
 }
