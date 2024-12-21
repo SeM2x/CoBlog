@@ -2,7 +2,7 @@ import dbClient from '../utils/db';
 
 const { ObjectId } = require('mongodb');
 
-export async function getUserById(req, res) {
+export async function getUserProfileById(req, res) {
   const { id } = req.params;
   const user = await dbClient.findData('users', { _id: new ObjectId(id) });
   if (!user) {
