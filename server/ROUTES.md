@@ -155,7 +155,7 @@ The User API allows you to fetch information about a user, either for your own p
 
 ---
 
-## **GET /api/users/:id**
+## **GET /api/users/:id/profile**
 
 ### **Description**
 This route allows you to retrieve the details of a user based on their unique user ID. It also checks the relationship of the requesting user with the target user (whether they follow the target user, are followed by the target user, or are not related). If the user exists, their profile information is returned, excluding sensitive details like the password.
@@ -202,3 +202,188 @@ null: There is no direct relationship between the two users.
 }
 ```
 This error occurs if the user with the provided id does not exist in the database.
+
+## **PUT /users/:id/follow**
+
+### **Description**
+Allows a user to follow another user by adding the target user's ID to the follower's list.
+
+- **Request Parameters**:
+  - `id` (path parameter): The ID of the user to be followed.
+  
+- **Response**:
+  - **200 OK**: User followed successfully.
+    ```json
+    {
+      "status": "success",
+      "message": "User followed successfully"
+    }
+    ```
+  - **409 Conflict**: If the user tries to follow themselves.
+    ```json
+    {
+      "status": "error",
+      "message": "You can't follow yourself"
+    }
+    ```
+  - **404 Not Found**: If the target user does not exist.
+    ```json
+    {
+      "status": "error",
+      "message": "User does not exist"
+    }
+    ```
+  - **409 Conflict**: If the user is already following the target user.
+    ```json
+    {
+      "status": "error",
+      "message": "You are already following this user"
+    }
+    ```
+  - **500 Internal Server Error**: If an unexpected error occurs during the process.
+    ```json
+    {
+      "status": "error",
+      "message": "Something went wrong"
+    }
+    ```
+
+---
+
+## **PUT /users/:id/unfollow**
+
+### **Description**
+ Allows a user to unfollow another user by removing the target user's ID from the follower's list.
+- **Request Parameters**:
+  - `id` (path parameter): The ID of the user to be unfollowed.
+  
+- **Response**:
+  - **200 OK**: User unfollowed successfully.
+    ```json
+    {
+      "status": "success",
+      "message": "User unfollowed successfully"
+    }
+    ```
+  - **409 Conflict**: If the user tries to unfollow themselves.
+    ```json
+    {
+      "status": "error",
+      "message": "You can't unfollow yourself"
+    }
+    ```
+  - **404 Not Found**: If the target user does not exist.
+    ```json
+    {
+      "status": "error",
+      "message": "User does not exist"
+    }
+    ```
+  - **409 Conflict**: If the user is not currently following the target user.
+    ```json
+    {
+      "status": "error",
+      "message": "You are not following this user"
+    }
+    ```
+  - **500 Internal Server Error**: If an unexpected error occurs during the process.
+    ```json
+    {
+      "status": "error",
+      "message": "Something went wrong"
+    }
+    ```
+
+---
+
+## **GET /users/:id/followers**
+
+### **Description**
+ Fetches a list of users following the specified user, with pagination support.
+- **Request Parameters**:
+  - `id` (path parameter): The ID of the user whose followers are to be fetched.
+
+- **Query Parameters**:
+  - `cursor` (optional): The starting index for pagination (default: 0).
+  - `limit` (optional): The maximum number of followers to fetch (default: 10).
+  
+- **Response**:
+  - **200 OK**: A list of followers for the specified user, including pagination information.
+    ```json
+    {
+      "status": "success",
+      "data": [
+        {
+          "id": "userId1",
+          "username": "user1",
+          "bio": "Bio of user1"
+        },
+      ],
+      "pageInfo": {
+        "cursor": "next cursor valie or null",
+        "hasNext": true || false
+      }
+    }
+    ```
+  - **404 Not Found**: If the target user does not exist.
+    ```json
+    {
+      "status": "error",
+      "message": "User does not exist"
+    }
+    ```
+  - **500 Internal Server Error**: If an unexpected error occurs during the process.
+    ```json
+    {
+      "status": "error",
+      "message": "Something went wrong"
+    }
+    ```
+
+---
+
+## **GET /users/:id/followings**
+
+### **Description**
+ Fetches a list of users that the specified user is following, with pagination support.
+- **Request Parameters**:
+  - `id` (path parameter): The ID of the user whose followings are to be fetched.
+
+- **Query Parameters**:
+  - `cursor` (optional): The starting index for pagination (default: 0).
+  - `limit` (optional): The maximum number of followings to fetch (default: 10).
+  
+- **Response**:
+  - **200 OK**: A list of users the specified user is following, including pagination information.
+    ```json
+    {
+      "status": "success",
+      "data": [
+        {
+          "id": "userId1",
+          "username": "user1",
+          "bio": "Bio of user1"
+        },
+      ],
+      "pageInfo": {
+        "cursor": "next cursor valie or null",
+        "hasNext": true || false
+      }
+    }
+    ```
+  - **404 Not Found**: If the target user does not exist.
+    ```json
+    {
+      "status": "error",
+      "message": "User does not exist"
+    }
+    ```
+  - **500 Internal Server Error**: If an unexpected error occurs during the process.
+    ```json
+    {
+      "status": "error",
+      "message": "Something went wrong"
+    }
+    ```
+
+---
