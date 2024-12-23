@@ -88,7 +88,14 @@ export async function followUser(req, res) {
     );
 
     // Create Notification
-
+    const notificationData = {
+      userId: new ObjectId(id),
+      type: 'follow',
+      message: `${req.user.username} started following you`,
+      follwerUserId: new ObjectId(req.user.userId),
+      read: false,
+    };
+    await dbClient.insertData('notifications', notificationData);
     return res.status(200).json({ status: 'success', message: 'user followed successfully' });
   } catch (err) {
     console.log(err);
@@ -146,8 +153,6 @@ export async function unfollowUser(req, res) {
       { _id: new ObjectId(id) },
       { $inc: { followerCount: -1 } },
     );
-
-    // Create Notification
 
     return res.status(200).json({ status: 'success', message: 'user unfollowed successfully' });
   } catch (err) {
