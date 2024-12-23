@@ -158,7 +158,7 @@ The User API allows you to fetch information about a user, either for your own p
 ## **GET /api/users/:id/profile**
 
 ### **Description**
-This route allows you to retrieve the details of a user based on their unique user ID. It also checks the relationship of the requesting user with the target user (whether they follow the target user, are followed by the target user, or are not related). If the user exists, their profile information is returned, excluding sensitive details like the password.
+This route allows you to retrieve the details of a user based on their unique user ID. It also checks the relationship of the requesting user with the target user (whether they follow the target user, are followed by the target user, or are not related). If the user exists, their profile information is returned.
 
 ### **Route Parameters**
 - `id` (string) - The unique identifier (ObjectId) of the user whose profile information is being requested.
@@ -387,3 +387,90 @@ Allows a user to follow another user by adding the target user's ID to the follo
     ```
 
 ---
+
+# Notification Routes API Documentation
+
+## **Get User Notifications**
+
+**GET /notifications/me**
+
+- **Description**: Fetches a list of notifications for the authenticated user, with pagination and optional filtering by read status.
+
+- **Query Parameters**:
+  - `cursor` (optional): The starting index for pagination (default: 0).
+  - `limit` (optional): The maximum number of notifications to fetch (default: 10).
+  - `read` (optional): Filters notifications by read status. Accepts "true", "false", or undefined (default: fetch all notifications).
+  
+- **Response**:
+  - **200 OK**: A list of notifications for the authenticated user, including pagination information.
+    ```json
+    {
+      "status": "success",
+      "data": [
+        {
+          "id": "notificationId1",
+          "message": "New follower",
+          "read": false,
+          "timestamp": "2024-12-22T12:34:56.000Z"
+        },
+      ],
+      "pageInfo": {
+        "cursor": 10,
+        "hasNext": true
+      }
+    }
+    ```
+  - **500 Internal Server Error**: If an unexpected error occurs while fetching notifications.
+    ```json
+    {
+      "status": "error",
+      "message": "Something went wrong"
+    }
+    ```
+
+---
+
+## **Mark Notification as Read or Unread**
+
+**GET /notifications/:id**
+
+- **Description**: Marks a specific notification as read or unread based on the query parameter. Default is "true"
+  
+- **Request Parameters**:
+  - `id` (path parameter): The ID of the notification to be marked.
+  
+- **Query Parameters**:
+  - `read` (optional): If set to "true", the notification is marked as read. If set to "false", the notification is marked as unread. Default is "true" (mark as read).
+  
+- **Response**:
+  - **200 OK**: Successfully marked the notification as read or unread.
+    ```json
+    {
+      "status": "success"
+    }
+    ```
+  - **400 Bad Request**: If the notification ID is missing or invalid.
+    ```json
+    {
+      "status": "error",
+      "message": "Notification id missing"
+    }
+    ```
+  - **404 Not Found**: If the notification with the specified ID does not exist.
+    ```json
+    {
+      "status": "error",
+      "message": "Notification does not exist"
+    }
+    ```
+  - **500 Internal Server Error**: If an unexpected error occurs while updating the notification.
+    ```json
+    {
+      "status": "error",
+      "message": "Something went wrong"
+    }
+    ```
+
+---
+
+
