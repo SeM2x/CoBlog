@@ -1,4 +1,4 @@
-import { userRouter, authRouter, router } from './routes/index';
+import { userRouter, authRouter, router, notificationRouter } from './routes/index';
 
 const express = require('express');
 const http = require('http');
@@ -17,6 +17,7 @@ app.use(cors(corsOptions));
 
 app.use('/api/users', userRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/notifications', notificationRouter);
 app.use('/api', router);
 
 const server = http.createServer(app);
