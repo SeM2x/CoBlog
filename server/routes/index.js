@@ -4,15 +4,18 @@ import {
   getUserProfileById, followUser, unfollowUser, getUserFollowers, getUserFollowings,
 } from '../controllers/UsersController';
 import { authenticate } from '../middlewares/authenticate';
+import { getUserNotifications, markNotificationRead } from '../controllers/NotificationsController';
 
 const { Router } = require('express');
 
 export const router = Router();
 export const authRouter = Router();
 export const userRouter = Router();
+export const notificationRouter = Router();
 
 // Protect router
 userRouter.use(authenticate);
+notificationRouter.use(authenticate);
 
 router.get('/status', getStatus);
 router.get('/stats', getStats);
@@ -23,3 +26,5 @@ userRouter.put('/:id/follow', followUser);
 userRouter.put('/:id/unfollow', unfollowUser);
 userRouter.get('/:id/followers', getUserFollowers);
 userRouter.get('/:id/followings', getUserFollowings);
+notificationRouter.get('/:id', markNotificationRead);
+notificationRouter.get('/me', getUserNotifications);
