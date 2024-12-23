@@ -75,7 +75,7 @@ A generic error occurs in case of server failure.
 
 
 
-## **POST /api/auth/create_account**
+## **POST /api/auth/sign_in**
 
 ### **Description**
 
