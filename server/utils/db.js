@@ -41,8 +41,8 @@ class DBClient {
       }
       const collection = this.db.collection(collectionType);
       try {
-        details.createdAt = new Date().toISOString().split('.')[0] + 'Z';
-        details.updatedAt = new Date().toISOString().split('.')[0] + 'Z';
+        details.createdAt = `${new Date().toISOString().split('.')[0]}Z`;
+        details.updatedAt = `${new Date().toISOString().split('.')[0]}Z`;
         const result = await collection.insertOne(details);
         return result;
       } catch (err) {
@@ -83,8 +83,20 @@ class DBClient {
         throw new Error('Collection type does not exist');
       }
       const collection = this.db.collection(collectionType);
-      update[`$set`] = { 'updatedAt':  new Date().toISOString().split('.')[0] + 'Z' }
+      let nUpdate = { ...update.$set, updatedAt: `${new Date().toISOString().split('.')[0]}Z` }
+      update.$set = nUpdate;
       const result = await collection.updateOne(filter, update);
+      return result;
+    }
+  }
+
+  async findManyData(collectionType, details) {
+    if (this.db) {
+      if (!this.DBCollections.includes(collectionType)) {
+        throw new Error('Collection type does not exist');
+      }
+      const collection = this.db.collection(collectionType);
+      const result = collection.find(details).toArray();
       return result;
     }
   }
