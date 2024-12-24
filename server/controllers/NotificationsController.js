@@ -29,18 +29,19 @@ export async function getUserNotifications(req, res) {
 
 export async function markNotificationRead(req, res) {
   const { read } = req.query;
-  let { id } = req.params;
+  const { id } = req.params;
+
   if (!id) {
-    return res.status(400).json({ status: 'error', message: 'Notification id missing' });
+    return res.status(400).json({ status: 'error', message: 'id missing' });
   }
 
   try {
-    id = new ObjectId(id);
+    const objId = new ObjectId(id);
   } catch (err) {
-    return res.status(400).json({ status: 'error', message: 'wrong notification id' });
+    return res.status(400).json({ status: 'error', message: 'incorrect id' })
   }
 
-  const filter = { _id: id };
+  const filter = { _id: new ObjectId(id) };
 
   let update;
   if (read === 'false') {
