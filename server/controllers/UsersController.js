@@ -21,15 +21,21 @@ export async function getUserProfileById(req, res) {
   }
 
   if (!resp.relationship) {
-    const userFollowers = await dbClient.findData('followers', { userId: new ObjectId(req.user.userId) });
-    if (userFollowers.followers.some((follower) => follower.equals(new ObjectId(id)))) {
+    const verify = await dbClient.findData('followers', {
+      userId: new ObjectId(req.user.userId),
+      followers: { $in: [new ObjectId(id)] },
+    });
+    if (verify) {
       resp.relationship = 'follows you';
     }
   }
 
   if (!resp.relationship) {
-    const userFollowings = await dbClient.findData('followings', { userId: new ObjectId(req.user.userId) });
-    if (userFollowings.followings.some((following) => following.equals(new ObjectId(id)))) {
+    const verify = await dbClient.findData('followings', {
+      userId: new ObjectId(req.user.userId),
+      followings: { $in: [new ObjectId(id)] },
+    });
+    if (verify) {
       resp.relationship = 'following';
     }
   }
