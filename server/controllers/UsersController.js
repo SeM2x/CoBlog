@@ -5,14 +5,10 @@ const { ObjectId } = require('mongodb');
 export async function getUserProfileById(req, res) {
   const { id } = req.params;
 
-  if (!id) {
-    return res.status(400).json({ status: 'error', message: 'id missing' });
-  }
-
   try {
-    const objId = new ObjectId(id);
+    ObjectId(id);
   } catch (err) {
-    return res.status(400).json({ status: 'error', message: 'incorrect id' })
+    return res.status(400).json({ status: 'error', message: 'incorrect id' });
   }
 
   const user = await dbClient.findData('users', { _id: new ObjectId(id) });
@@ -56,14 +52,10 @@ export async function getUserProfileById(req, res) {
 export async function followUser(req, res) {
   const { id } = req.params;
 
-  if (!id) {
-    return res.status(400).json({ status: 'error', message: 'id missing' });
-  }
-
   try {
-    const objId = new ObjectId(id);
+    ObjectId(id);
   } catch (err) {
-    return res.status(400).json({ status: 'error', message: 'incorrect id' })
+    return res.status(400).json({ status: 'error', message: 'incorrect id' });
   }
 
   if (id === req.user.userId) {
@@ -134,14 +126,10 @@ export async function followUser(req, res) {
 export async function unfollowUser(req, res) {
   const { id } = req.params;
 
-  if (!id) {
-    return res.status(400).json({ status: 'error', message: 'Notification id missing' });
-  }
-
   try {
-    const objId = new ObjectId(id);
+    ObjectId(id);
   } catch (err) {
-    return res.status(400).json({ status: 'error', message: 'incorrect id' })
+    return res.status(400).json({ status: 'error', message: 'incorrect id' });
   }
 
   if (id === req.user.userId) {
@@ -203,14 +191,10 @@ export async function unfollowUser(req, res) {
 export async function getUserFollowers(req, res) {
   const { id } = req.params;
 
-  if (!id) {
-    return res.status(400).json({ status: 'error', message: 'id missing' });
-  }
-
   try {
-    const objId = new ObjectId(id);
+    ObjectId(id);
   } catch (err) {
-    return res.status(400).json({ status: 'error', message: 'incorrect id' })
+    return res.status(400).json({ status: 'error', message: 'incorrect id' });
   }
 
   const cursor = req.query.cursor || 0;
@@ -256,14 +240,10 @@ export async function getUserFollowers(req, res) {
 export async function getUserFollowings(req, res) {
   const { id } = req.params;
 
-  if (!id) {
-    return res.status(400).json({ status: 'error', message: 'id missing' });
-  }
-
   try {
-    const objId = new ObjectId(id);
+    ObjectId(id);
   } catch (err) {
-    return res.status(400).json({ status: 'error', message: 'incorrect id' })
+    return res.status(400).json({ status: 'error', message: 'incorrect id' });
   }
 
   const cursor = req.query.cursor || 0;
