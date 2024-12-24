@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useUserStore } from '@/lib/store';
 
 const userProfile = {
   name: 'John Doe',
@@ -65,6 +66,7 @@ export default function ProfilePage() {
     setIsEditProfileOpen(false);
   };
 
+  const user = useUserStore((state) => state.user);
   return (
     <div className='space-y-6'>
       <Card>
@@ -79,14 +81,16 @@ export default function ProfilePage() {
             </AvatarFallback>
           </Avatar>
           <div className='space-y-2 text-center sm:text-left'>
-            <h1 className='text-2xl font-bold'>{userProfile.name}</h1>
+            <h1 className='text-2xl font-bold'>
+              {user?.firstName || 'John'} {user?.lastName || 'Doe'}
+            </h1>
             <p className='text-light-secondary dark:text-dark-secondary'>
-              {userProfile.username}
+              @{user?.username || userProfile.username}
             </p>
-            <p>{userProfile.bio}</p>
+            <p>{user?.bio || userProfile.bio}</p>
             <div className='flex justify-center space-x-4 sm:justify-start'>
-              <span>{userProfile.followers} Followers</span>
-              <span>{userProfile.following} Following</span>
+              <span>{user?.followerCount} Followers</span>
+              <span>{user?.followingCount} Following</span>
             </div>
           </div>
           <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>

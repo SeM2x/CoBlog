@@ -25,39 +25,23 @@ import {
 } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff } from 'lucide-react';
-
-const formSchema = z
-  .object({
-    fullName: z
-      .string()
-      .min(2, { message: 'Full name must be at least 2 characters' }),
-    username: z
-      .string()
-      .min(3, { message: 'Username must be at least 3 characters' }),
-    email: z.string().email({ message: 'Invalid email address' }),
-    password: z
-      .string()
-      .min(8, { message: 'Password must be at least 8 characters' }),
-    confirmPassword: z.string(),
-    terms: z
-      .boolean()
-      .refine((val) => val === true, {
-        message: 'You must agree to the terms and conditions',
-      }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
+import { register } from '@/lib/actions/auth';
+import { SignupFormSchema } from '@/lib/form-validation/auth';
+import { useAction } from 'next-safe-action/hooks';
+import { setLocalUser } from '@/lib/utils/local-storage';
+import { useUserStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof SignupFormSchema>>({
+    resolver: zodResolver(SignupFormSchema),
     defaultValues: {
-      fullName: '',
+      firstName: '',
+      lastName: '',
       username: '',
       email: '',
       password: '',
@@ -66,13 +50,29 @@ export default function RegisterPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  const setUser = useUserStore((state) => state.setUser);
+  const router = useRouter();
+
+  const { execute, isPending } = useAction(register, {
+    onSettled: ({ result: { data } }) => {
+      if (data?.user) {
+        setLocalUser(data?.user);
+        setUser(data?.user);
+        router.push('/dashboard');
+      }
+      if (data?.message) {
+        setError(data?.message);
+      }
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof SignupFormSchema>) {
+    execute(values);
   }
 
   return (
     <div className='flex items-center justify-center min-h-screen bg-light-bg dark:bg-dark-bg'>
-      <Card className='w-full max-w-md'>
+      <Card className='w-full max-w-md my-4 mx-2'>
         <CardHeader className='space-y-1'>
           <CardTitle className='text-2xl font-bold text-center'>
             Join the community of creators and readers!
@@ -84,19 +84,34 @@ export default function RegisterPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-              <FormField
-                control={form.control}
-                name='fullName'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter your full name' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className='flex items-start gap-2'>
+                <FormField
+                  control={form.control}
+                  name='firstName'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder='Enter your first name' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='lastName'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder='Enter your last name' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name='username'
@@ -205,7 +220,11 @@ export default function RegisterPage() {
                         I agree to the{' '}
                         <Link
                           href='/terms'
-                          className='text-primary hover:underline'
+                          className={`${
+                            !form.formState.errors.terms
+                              ? 'text-primary'
+                              : 'text-destructive'
+                          } hover:underline`}
                         >
                           terms and conditions
                         </Link>
@@ -214,7 +233,8 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-              <Button type='submit' className='w-full'>
+              {error && <FormMessage className='text-sm'>{error}</FormMessage>}
+              <Button loading={isPending} type='submit' className='w-full'>
                 Register
               </Button>
             </form>

@@ -1,10 +1,11 @@
-import { create } from 'zustand'
+import { Profile } from '@/types';
+import { create } from 'zustand';
 
 interface BlogState {
-  blogs: { id: string; title: string }[]
-  addBlog: (blog: { id: string; title: string }) => void
-  updateBlog: (id: string, blog: { id: string; title: string }) => void
-  deleteBlog: (id: string) => void
+  blogs: { id: string; title: string }[];
+  addBlog: (blog: { id: string; title: string }) => void;
+  updateBlog: (id: string, blog: { id: string; title: string }) => void;
+  deleteBlog: (id: string) => void;
 }
 
 export const useBlogStore = create<BlogState>((set) => ({
@@ -20,27 +21,16 @@ export const useBlogStore = create<BlogState>((set) => ({
     set((state) => ({
       blogs: state.blogs.filter((blog) => blog.id !== id),
     })),
-}))
-
-type Profile = {
-  id: string;
-  name: string;
-  bio: string;
-  avatar: string;
-  followers: number;
-  following: number;
-  blogs: { id: number; title: string }[];
-};
+}));
 
 interface UserState {
-  user: Profile | null
-  setUser: (user: Profile) => void
-  clearUser: () => void
+  user: Profile | null;
+  setUser: (user: Profile) => void;
+  clearUser: () => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
   clearUser: () => set({ user: null }),
-}))
-
+}));

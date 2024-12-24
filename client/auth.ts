@@ -1,26 +1,49 @@
 import NextAuth from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import Credentials from 'next-auth/providers/credentials';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { JWT } from 'next-auth/jwt';
 
-export const { auth, handlers, signIn, signOut } = NextAuth({
-  session: {
-    strategy: 'jwt',
+export { auth as middleware } from '@/auth';
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  pages: {
+    signIn: '/login',
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.accessToken = user.accessToken;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.accessToken = token.accessToken;
+      return session;
+    },
   },
   providers: [
-    CredentialsProvider({
-      name: 'Sign in',
-      credentials: {
-        username: {
-          label: 'Username',
-          type: 'text',
-          placeholder: 'Enter your username',
-        },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        console.log(credentials);
-
-        return { id: '1', email: 'admin@email.com' };
+    Credentials({
+      name: 'Credentials',
+      authorize: async (credentials) => {
+        if (credentials.token) {
+          return { accessToken: credentials.token as string };
+        }
+        return null;
       },
     }),
   ],
+  trustHost: true,
+  debug: process.env.NODE_ENV === 'development',
 });
+
+declare module 'next-auth' {
+  interface User {
+    accessToken?: string;
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    accessToken?: string;
+  }
+}

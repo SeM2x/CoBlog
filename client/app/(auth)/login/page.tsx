@@ -25,21 +25,19 @@ import {
 } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff } from 'lucide-react';
-import { signIn } from 'next-auth/react';
-
-const formSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address' }),
-  password: z
-    .string()
-    .min(8, { message: 'Password must be at least 8 characters' }),
-  rememberMe: z.boolean().optional(),
-});
+import { login } from '@/lib/actions/auth';
+import { useUserStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
+import { setLocalUser } from '@/lib/utils/local-storage';
+import { useAction } from 'next-safe-action/hooks';
+import { LoginFormSchema } from '@/lib/form-validation/auth';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof LoginFormSchema>>({
+    resolver: zodResolver(LoginFormSchema),
     defaultValues: {
       email: '',
       password: '',
@@ -47,12 +45,24 @@ export default function LoginPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    signIn('credentials', {
-      email: values.email,
-      password: values.password,
-      rememberMe: values.rememberMe,
-    });
+  const setUser = useUserStore((state) => state.setUser);
+  const router = useRouter();
+
+  const { execute, isPending } = useAction(login, {
+    onSettled: ({ result: { data } }) => {
+      if (data?.user) {
+        setLocalUser(data?.user);
+        setUser(data?.user);
+        router.push('/dashboard');
+      }
+      if (data?.message) {
+        setError(data?.message);
+      }
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof LoginFormSchema>) {
+    execute({ email: values.email, password: values.password });
   }
 
   return (
@@ -131,7 +141,8 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type='submit' className='w-full'>
+              {error && <FormMessage className='text-sm'>{error}</FormMessage>}
+              <Button loading={isPending} type='submit' className='w-full'>
                 Log in
               </Button>
             </form>
