@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DialogTitle } from '@/components/ui/dialog';
 import { ModeToggle } from './mode-toggle';
 import { signOut } from 'next-auth/react';
+import NotificationsMenu from './notifications-menu';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,6 +57,9 @@ export function Navbar() {
           </form>
           <div>
             <ModeToggle />
+          </div>
+          <div>
+            <NotificationsMenu />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
