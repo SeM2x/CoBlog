@@ -9,7 +9,7 @@ export async function createUserAccount(req, res) {
     firstName, lastName, email, password, username,
   } = req.body;
 
-  if (!email || !password || !username) {
+  if (!email || !password || !username || !firstName || !lastName) {
     return res.status(400).json({ status: 'error', message: 'Name, email, and password are required' });
   }
 
