@@ -27,7 +27,7 @@ export function Navbar() {
   ];
 
   return (
-    <nav className='sticky top-0 z-40 w-full border-b border-light-border dark:border-dark-border bg-light-bg/80 dark:bg-dark-bg/80 backdrop-blur-md'>
+    <nav className='sticky top-0 z-40 w-full border-b border-light-border dark:border-dark-border bg-background/50 backdrop-blur-md'>
       <div className='container mx-auto flex h-16 items-center px-4'>
         <Link href='/' className='flex items-center space-x-2'>
           <span className='font-heading text-2xl font-bold text-primary'>

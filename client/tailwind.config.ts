@@ -58,6 +58,40 @@ export default {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        heading: ['Poppins', 'sans-serif'],
+      },
+      typography: (theme: (path: string) => string) => ({
+        DEFAULT: {
+          css: {
+            '--tw-prose-body': theme('colors.light.primary'),
+            '--tw-prose-headings': theme('colors.light.primary'),
+            '--tw-prose-links': theme('colors.primary'),
+            lineHeight: '1.5',
+            p: {
+              marginTop: '0.25em',
+              marginBottom: '0.25em',
+            },
+            'h1, h2, h3, h4': {
+              marginTop: '1.5em',
+              marginBottom: '0.75em',
+            },
+            ul: {
+              marginTop: '0.75em',
+              marginBottom: '0.75em',
+            },
+            ol: {
+              marginTop: '0.75em',
+              marginBottom: '0.75em',
+            },
+            li: {
+              marginTop: '0.375em',
+              marginBottom: '0.375em',
+            },
+          },
+        },
+      }),
     },
   },
   plugins: [animate, typography],

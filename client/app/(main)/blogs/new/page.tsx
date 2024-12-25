@@ -3,92 +3,46 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-// import dynamic from 'next/dynamic';
-//import 'react-quill/dist/quill.snow.css';
-
-// const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-
-// const modules = {
-//   toolbar: [
-//     [{ header: [1, 2, false] }],
-//     ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-//     [
-//       { list: 'ordered' },
-//       { list: 'bullet' },
-//       { indent: '-1' },
-//       { indent: '+1' },
-//     ],
-//     ['link', 'image'],
-//     ['clean'],
-//   ],
-// };
-
-// const formats = [
-//   'header',
-//   'bold',
-//   'italic',
-//   'underline',
-//   'strike',
-//   'blockquote',
-//   'list',
-//   'bullet',
-//   'indent',
-//   'link',
-//   'image',
-// ];
+import TipTapEditor from '@/components/tiptap';
 
 export default function CreateBlogPage() {
   const [title, setTitle] = useState('');
-  // const [content, setContent] = useState('');
+  const [content, setContent] = useState('');
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   // Here you would typically send the blog post to your backend
-  //   console.log('Blog post:', { title, content });
-  // };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would typically send the blog post to your backend
+    console.log('Blog post:', { title, content });
+  };
 
   return (
-    <div className='max-w-3xl mx-auto'>
+    <div className='relative container mx-auto px-4 py-8 max-w-4xl space-y-4'>
       <Card>
-        <CardHeader>
-          <CardTitle>Create New Blog Post</CardTitle>
+        <CardHeader className='flex flex-row justify-between items-center'>
+          <CardTitle>Create New Blog</CardTitle>
+          <Button type='submit'>Publish</Button>
         </CardHeader>
-        <form >
+        <form onSubmit={handleSubmit}>
           <CardContent className='space-y-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='title'>Title</Label>
-              <Input
-                id='title'
-                placeholder='Enter your blog title'
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-            <div className='space-y-2'>
-              <Label htmlFor='content'>Content</Label>
-              {/* <ReactQuill
-                theme='snow'
-                value={content}
-                onChange={setContent}
-                modules={modules}
-                formats={formats}
-                className='h-64 mb-12'
-              /> */}
-            </div>
+            <Input
+              id='title'
+              placeholder='Title'
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className='!text-5xl font-semibold h-fit border-none shadow-none focus-visible:ring-0 placeholder:text-gray-300'
+            />
           </CardContent>
-          <CardFooter>
-            <Button type='submit'>Publish</Button>
-          </CardFooter>
         </form>
       </Card>
+      <div className='space-y-2'>
+        <TipTapEditor content={content} onChange={setContent} />
+      </div>
     </div>
   );
 }
