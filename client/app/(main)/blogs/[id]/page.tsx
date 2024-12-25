@@ -9,7 +9,7 @@ const blogPost = {
   content: `
     <h2>Introduction</h2>
     <p>Next.js 14 introduces several new features and improvements that make building modern web applications even easier. In this blog post, we'll explore the key highlights and how to get started with this powerful framework.</p>
-    
+
     <h2>Key Features</h2>
     <ul>
       <li>Improved performance with server components</li>
