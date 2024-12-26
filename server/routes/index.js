@@ -1,7 +1,7 @@
 import { getStatus, getStats } from '../controllers/AppController';
 import { createUserAccount, userSignIn } from '../controllers/AuthController';
 import {
-  getUserProfileById, followUser, unfollowUser, getUserFollowers, getUserFollowings,
+  getUserProfileById, followUser, unfollowUser, getUserFollowers, getUserFollowings, editUserData
 } from '../controllers/UsersController';
 import { authenticate } from '../middlewares/authenticate';
 import { getUserNotifications, markNotificationRead } from '../controllers/NotificationsController';
@@ -26,5 +26,6 @@ userRouter.put('/:id/follow', followUser);
 userRouter.put('/:id/unfollow', unfollowUser);
 userRouter.get('/:id/followers', getUserFollowers);
 userRouter.get('/:id/followings', getUserFollowings);
-notificationRouter.get('/:id', markNotificationRead);
+userRouter.put('/profile', editUserData);
 notificationRouter.get('/me', getUserNotifications);
+notificationRouter.get('/:id', markNotificationRead);
