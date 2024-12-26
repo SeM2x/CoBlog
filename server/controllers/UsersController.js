@@ -285,3 +285,34 @@ export async function getUserFollowings(req, res) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
   }
 }
+
+export async function editUserData(req, res) {
+  const { profileUrl, firstName, lastName } = req.body;
+
+  const details = {};
+  if (profileUrl) {
+    details.profileUrl = profileUrl;
+  }
+
+  if (firstName) {
+    details.firstName = firstName;
+  }
+
+  if (lastName) {
+    details.lastName = lastName;
+  }
+
+  try {
+    const result = await dbClient.updateData('users', { _id: new ObjectId(req.user.userId) }, { $set: details });
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ status: 'error', message: 'User does not exist' });
+    }
+
+    if (result.modifiedCount > 0) {
+      return res.status(200).json({ status: 'success', message: 'Update succeded' });
+    }
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  }
+}
