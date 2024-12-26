@@ -1,7 +1,7 @@
 import { getStatus, getStats } from '../controllers/AppController';
 import { createUserAccount, userSignIn } from '../controllers/AuthController';
 import {
-  getUserProfileById, followUser, unfollowUser, getUserFollowers, getUserFollowings, editUserData
+  getUserProfileById, followUser, unfollowUser, getUserFollowers, getUserFollowings, editUserData,
 } from '../controllers/UsersController';
 import { authenticate } from '../middlewares/authenticate';
 import { getUserNotifications, markNotificationRead } from '../controllers/NotificationsController';
@@ -17,15 +17,22 @@ export const notificationRouter = Router();
 userRouter.use(authenticate);
 notificationRouter.use(authenticate);
 
+// Manages all default routes
 router.get('/status', getStatus);
 router.get('/stats', getStats);
+
+// Manages all Auth routes
 authRouter.post('/create_account', createUserAccount);
 authRouter.post('/sign_in', userSignIn);
+
+// Manages all Users routes
 userRouter.get('/:id/profile', getUserProfileById);
 userRouter.put('/:id/follow', followUser);
 userRouter.put('/:id/unfollow', unfollowUser);
 userRouter.get('/:id/followers', getUserFollowers);
 userRouter.get('/:id/followings', getUserFollowings);
 userRouter.put('/profile', editUserData);
+
+// Manages all Notification routes
 notificationRouter.get('/me', getUserNotifications);
 notificationRouter.get('/:id', markNotificationRead);
