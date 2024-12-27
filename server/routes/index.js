@@ -5,6 +5,7 @@ import {
 } from '../controllers/UsersController';
 import { authenticate } from '../middlewares/authenticate';
 import { getUserNotifications, markNotificationRead } from '../controllers/NotificationsController';
+import { suggestTopics } from '../controllers/BlogsController';
 
 const { Router } = require('express');
 
@@ -12,10 +13,12 @@ export const router = Router();
 export const authRouter = Router();
 export const userRouter = Router();
 export const notificationRouter = Router();
+export const blogRouter = Router();
 
 // Protect router
 userRouter.use(authenticate);
 notificationRouter.use(authenticate);
+blogRouter.use(authenticate);
 
 // Manages all default routes
 router.get('/status', getStatus);
@@ -36,3 +39,6 @@ userRouter.put('/profile', editUserData);
 // Manages all Notification routes
 notificationRouter.get('/me', getUserNotifications);
 notificationRouter.get('/:id', markNotificationRead);
+
+// Manages all Blogs routes
+blogRouter.get('/topics', suggestTopics);
