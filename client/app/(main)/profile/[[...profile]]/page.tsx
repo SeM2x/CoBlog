@@ -21,6 +21,7 @@ import { useUserStore } from '@/lib/store';
 import { useAction } from 'next-safe-action/hooks';
 import { updateProfile } from '@/lib/actions/users';
 import { toast } from '@/hooks/use-toast';
+import { updateLocalUser } from '@/lib/utils/local-storage';
 
 const userBlogs = [
   {
@@ -60,10 +61,20 @@ export default function ProfilePage() {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [editedProfile, setEditedProfile] = useState(emptyProfile);
 
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
+
   const { execute, isPending } = useAction(updateProfile, {
-    onSettled: ({ result: { data } }) => {
+    onSettled: ({ input, result: { data } }) => {
       if (data?.success) {
+        if (user) {
+          setUser({ ...user, ...input });
+          updateLocalUser({ ...user, ...input });
+        }
         setIsEditProfileOpen(false);
+        toast({
+          title: 'Profile updated successfully',
+        });
       } else {
         toast({
           title: 'Failed to update profile',
@@ -77,8 +88,6 @@ export default function ProfilePage() {
     e.preventDefault();
     if (editedProfile) execute(editedProfile);
   };
-
-  const user = useUserStore((state) => state.user);
 
   useEffect(() => {
     if (user) {
@@ -97,7 +106,7 @@ export default function ProfilePage() {
         <CardContent className='flex flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0 p-6'>
           <Avatar className='h-24 w-24'>
             <AvatarImage
-              src={user?.profileUrl}
+              src={user?.profileUrl.split('/')[4] || ''}
               alt={`${user?.firstName}-profile-picture`}
             />
             <AvatarFallback>
