@@ -12,6 +12,7 @@ type Profile = {
   createdAt: string;
   updatedAt: string;
   id: string;
+  profileUrl: string;
 };
 
 export type { Profile };

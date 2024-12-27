@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -18,15 +18,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useUserStore } from '@/lib/store';
-
-const userProfile = {
-  name: 'John Doe',
-  username: '@johndoe',
-  avatar: '/avatars/john-doe.png',
-  bio: 'Full-stack developer | Tech enthusiast | Blogger',
-  followers: 1234,
-  following: 567,
-};
+import { useAction } from 'next-safe-action/hooks';
+import { updateProfile } from '@/lib/actions/users';
+import { toast } from '@/hooks/use-toast';
 
 const userBlogs = [
   {
@@ -55,39 +49,72 @@ const userDrafts = [
   },
 ];
 
+const emptyProfile = {
+  profileUrl: '',
+  firstName: '',
+  lastName: '',
+  bio: '',
+};
+
 export default function ProfilePage() {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [editedProfile, setEditedProfile] = useState(userProfile);
+  const [editedProfile, setEditedProfile] = useState(emptyProfile);
+
+  const { execute, isPending } = useAction(updateProfile, {
+    onSettled: ({ result: { data } }) => {
+      if (data?.success) {
+        setIsEditProfileOpen(false);
+      } else {
+        toast({
+          title: 'Failed to update profile',
+          variant: 'destructive',
+        });
+      }
+    },
+  });
 
   const handleEditProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the editedProfile to your backend
-    console.log('Profile updated:', editedProfile);
-    setIsEditProfileOpen(false);
+    if (editedProfile) execute(editedProfile);
   };
 
   const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    if (user) {
+      setEditedProfile({
+        profileUrl: user.profileUrl || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        bio: user.bio || '',
+      });
+    }
+  }, [user]);
+
   return (
     <div className='space-y-6'>
       <Card>
         <CardContent className='flex flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0 p-6'>
           <Avatar className='h-24 w-24'>
-            <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
+            <AvatarImage
+              src={user?.profileUrl}
+              alt={`${user?.firstName}-profile-picture`}
+            />
             <AvatarFallback>
-              {userProfile.name
-                .split(' ')
+              {user?.firstName
+                ?.split(' ')
                 .map((n) => n[0])
                 .join('')}
             </AvatarFallback>
           </Avatar>
           <div className='space-y-2 text-center sm:text-left'>
             <h1 className='text-2xl font-bold'>
-              {user?.firstName || 'John'} {user?.lastName || 'Doe'}
+              {user?.firstName} {user?.lastName}
             </h1>
             <p className='text-light-secondary dark:text-dark-secondary'>
-              @{user?.username || userProfile.username}
+              @{user?.username}
             </p>
-            <p>{user?.bio || userProfile.bio}</p>
+            <p>{user?.bio}</p>
             <div className='flex justify-center space-x-4 sm:justify-start'>
               <span>{user?.followerCount} Followers</span>
               <span>{user?.followingCount} Following</span>
@@ -109,15 +136,15 @@ export default function ProfilePage() {
                 <div className='grid gap-4 py-4'>
                   <div className='grid grid-cols-4 items-center gap-4'>
                     <Label htmlFor='name' className='text-right'>
-                      Name
+                      First name
                     </Label>
                     <Input
-                      id='name'
-                      value={editedProfile.name}
+                      id='firstName'
+                      value={editedProfile?.firstName}
                       onChange={(e) =>
                         setEditedProfile({
                           ...editedProfile,
-                          name: e.target.value,
+                          firstName: e.target.value,
                         })
                       }
                       className='col-span-3'
@@ -125,15 +152,15 @@ export default function ProfilePage() {
                   </div>
                   <div className='grid grid-cols-4 items-center gap-4'>
                     <Label htmlFor='username' className='text-right'>
-                      Username
+                      Last name{' '}
                     </Label>
                     <Input
-                      id='username'
-                      value={editedProfile.username}
+                      id='lastName'
+                      value={editedProfile?.lastName}
                       onChange={(e) =>
                         setEditedProfile({
                           ...editedProfile,
-                          username: e.target.value,
+                          lastName: e.target.value,
                         })
                       }
                       className='col-span-3'
@@ -145,7 +172,7 @@ export default function ProfilePage() {
                     </Label>
                     <Textarea
                       id='bio'
-                      value={editedProfile.bio}
+                      value={editedProfile?.bio}
                       onChange={(e) =>
                         setEditedProfile({
                           ...editedProfile,
@@ -157,7 +184,9 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type='submit'>Save changes</Button>
+                  <Button loading={isPending} type='submit'>
+                    Save changes
+                  </Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -201,10 +230,10 @@ export default function ProfilePage() {
         <TabsContent value='about'>
           <Card>
             <CardHeader>
-              <CardTitle>About {userProfile.name}</CardTitle>
+              <CardTitle>About {user?.firstName}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>{userProfile.bio}</p>
+              <p>{user?.bio}</p>
             </CardContent>
           </Card>
         </TabsContent>
