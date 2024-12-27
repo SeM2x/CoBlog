@@ -287,7 +287,7 @@ export async function getUserFollowings(req, res) {
 }
 
 export async function editUserData(req, res) {
-  const { profileUrl, firstName, lastName } = req.body;
+  const { profileUrl, firstName, lastName, bio } = req.body;
 
   const details = {};
   if (profileUrl) {
@@ -300,6 +300,10 @@ export async function editUserData(req, res) {
 
   if (lastName) {
     details.lastName = lastName;
+  }
+
+  if (bio) {
+    details.bio = bio;
   }
 
   try {
