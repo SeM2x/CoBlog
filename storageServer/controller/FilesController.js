@@ -79,6 +79,6 @@ fileQueue.on('failed', (job, err) => {
   console.log(`Job ${job.id} failed with error: ${err.message}`);
 });
 
-fileQueue.on('completed', (job, result) => {
+fileQueue.on('completed', (job) => {
   console.log(`Job ${job.id} completed`);
 });
