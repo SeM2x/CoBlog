@@ -50,6 +50,10 @@ export function fileUpload(req, res) {
     }
     try {
       const details = { ...req.file };
+      if (!details.filename) {
+        return res.status(400).json({ status: 'error', message: 'File expected in form data'});
+      }
+
       details.userId = userId;
       details.profileUrl = `${serverName}${req.localFileName}`;
 
@@ -59,6 +63,7 @@ export function fileUpload(req, res) {
         await dbClient.deleteData('storage', { userId, fieldname: 'avatar' });
         fileQueue.add({ filePath: search.path }); // Create a job to delete avatar in storage
       }
+
       await dbClient.insertData('storage', details);
 
       return res.status(200).json({ status: 'success', message: 'Image uploaded successfully', data: { profileUrl: details.profileUrl } });
