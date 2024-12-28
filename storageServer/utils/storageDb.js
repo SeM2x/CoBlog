@@ -26,6 +26,7 @@ class DBClient {
       this.db = this.dbClient.db(this.dbName);
       console.log(`mongo successfully connected to ${this.dbName}`);
     } catch (err) {
+      console.log(err);
       console.log('Mongo encountered an error');
     }
   }
