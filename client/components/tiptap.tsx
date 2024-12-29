@@ -37,15 +37,50 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import Collaboration from '@tiptap/extension-collaboration';
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
+import Document from '@tiptap/extension-document';
+import Paragraph from '@tiptap/extension-paragraph';
+import { TiptapCollabProvider } from '@hocuspocus/provider';
+import * as Y from 'yjs';
+
 interface TipTapEditorProps {
   content: string;
   onChange: (content: string) => void;
+  provider: TiptapCollabProvider;
+  doc: Y.Doc;
 }
 
-const TipTapEditor = ({ content, onChange }: TipTapEditorProps) => {
+const defaultContent = `
+  <p>Hi 👋, this is a collaborative document.</p>
+  <p>Feel free to edit and collaborate in real-time!</p>
+`;
+
+const TipTapEditor = ({
+  content,
+  onChange,
+  provider,
+  doc,
+}: TipTapEditorProps) => {
   const editor = useEditor({
+    enableContentCheck: true,
+    immediatelyRender: false,
+    onContentError: ({ disableCollaboration }) => {
+      disableCollaboration();
+    },
+    onCreate: ({ editor: currentEditor }) => {
+      provider.on('synced', () => {
+        if (currentEditor.isEmpty) {
+          currentEditor.commands.setContent(defaultContent);
+        }
+      });
+    },
     extensions: [
-      StarterKit,
+      Document,
+      Paragraph,
+      StarterKit.configure({
+        history: false, // Disables default history to use Collaboration's history management
+      }),
       Underline,
       TextStyle,
       Color,
@@ -57,16 +92,13 @@ const TipTapEditor = ({ content, onChange }: TipTapEditorProps) => {
         openOnClick: false,
       }),
       Placeholder.configure({
-        // Use a placeholder:
         placeholder: 'Tell your story...',
-        // Use different placeholders depending on the node type:
-        // placeholder: ({ node }) => {
-        //   if (node.type.name === 'heading') {
-        //     return 'What’s the title?'
-        //   }
-
-        //   return 'Can you add some further context?'
-        // },
+      }),
+      Collaboration.configure({
+        document: doc,
+      }),
+      CollaborationCursor.extend().configure({
+        provider,
       }),
     ],
     editorProps: {

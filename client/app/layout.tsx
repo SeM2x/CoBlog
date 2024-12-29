@@ -3,6 +3,7 @@ import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AppStateProvider } from '@/providers/AppStateProvider';
+import { Toaster } from '@/components/ui/toaster';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const poppins = Poppins({
@@ -27,7 +28,10 @@ export default function RootLayout({
         className={`${inter.variable} ${poppins.variable} font-sans bg-light-bg dark:bg-dark-bg`}
       >
         <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-          <AppStateProvider>{children}</AppStateProvider>
+          <AppStateProvider>
+            {children}
+            <Toaster />
+          </AppStateProvider>
         </ThemeProvider>
       </body>
     </html>

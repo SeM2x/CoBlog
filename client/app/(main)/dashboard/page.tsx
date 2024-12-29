@@ -135,7 +135,7 @@ export default function DashboardPage() {
                     <p className='text-sm text-gray-500'>Views</p>
                   </div>
                 </div>
-                <Link href={'/blogs/new'}>
+                <Link href={'/new-blog/123'}>
                   <Button>
                     <Edit3 className='w-4 h-4 mr-2' />
                     New Post

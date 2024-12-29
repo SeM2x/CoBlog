@@ -2,7 +2,7 @@ import { auth } from '@/auth';
 import axios from 'axios';
 
 const apiRequest = axios.create({
-  baseURL: process.env.API_URL || 'http://api.techerudites.tech:5000/api/',
+  baseURL: process.env.API_URL || 'http://localhost:5000/api/',
 });
 
 apiRequest.interceptors.request.use(

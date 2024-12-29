@@ -26,11 +26,14 @@ export const useBlogStore = create<BlogState>((set) => ({
 interface UserState {
   user: Profile | null;
   setUser: (user: Profile) => void;
+  updateUser: (updatedUser: Partial<Profile>) => void;
   clearUser: () => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
+  updateUser: (updatedUser) =>
+    set((state) => ({ user: { ...(state.user as Profile), ...updatedUser } })),
   clearUser: () => set({ user: null }),
 }));
