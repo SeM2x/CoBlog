@@ -1,2 +1,5 @@
 node_modules/*
 .env
+socket.js
+storageserver.js
+test.html

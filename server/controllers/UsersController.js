@@ -4,6 +4,13 @@ const { ObjectId } = require('mongodb');
 
 export async function getUserProfileById(req, res) {
   const { id } = req.params;
+
+  try {
+    ObjectId(id);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'incorrect id' });
+  }
+
   const user = await dbClient.findData('users', { _id: new ObjectId(id) });
   if (!user) {
     return res.status(404).json({ status: 'error', message: 'User not found' });
@@ -44,6 +51,13 @@ export async function getUserProfileById(req, res) {
 
 export async function followUser(req, res) {
   const { id } = req.params;
+
+  try {
+    ObjectId(id);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'incorrect id' });
+  }
+
   if (id === req.user.userId) {
     return res.status(409).json({ status: 'error', message: "You can't follow yourself" });
   }
@@ -111,6 +125,13 @@ export async function followUser(req, res) {
 
 export async function unfollowUser(req, res) {
   const { id } = req.params;
+
+  try {
+    ObjectId(id);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'incorrect id' });
+  }
+
   if (id === req.user.userId) {
     return res.status(409).json({ status: 'error', message: "You can't unfollow yourself" });
   }
@@ -169,6 +190,13 @@ export async function unfollowUser(req, res) {
 
 export async function getUserFollowers(req, res) {
   const { id } = req.params;
+
+  try {
+    ObjectId(id);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'incorrect id' });
+  }
+
   const cursor = req.query.cursor || 0;
   const limit = req.query.limit || 10;
 
@@ -211,6 +239,13 @@ export async function getUserFollowers(req, res) {
 
 export async function getUserFollowings(req, res) {
   const { id } = req.params;
+
+  try {
+    ObjectId(id);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'incorrect id' });
+  }
+
   const cursor = req.query.cursor || 0;
   const limit = req.query.limit || 10;
 
@@ -248,5 +283,40 @@ export async function getUserFollowings(req, res) {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
+  }
+}
+
+export async function editUserData(req, res) {
+  const { profileUrl, firstName, lastName, bio } = req.body;
+
+  const details = {};
+  if (profileUrl) {
+    details.profileUrl = profileUrl;
+  }
+
+  if (firstName) {
+    details.firstName = firstName;
+  }
+
+  if (lastName) {
+    details.lastName = lastName;
+  }
+
+  if (bio) {
+    details.bio = bio;
+  }
+
+  try {
+    const result = await dbClient.updateData('users', { _id: new ObjectId(req.user.userId) }, { $set: details });
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ status: 'error', message: 'User does not exist' });
+    }
+
+    if (result.modifiedCount > 0) {
+      return res.status(200).json({ status: 'success', message: 'Update succeded' });
+    }
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }

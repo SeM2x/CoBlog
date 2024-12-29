@@ -1,3 +1,6 @@
+/* eslint-disable consistent-return */
+/* eslint-disable no-param-reassign */
+
 import { MongoClient } from 'mongodb';
 
 require('dotenv').config();
@@ -11,7 +14,7 @@ class DBClient {
     this.dbClient = null;
     this.db = null;
     this.verifyConnection = false;
-    this.DBCollections = ['users', 'followers', 'followings', 'blogs', 'conversations', 'notifications'];
+    this.DBCollections = ['users', 'followers', 'followings', 'blogs', 'conversations', 'notifications', 'topics', 'subtopics'];
   }
 
   async init() {
@@ -83,7 +86,7 @@ class DBClient {
         throw new Error('Collection type does not exist');
       }
       const collection = this.db.collection(collectionType);
-      let nUpdate = { ...update.$set, updatedAt: `${new Date().toISOString().split('.')[0]}Z` }
+      const nUpdate = { ...update.$set, updatedAt: `${new Date().toISOString().split('.')[0]}Z` };
       update.$set = nUpdate;
       const result = await collection.updateOne(filter, update);
       return result;
