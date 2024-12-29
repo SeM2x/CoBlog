@@ -7,9 +7,9 @@ require('dotenv').config();
 
 class DBClient {
   constructor() {
-    this.dbHost = process.env.DB_HOST || 'localhost';
-    this.dbPort = process.env.PORT || '27017';
-    this.dbName = process.env.DB_NAME || 'coblogdb';
+    this.dbHost = process.env.DATABASE_HOST;
+    this.dbPort = process.env.DATABASE_PORT;
+    this.dbName = process.env.DATABASE_NAME;
     this.url = `mongodb://${this.dbHost}:${this.dbPort}`;
     this.dbClient = null;
     this.db = null;
@@ -93,13 +93,19 @@ class DBClient {
     }
   }
 
-  async findManyData(collectionType, details) {
+  async findManyData(collectionType, details, aggregate = false) {
     if (this.db) {
       if (!this.DBCollections.includes(collectionType)) {
         throw new Error('Collection type does not exist');
       }
+
       const collection = this.db.collection(collectionType);
-      const result = collection.find(details).toArray();
+      let result;
+      if (aggregate) {
+        result = collection.aggregate(details).toArray();
+      } else {
+        result = collection.find(details).toArray();
+      }
       return result;
     }
   }
