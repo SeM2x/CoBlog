@@ -3,13 +3,19 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import TipTapEditor from '@/components/tiptap';
+import { TiptapCollabProvider } from '@hocuspocus/provider';
+import * as Y from 'yjs';
+
+const doc = new Y.Doc();
+
+const provider = new TiptapCollabProvider({
+  name: 'document.name', // Unique document identifier for syncing. This is your document name.
+  appId: process.env.NEXT_PUBLIC_APP_ID || '', // Your Cloud Dashboard AppID or `baseURL` for on-premises
+  token: process.env.NEXT_PUBLIC_APP_TOKEN, // Your Cloud Dashboard App Token
+  document: doc,
+});
 
 export default function CreateBlogPage() {
   const [title, setTitle] = useState('');
@@ -41,7 +47,12 @@ export default function CreateBlogPage() {
         </form>
       </Card>
       <div className='space-y-2'>
-        <TipTapEditor content={content} onChange={setContent} />
+        <TipTapEditor
+          provider={provider}
+          doc={doc}
+          content={content}
+          onChange={setContent}
+        />
       </div>
     </div>
   );

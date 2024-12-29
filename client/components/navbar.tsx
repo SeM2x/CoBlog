@@ -22,7 +22,7 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
-    { name: 'Create Blog', href: '/blogs/new' },
+    { name: 'Create Blog', href: '/new-blog/123' },
     { name: 'My Blogs', href: '/my-blogs' },
   ];
 
