@@ -197,8 +197,9 @@ export async function getUserFollowers(req, res) {
     return res.status(400).json({ status: 'error', message: 'incorrect id' });
   }
 
-  const cursor = req.query.cursor || 0;
-  const limit = req.query.limit || 10;
+  let { cursor, limit } = req.query 
+  limit = limit ? (limit + 0) / 10 : 10
+  cursor = cursor ? (cursor + 0) / 10 : 0
 
   try {
     const result = await dbClient.findData('followers', { userId: new ObjectId(id) });
@@ -246,8 +247,9 @@ export async function getUserFollowings(req, res) {
     return res.status(400).json({ status: 'error', message: 'incorrect id' });
   }
 
-  const cursor = req.query.cursor || 0;
-  const limit = req.query.limit || 10;
+  let { cursor, limit } = req.query
+  limit = limit ? (limit + 0) / 10 : 10
+  cursor = cursor ? (cursor + 0) / 10 : 0
 
   try {
     const result = await dbClient.findData('followings', { userId: new ObjectId(id) });
@@ -320,3 +322,4 @@ export async function editUserData(req, res) {
     return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
+

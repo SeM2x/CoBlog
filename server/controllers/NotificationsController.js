@@ -3,8 +3,13 @@ import dbClient from '../utils/db';
 const { ObjectId } = require('mongodb');
 
 export async function getUserNotifications(req, res) {
-  const cursor = req.query.cursor || 0;
-  const limit = req.query.limit || 10;
+  let { cursor, limit } = req.query
+  if (cursor === 'null') {
+    return res.status(200).json({ status: 'success', message: 'No more data to fetch', data: [] });
+  }
+
+  limit = limit ? (limit + 0) / 10 : 10
+  cursor = cursor ? (cursor + 0) / 10 : 0
   const { read } = req.query;
 
   const details = { userId: new ObjectId(req.user.userId) };
@@ -41,7 +46,7 @@ export async function markNotificationRead(req, res) {
     return res.status(400).json({ status: 'error', message: 'incorrect id' });
   }
 
-  const filter = { _id: new ObjectId(id) };
+  const filter = { _id: new ObjectId(id), userId: new ObjectId(req.user.userId) };
 
   let update;
   if (read === 'false') {
@@ -58,7 +63,7 @@ export async function markNotificationRead(req, res) {
     );
 
     if (result.matchedCount === 0) {
-      return res.status(404).json({ status: 'error', message: 'Notification does not exist' });
+      return res.status(404).json({ status: 'error', message: 'Notification does not exist for this user' });
     }
     return res.status(200).json({ status: 'success' });
   } catch (err) {
