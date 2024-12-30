@@ -19,6 +19,7 @@ import { signOut } from 'next-auth/react';
 import NotificationsMenu from './notifications-menu';
 import { useUserStore } from '@/lib/store';
 import getImageId from '@/lib/utils/get-image-id';
+import { usePathname } from 'next/navigation';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -28,6 +29,8 @@ export function Navbar() {
     { name: 'My Blogs', href: '/my-blogs' },
   ];
   const user = useUserStore((state) => state.user);
+
+  const pathname = usePathname();
 
   return (
     <nav className='sticky top-0 z-40 w-full border-b border-light-border dark:border-dark-border bg-background/50 backdrop-blur-md'>
@@ -42,7 +45,9 @@ export function Navbar() {
             <Link
               key={item.name}
               href={item.href}
-              className='text-sm font-medium text-light-primary dark:text-dark-primary hover:text-primary'
+              className={`text-sm font-medium text-light-primary dark:text-dark-primary hover:text-primary ${
+                pathname.includes(item.href) ? 'text-primary' : ''
+              }`}
             >
               {item.name}
             </Link>
@@ -72,7 +77,10 @@ export function Navbar() {
                     src={getImageId(user?.profileUrl)}
                     alt='@shadcn'
                   />
-                  <AvatarFallback>SC</AvatarFallback>
+                  <AvatarFallback>
+                    {user?.firstName?.[0]}
+                    {user?.lastName?.[0]}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

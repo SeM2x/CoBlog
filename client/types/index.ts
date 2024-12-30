@@ -15,4 +15,28 @@ type Profile = {
   profileUrl: string;
 };
 
-export type { Profile };
+type Blog = {
+  _id: string;
+  title: string;
+  nLikes: number;
+  nComments: number;
+  nShares: number;
+  conversationId: string;
+  isPublished: true;
+  status: 'published' | 'draft';
+  content: string;
+  Topics: string[];
+  subTopics: string[];
+  authorId: string;
+  authorEmail: string;
+  authorUsername: string;
+  roomId: string;
+  imagesUrl: string[];
+  CoAuthorId: string[];
+  minuteRead: number;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+};
+
+export type { Profile, Blog };
