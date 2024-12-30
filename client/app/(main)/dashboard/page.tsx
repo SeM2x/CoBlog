@@ -22,6 +22,7 @@ import {
   Bell,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useUserStore } from '@/lib/store';
 
 const blogPosts = [
   {
@@ -94,15 +95,19 @@ const trendingTags = [
   { id: 5, name: 'WebDev', count: 654 },
 ];
 
-const userStats = {
-  posts: 15,
-  followers: 230,
-  following: 180,
-  views: 1200,
-};
+
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('feed');
+
+  const user = useUserStore((state) => state.user);
+
+  const userStats = {
+    posts: user?.postCount,
+    followers: user?.followerCount,
+    following: user?.followingCount,
+    views: user?.viewsCount,
+  };
 
   return (
     <div className='container mx-auto px-4 py-8'>
@@ -110,7 +115,7 @@ export default function DashboardPage() {
         <div className='lg:col-span-2 space-y-6'>
           <Card>
             <CardHeader>
-              <CardTitle>Welcome back, John!</CardTitle>
+              <CardTitle>Welcome back, {user?.firstName}!</CardTitle>
               <CardDescription>
                 Here&apos;s what&apos;s happening in your blog world today.
               </CardDescription>

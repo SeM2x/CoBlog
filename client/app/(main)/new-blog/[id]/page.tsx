@@ -41,7 +41,7 @@ export default function CreateBlogPage() {
               placeholder='Title'
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className='!text-5xl font-semibold h-fit border-none shadow-none focus-visible:ring-0 placeholder:text-gray-300'
+              className='!text-5xl font-semibold h-fit border-none shadow-none focus-visible:ring-0 placeholder:text-gray-300 dark:placeholder-gray-500'
             />
           </CardContent>
         </form>

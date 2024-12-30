@@ -50,7 +50,9 @@ const login = actionClient
       return { user: res.data };
     } catch (error) {
       if (error instanceof AxiosError) {
-        return { message: error.response?.data.message || 'Something went wrong.' };
+        return {
+          message: error.response?.data.message || 'Something went wrong.',
+        };
       }
 
       if (error instanceof AuthError) {
