@@ -17,6 +17,8 @@ import { DialogTitle } from '@/components/ui/dialog';
 import { ModeToggle } from './mode-toggle';
 import { signOut } from 'next-auth/react';
 import NotificationsMenu from './notifications-menu';
+import { useUserStore } from '@/lib/store';
+import getImageId from '@/lib/utils/get-image-id';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,6 +27,7 @@ export function Navbar() {
     { name: 'Create Blog', href: '/new-blog/123' },
     { name: 'My Blogs', href: '/my-blogs' },
   ];
+  const user = useUserStore((state) => state.user);
 
   return (
     <nav className='sticky top-0 z-40 w-full border-b border-light-border dark:border-dark-border bg-background/50 backdrop-blur-md'>
@@ -65,7 +68,10 @@ export function Navbar() {
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
                 <Avatar className='h-8 w-8'>
-                  <AvatarImage src='/avatars/01.png' alt='@shadcn' />
+                  <AvatarImage
+                    src={getImageId(user?.profileUrl)}
+                    alt='@shadcn'
+                  />
                   <AvatarFallback>SC</AvatarFallback>
                 </Avatar>
               </Button>
