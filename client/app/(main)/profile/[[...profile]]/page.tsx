@@ -25,6 +25,7 @@ import { updateLocalUser } from '@/lib/utils/local-storage';
 import { Camera, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
+import getImageId from '@/lib/utils/get-image-id';
 
 const userBlogs = [
   {
@@ -64,7 +65,6 @@ const emptyProfile = {
   firstName: '',
   lastName: '',
   bio: '',
-  profilePicture: null as File | null,
 };
 
 export default function ProfilePage() {
@@ -73,6 +73,7 @@ export default function ProfilePage() {
   const [profilePicPreview, setProfilePicPreview] = useState<string | null>(
     null
   );
+  const [file, setFile] = useState<File | null>(null);
 
   const user = useUserStore((state) => state.user);
   const updateUser = useUserStore((state) => state.updateUser);
@@ -80,9 +81,8 @@ export default function ProfilePage() {
   const { execute, isPending } = useAction(updateProfile, {
     onSettled: ({ input, result: { data } }) => {
       if (data?.success) {
-        console.log('input', input);
-        updateUser(input);
-        updateLocalUser(input);
+        updateUser({ ...input, profileUrl: data.profileUrl });
+        updateLocalUser({ ...input, profileUrl: data.profileUrl });
 
         setIsEditProfileOpen(false);
         toast({
@@ -105,14 +105,18 @@ export default function ProfilePage() {
         setProfilePicPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
-      setEditedProfile({ ...editedProfile, profilePicture: file });
+      setFile(file);
     }
   };
 
   const handleEditProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editedProfile) {
-      execute(editedProfile);
+      const formData = new FormData();
+      if (file) {
+        formData.set('avatar', file);
+      }
+      execute({ ...editedProfile, profilePicture: formData });
     }
   };
 
@@ -123,7 +127,6 @@ export default function ProfilePage() {
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         bio: user.bio || '',
-        profilePicture: null,
       });
       setProfilePicPreview(null);
     }
@@ -137,7 +140,7 @@ export default function ProfilePage() {
             <div className='relative'>
               <Avatar className='h-32 w-32'>
                 <AvatarImage
-                  src={user?.profileUrl || ''}
+                  src={getImageId(user?.profileUrl)}
                   alt={`${user?.firstName}-profile-picture`}
                 />
                 <AvatarFallback className='text-4xl'>
@@ -176,10 +179,14 @@ export default function ProfilePage() {
                               width={96}
                               height={96}
                               alt='Profile picture'
+                              className='object-contain rounded-full'
                             />
                           ) : (
                             <AvatarImage
-                              src={profilePicPreview || user?.profileUrl || ''}
+                              src={
+                                profilePicPreview ||
+                                getImageId(user?.profileUrl)
+                              }
                               alt='Profile picture'
                             />
                           )}
@@ -247,7 +254,7 @@ export default function ProfilePage() {
                     </div>
                     <DialogFooter>
                       <Button type='submit' loading={isPending}>
-                        Save changes
+                        {isPending? 'Saving':'Save changes'}
                       </Button>
                     </DialogFooter>
                   </form>
