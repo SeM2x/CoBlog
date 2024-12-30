@@ -102,9 +102,9 @@ class DBClient {
       const collection = this.db.collection(collectionType);
       let result;
       if (aggregate) {
-        result = collection.aggregate(details).toArray();
+        result = await collection.aggregate(details).toArray();
       } else {
-        result = collection.find(details).toArray();
+        result = await collection.find(details).toArray();
       }
       return result;
     }
