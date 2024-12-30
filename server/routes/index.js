@@ -5,7 +5,7 @@ import {
 } from '../controllers/UsersController';
 import { authenticate } from '../middlewares/authenticate';
 import { getUserNotifications, markNotificationRead } from '../controllers/NotificationsController';
-import { suggestTopics } from '../controllers/BlogsController';
+import { suggestTopics, getUserBlogs, createBlog, inviteUsers } from '../controllers/BlogsController';
 
 const { Router } = require('express');
 
@@ -38,7 +38,10 @@ userRouter.put('/profile', editUserData);
 
 // Manages all Notification routes
 notificationRouter.get('/me', getUserNotifications);
-notificationRouter.get('/:id', markNotificationRead);
+notificationRouter.put('/:id', markNotificationRead);
 
 // Manages all Blogs routes
 blogRouter.get('/topics', suggestTopics);
+blogRouter.get('/me', getUserBlogs);
+blogRouter.post('/create', createBlog);
+blogRouter.put('/:blogId/invite', inviteUsers);
