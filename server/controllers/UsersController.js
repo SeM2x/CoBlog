@@ -348,7 +348,7 @@ export async function searchUser(req, res) {
   if (!result || result.length < 1) {
     return res.status(200).json({ status: 'success', message: 'No user found', data: [] });
   }
-console.log(result);
+
   const users = result.map((user) => ({
     id: user._id,
     username: user.username,
