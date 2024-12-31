@@ -1,11 +1,14 @@
 import { getStatus, getStats } from '../controllers/AppController';
 import { createUserAccount, userSignIn } from '../controllers/AuthController';
 import {
-  getUserProfileById, followUser, unfollowUser, getUserFollowers, getUserFollowings, editUserData,
+  getUserProfileById, followUser, unfollowUser, getUserFollowers,
+  getUserFollowings, editUserData, searchUser,
 } from '../controllers/UsersController';
 import { authenticate } from '../middlewares/authenticate';
 import { getUserNotifications, markNotificationRead } from '../controllers/NotificationsController';
-import { suggestTopics, getUserBlogs, createBlog, inviteUsers } from '../controllers/BlogsController';
+import {
+  suggestTopics, getUserBlogs, createBlog, inviteUsers,
+} from '../controllers/BlogsController';
 
 const { Router } = require('express');
 
@@ -35,6 +38,7 @@ userRouter.put('/:id/unfollow', unfollowUser);
 userRouter.get('/:id/followers', getUserFollowers);
 userRouter.get('/:id/followings', getUserFollowings);
 userRouter.put('/profile', editUserData);
+userRouter.get('/search', searchUser);
 
 // Manages all Notification routes
 notificationRouter.get('/me', getUserNotifications);
