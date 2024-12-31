@@ -197,9 +197,9 @@ export async function getUserFollowers(req, res) {
     return res.status(400).json({ status: 'error', message: 'incorrect id' });
   }
 
-  let { cursor, limit } = req.query 
-  limit = limit ? (limit + 0) / 10 : 10
-  cursor = cursor ? (cursor + 0) / 10 : 0
+  let { cursor, limit } = req.query;
+  limit = limit ? (limit + 0) / 10 : 10;
+  cursor = cursor ? (cursor + 0) / 10 : 0;
 
   try {
     const result = await dbClient.findData('followers', { userId: new ObjectId(id) });
@@ -223,8 +223,10 @@ export async function getUserFollowers(req, res) {
       .then((results) => {
         const resp = results.map((result) => ({
           id: result._id,
+          firstName: result.firstName,
+          lastName: result.lastName,
           username: result.username,
-          bio: result.bio,
+          profileUrl: result.profileUrl,
         }));
         return res.status(200).json({ status: 'success', data: resp, pageInfo });
       })
@@ -247,9 +249,9 @@ export async function getUserFollowings(req, res) {
     return res.status(400).json({ status: 'error', message: 'incorrect id' });
   }
 
-  let { cursor, limit } = req.query
-  limit = limit ? (limit + 0) / 10 : 10
-  cursor = cursor ? (cursor + 0) / 10 : 0
+  let { cursor, limit } = req.query;
+  limit = limit ? (limit + 0) / 10 : 10;
+  cursor = cursor ? (cursor + 0) / 10 : 0;
 
   try {
     const result = await dbClient.findData('followings', { userId: new ObjectId(id) });
@@ -273,8 +275,10 @@ export async function getUserFollowings(req, res) {
       .then((results) => {
         const resp = results.map((result) => ({
           id: result._id,
+          firstName: result.firstName,
+          lastName: result.lastName,
           username: result.username,
-          bio: result.bio,
+          profileUrl: result.profileUrl,
         }));
         return res.status(200).json({ status: 'success', data: resp, pageInfo });
       })
@@ -289,7 +293,9 @@ export async function getUserFollowings(req, res) {
 }
 
 export async function editUserData(req, res) {
-  const { profileUrl, firstName, lastName, bio } = req.body;
+  const {
+    profileUrl, firstName, lastName, bio, preference,
+  } = req.body;
 
   const details = {};
   if (profileUrl) {
@@ -308,6 +314,10 @@ export async function editUserData(req, res) {
     details.bio = bio;
   }
 
+  if (preference) {
+    details.preference = preference;
+  }
+
   try {
     const result = await dbClient.updateData('users', { _id: new ObjectId(req.user.userId) }, { $set: details });
     if (result.matchedCount === 0) {
@@ -323,3 +333,29 @@ export async function editUserData(req, res) {
   }
 }
 
+export async function searchUser(req, res) {
+  const { username } = req.query;
+  if (!username) {
+    return res.status(200).json({ status: 'success', message: 'No user found' });
+  }
+
+  const pipeline = [
+    { $match: { username: { $regex: username, $options: "i" } } },
+  ];
+
+  const result = await dbClient.findManyData('users', pipeline, true);
+
+  if (!result || result.length < 1) {
+    return res.status(200).json({ status: 'success', message: 'No user found', data: [] });
+  }
+console.log(result);
+  const users = result.map((user) => ({
+    id: user._id,
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    profileUrl: user.profileUrl,
+  }));
+
+  return res.status(200).json({ status: 'sucess', data: users });
+}
