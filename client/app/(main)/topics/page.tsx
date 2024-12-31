@@ -151,7 +151,7 @@ export default function SelectTopicsPage() {
             className={`cursor-pointer transition-colors ${
               selectedTopics.includes(topic._id)
                 ? 'bg-primary/10 ring-2 ring-primary'
-                : 'hover:bg-gray-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-900'
             }`}
             onClick={() => toggleTopic(topic._id)}
           >
