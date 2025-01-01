@@ -1,4 +1,4 @@
-import { userRouter, authRouter, router, notificationRouter, blogRouter } from './routes/index';
+import { userRouter, authRouter, router, notificationRouter, blogRouter, messageRouter } from './routes/index';
 
 const express = require('express');
 const http = require('http');
@@ -19,13 +19,7 @@ app.use('/api/users', userRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/blogs', blogRouter);
+app.use('/api/messages', messageRouter);
 app.use('/api', router);
 
-const server = http.createServer(app);
-
-const hostname = '0.0.0.0';
-const port = '5000';
-
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
+export const server = http.createServer(app);
