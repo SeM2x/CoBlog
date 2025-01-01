@@ -14,7 +14,7 @@ class DBClient {
     this.dbClient = null;
     this.db = null;
     this.verifyConnection = false;
-    this.DBCollections = ['users', 'followers', 'followings', 'blogs', 'conversations', 'notifications', 'topics', 'subtopics'];
+    this.DBCollections = ['users', 'followers', 'messages', 'followings', 'blogs', 'conversations', 'notifications', 'topics', 'subtopics'];
   }
 
   async init() {
