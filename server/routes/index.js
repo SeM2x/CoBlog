@@ -9,6 +9,7 @@ import { getUserNotifications, markNotificationRead } from '../controllers/Notif
 import {
   suggestTopics, getUserBlogs, createBlog, inviteUsers,
 } from '../controllers/BlogsController';
+import { createMessage, getAllMessages } from '../controllers/MessagesController';
 
 const { Router } = require('express');
 
@@ -17,11 +18,14 @@ export const authRouter = Router();
 export const userRouter = Router();
 export const notificationRouter = Router();
 export const blogRouter = Router();
+export const messageRouter = Router();
+
 
 // Protect router
 userRouter.use(authenticate);
 notificationRouter.use(authenticate);
 blogRouter.use(authenticate);
+messageRouter.use(authenticate);
 
 // Manages all default routes
 router.get('/status', getStatus);
@@ -49,3 +53,7 @@ blogRouter.get('/topics', suggestTopics);
 blogRouter.get('/me', getUserBlogs);
 blogRouter.post('/create', createBlog);
 blogRouter.put('/:blogId/invite', inviteUsers);
+
+// Manages all messages routes
+messageRouter.post('/create', createMessage);
+messageRouter.get('/:conversationId', getAllMessages);
