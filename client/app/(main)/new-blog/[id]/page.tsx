@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import TipTapEditor from '@/components/tiptap';
 import { TiptapCollabProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
+import { BlogChat } from '../blogChat';
 
 const doc = new Y.Doc();
 
@@ -16,6 +17,18 @@ const provider = new TiptapCollabProvider({
   token: process.env.NEXT_PUBLIC_APP_TOKEN, // Your Cloud Dashboard App Token
   document: doc,
 });
+
+const currentUser = {
+  id: '1',
+  name: 'John Doe',
+  avatar: '/avatars/john-doe.jpg'
+};
+
+const collaborators = [
+  { id: '2', name: 'Alice Johnson', avatar: '/avatars/alice-johnson.jpg' },
+  { id: '3', name: 'Bob Smith', avatar: '/avatars/bob-smith.jpg' },
+  { id: '4', name: 'Charlie Brown', avatar: '/avatars/charlie-brown.jpg' },
+];
 
 export default function CreateBlogPage() {
   const [title, setTitle] = useState('');
@@ -54,6 +67,11 @@ export default function CreateBlogPage() {
           onChange={setContent}
         />
       </div>
+      <BlogChat
+        blogId={'blogId'}
+        currentUser={currentUser}
+        collaborators={collaborators}
+      />
     </div>
   );
 }
