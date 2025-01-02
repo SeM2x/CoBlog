@@ -114,7 +114,7 @@ export async function inviteUsers(req, res) {
       return res.status(404).json({ status: 'error', message: 'Some users does not exist' });
     }
 
-    // Update post invited users
+    // Update Blog invited users
     await dbClient.updateData(
       'blogs',
       { _id: new ObjectId(blog._id) },
@@ -124,6 +124,7 @@ export async function inviteUsers(req, res) {
     // Create notification for invited users
     const userNotificationsPromise = result.map((user) => dbClient.insertData('notifications', {
       userId: user._id,
+      blogId: blog._id,
       type: 'invite',
       message: `${blog.authorUsername} invites you to co-write a blog: ${blog.title}`,
       read: false,
