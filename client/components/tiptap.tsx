@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import Collaboration from '@tiptap/extension-collaboration';
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import Document from '@tiptap/extension-document';
 import Paragraph from '@tiptap/extension-paragraph';
 import { TiptapCollabProvider } from '@hocuspocus/provider';
@@ -56,6 +56,8 @@ const defaultContent = `
   <p>Feel free to edit and collaborate in real-time!</p>
 `;
 
+console.log(defaultContent);
+
 const TipTapEditor = ({
   content,
   onChange,
@@ -71,7 +73,7 @@ const TipTapEditor = ({
     onCreate: ({ editor: currentEditor }) => {
       provider.on('synced', () => {
         if (currentEditor.isEmpty) {
-          currentEditor.commands.setContent(defaultContent);
+          currentEditor.commands.setContent(content);
         }
       });
     },

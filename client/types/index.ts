@@ -37,6 +37,24 @@ type Blog = {
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
+  blogId?: string;
 };
 
-export type { Profile, Blog };
+interface User {
+  id: string;
+  name: string;
+  avatar: string;
+}
+
+interface Message {
+  id: string;
+  senderId: string;
+  content: string;
+  timestamp: Date;
+  status: 'sent' | 'delivered' | 'read';
+  type: 'text' | 'file';
+  fileUrl?: string;
+  fileName?: string;
+}
+
+export type { Profile, Blog, User, Message };

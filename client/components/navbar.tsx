@@ -25,7 +25,7 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
-    { name: 'Create Blog', href: '/new-blog/123' },
+    { name: 'Create Blog', href: '/new-blog' },
     { name: 'My Blogs', href: '/my-blogs' },
   ];
   const user = useUserStore((state) => state.user);
