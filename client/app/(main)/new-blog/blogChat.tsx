@@ -14,10 +14,10 @@ import {
 import { ChevronUp, ChevronDown, Smile, Send, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Message from '@/components/blog-chat/Message';
-import { Message as MessageType, User } from '@/types';
+import { Blog, Message as MessageType, User } from '@/types';
 
 interface BlogChatProps {
-  blogId: string;
+  blog: Blog;
   currentUser: User;
   collaborators: User[];
 }
@@ -69,11 +69,7 @@ const mockMessages: MessageType[] = [
   },
 ];
 
-export function BlogChat({
-  blogId,
-  currentUser,
-  collaborators,
-}: BlogChatProps) {
+export function BlogChat({ blog, currentUser, collaborators }: BlogChatProps) {
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<MessageType[]>(mockMessages);
   const [message, setMessage] = useState('');
@@ -82,16 +78,16 @@ export function BlogChat({
 
   useEffect(() => {
     // Load messages from local storage or API
-    const savedMessages = localStorage.getItem(`blog-${blogId}-messages`);
+    const savedMessages = localStorage.getItem(`blog-${blog._id}-messages`);
     if (savedMessages) {
       setMessages(JSON.parse(savedMessages));
     }
-  }, [blogId]);
+  }, [blog]);
 
   useEffect(() => {
     // Save messages to local storage
-    localStorage.setItem(`blog-${blogId}-messages`, JSON.stringify(messages));
-  }, [blogId, messages]);
+    localStorage.setItem(`blog-${blog._id}-messages`, JSON.stringify(messages));
+  }, [blog._id, messages]);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -175,111 +171,119 @@ export function BlogChat({
 
   return (
     <TooltipProvider>
-      <div className='fixed bottom-0 right-0 mx-4 z-50 max-w-96 bg-white dark:bg-gray-900 rounded-t-lg shadow-lg overflow-hidden transition-all duration-300 ease-in-out'>
-        <div className='flex items-center justify-between sm:w-96 py-2 px-3 bg-primary text-primary-foreground'>
-          <div className='flex items-center space-x-2'>
-            <h3 className='font-semibold'>Blog Collaboration Chat</h3>
-            <div className='flex -space-x-2'>
-              {collaborators.map((user) => (
-                <Tooltip key={user.id}>
-                  <TooltipTrigger>
-                    <Avatar className='h-6 w-6 border-2 border-primary'>
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback className='text-gray-800 dark:text-gray-300'>{user.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                  </TooltipTrigger>
-                  <TooltipContent className='border'>{user.name}</TooltipContent>
-                </Tooltip>
-              ))}
-            </div>
-          </div>
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={() => setIsMinimized(!isMinimized)}
-            className='text-primary-foreground hover:bg-primary-foreground/20'
-          >
-            {isMinimized ? (
-              <ChevronUp className='h-4 w-4' />
-            ) : (
-              <ChevronDown className='h-4 w-4' />
-            )}
-          </Button>
-        </div>
-        <AnimatePresence>
-          {!isMinimized && (
-            <motion.div
-              initial={{ height: 0 }}
-              animate={{ height: 'auto' }}
-              exit={{ height: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ScrollArea className='h-96 px-4 pt-1' ref={scrollAreaRef}>
-                {messages.map((msg) => (
-                  <Message
-                    key={msg.id}
-                    message={msg}
-                    currentUser={currentUser}
-                    collaborators={collaborators}
-                  />
+      <div className='fixed bottom-0 right-0 z-50 w-full max-w-96 px-3'>
+        <div className=' bg-white dark:bg-gray-900 w-full max-w-96 rounded-t-lg shadow-lg overflow-hidden transition-all duration-300 ease-in-out'>
+          <div className='flex items-center justify-between w-full py-2 px-3 bg-primary text-primary-foreground'>
+            <div className='flex items-center space-x-2'>
+              <h3 className='font-semibold line-clamp-2'>{blog.title}</h3>
+              <div className='flex -space-x-2'>
+                {collaborators.map((user) => (
+                  <Tooltip key={user.id}>
+                    <TooltipTrigger>
+                      <Avatar className='h-6 w-6 border-2 border-primary'>
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback className='text-gray-800 dark:text-gray-300'>
+                          {user.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </TooltipTrigger>
+                    <TooltipContent className='border'>
+                      {user.name}
+                    </TooltipContent>
+                  </Tooltip>
                 ))}
-              </ScrollArea>
-              <div className='p-2 bg-gray-100 dark:bg-gray-800'>
-                <div className='flex items-center space-x-1 bg-white dark:bg-gray-700 rounded-full px-4 py-1 focus-within:ring-2 focus-within:ring-primary'>
-                  <Input
-                    type='text'
-                    placeholder='Type a message...'
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                    className='shadow-none flex-grow border-none bg-transparent focus-visible:ring-0 focus:outline-none focus:ring-0'
-                  />
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        className='text-gray-500 hover:text-gray-700 dark:text-gray-400 rounded-full h-fit p-2 dark:hover:text-gray-200'
-                      >
-                        <Smile className='h-5 w-5' />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Insert emoji</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full h-fit p-2'
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <Paperclip className='h-5 w-5' />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Attach file</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <input
-                    type='file'
-                    ref={fileInputRef}
-                    className='hidden'
-                    onChange={handleFileUpload}
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    className='bg-primary text-primary-foreground hover:bg-primary/90 p-2 w-10 flex items-center justify-center rounded-full h-fit'
-                  >
-                    <Send className='h-5 w-5' />
-                  </Button>
-                </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={() => setIsMinimized(!isMinimized)}
+              className='text-primary-foreground hover:bg-primary-foreground/20'
+            >
+              {isMinimized ? (
+                <ChevronUp className='h-4 w-4' />
+              ) : (
+                <ChevronDown className='h-4 w-4' />
+              )}
+            </Button>
+          </div>
+          <AnimatePresence>
+            {!isMinimized && (
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                exit={{ height: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ScrollArea className='h-96 px-4 pt-1' ref={scrollAreaRef}>
+                  {messages.map((msg) => (
+                    <Message
+                      key={msg.id}
+                      message={msg}
+                      currentUser={currentUser}
+                      collaborators={collaborators}
+                    />
+                  ))}
+                </ScrollArea>
+                <div className='p-2 bg-gray-100 dark:bg-gray-800'>
+                  <div className='flex items-center space-x-1 bg-white dark:bg-gray-700 rounded-full px-4 py-1 focus-within:ring-2 focus-within:ring-primary'>
+                    <Input
+                      type='text'
+                      placeholder='Type a message...'
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyDown={(e) =>
+                        e.key === 'Enter' && handleSendMessage()
+                      }
+                      className='shadow-none flex-grow border-none bg-transparent focus-visible:ring-0 focus:outline-none focus:ring-0'
+                    />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className='text-gray-500 hover:text-gray-700 dark:text-gray-400 rounded-full h-fit p-2 dark:hover:text-gray-200'
+                        >
+                          <Smile className='h-5 w-5' />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Insert emoji</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full h-fit p-2'
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Paperclip className='h-5 w-5' />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Attach file</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <input
+                      type='file'
+                      ref={fileInputRef}
+                      className='hidden'
+                      onChange={handleFileUpload}
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      className='bg-primary text-primary-foreground hover:bg-primary/90 p-2 w-10 flex items-center justify-center rounded-full h-fit'
+                    >
+                      <Send className='h-5 w-5' />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </TooltipProvider>
   );

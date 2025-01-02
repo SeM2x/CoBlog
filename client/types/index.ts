@@ -37,6 +37,7 @@ type Blog = {
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
+  blogId?: string;
 };
 
 interface User {
