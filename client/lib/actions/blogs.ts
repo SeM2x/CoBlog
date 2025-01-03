@@ -39,4 +39,16 @@ const createBlog = actionClient
     return res.data as Partial<Blog>;
   });
 
-export { getTopics, getUserBlogs, createBlog };
+const inviteCollaborator = actionClient
+  .schema(
+    z.object({
+      blogId: z.string().nonempty(),
+      users: z.array(z.string().nonempty()),
+    })
+  )
+  .action(async ({ parsedInput: { blogId, users } }) => {
+    const res = (await apiRequest.put(`/blogs/${blogId}/invite`, { users }))
+      .data;
+    return res.message;
+  });
+export { getTopics, getUserBlogs, createBlog, inviteCollaborator };

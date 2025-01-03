@@ -7,7 +7,7 @@ import { TiptapCollabProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
 import { BlogChat } from './blogChat';
 import { CreateBlogModal } from '@/components/createBlogModal';
-import { Blog } from '@/types';
+import { Blog, PartialUser } from '@/types';
 import { useUserStore } from '@/lib/store';
 import generateTipTapToken from '@/lib/utils/tiptap-token';
 import {
@@ -32,14 +32,14 @@ import PermissionsModal from './PermissionsModal';
 
 const currentUser = {
   id: '1',
-  name: 'John Doe',
-  avatar: '/avatars/john-doe.jpg',
+  username: 'John Doe',
+  profileUrl: '/avatars/john-doe.jpg',
 };
 
 const intialCollaborators = [
-  { id: '2', name: 'Alice Johnson', avatar: '/avatars/alice-johnson.jpg' },
-  { id: '3', name: 'Bob Smith', avatar: '/avatars/bob-smith.jpg' },
-  { id: '4', name: 'Charlie Brown', avatar: '/avatars/charlie-brown.jpg' },
+  { id: '2', username: 'Alice Johnson', profileUrl: '/profileUrls/alice-johnson.jpg' },
+  { id: '3', username: 'Bob Smith', profileUrl: '/profileUrls/bob-smith.jpg' },
+  { id: '4', username: 'Charlie Brown', profileUrl: '/profileUrls/charlie-brown.jpg' },
 ];
 
 export default function CreateBlog({ blog }: { blog?: Blog }) {
@@ -100,7 +100,7 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
   //const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [collaborators, setCollaborators] =
-    useState<{ id: string; name: string; avatar: string }[]>(
+    useState<PartialUser[]>(
       intialCollaborators
     );
   const handleVisibilityChange = () => {
@@ -108,7 +108,7 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
   };
 
   const handleInviteCollaborators = (
-    newCollaborators: { id: string; name: string; avatar: string }[]
+    newCollaborators: PartialUser[]
   ) => {
     setCollaborators([...collaborators, ...newCollaborators]);
     setIsInviteModalOpen(false);
@@ -141,8 +141,8 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
         <div className='flex items-center space-x-2'>
           {collaborators.map((collaborator) => (
             <Avatar key={collaborator.id} className='h-8 w-8'>
-              <AvatarImage src={collaborator.avatar} alt={collaborator.name} />
-              <AvatarFallback>{collaborator.name[0]}</AvatarFallback>
+              <AvatarImage src={collaborator.profileUrl} alt={collaborator.username} />
+              <AvatarFallback>{collaborator.username[0]}</AvatarFallback>
             </Avatar>
           ))}
           <Button

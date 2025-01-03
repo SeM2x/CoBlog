@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 
 import { cn } from '@/lib/utils';
+import getImageId from '@/lib/utils/get-image-id';
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
@@ -28,7 +29,9 @@ const AvatarImage = React.forwardRef<
     ref={ref}
     className={cn('aspect-square object-contain h-full w-full', className)}
     {...props}
-    src={`/api/images/${props.src}`}
+    src={`/api/images/${
+      props.src?.startsWith('https://') ? getImageId(props.src) : props.src
+    }`}
   />
 ));
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;

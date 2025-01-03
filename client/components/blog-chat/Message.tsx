@@ -1,7 +1,7 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Check, CheckCheck, Paperclip } from 'lucide-react';
-import { Message as MessageType, User } from '@/types';
+import { Message as MessageType, PartialUser } from '@/types';
 import { format } from 'date-fns';
 
 const Message = ({
@@ -10,8 +10,8 @@ const Message = ({
   collaborators,
 }: {
   message: MessageType;
-  currentUser: User;
-  collaborators: User[];
+  currentUser: PartialUser;
+  collaborators: PartialUser[];
 }) => {
   return (
     <div
@@ -31,16 +31,16 @@ const Message = ({
           <div className='flex items-center mb-1'>
             <Avatar className='h-5 w-5 mr-2'>
               <AvatarImage
-                src={collaborators.find((u) => u.id === msg.senderId)?.avatar}
+                src={collaborators.find((u) => u.id === msg.senderId)?.profileUrl}
               />
               <AvatarFallback>
                 {collaborators
                   .find((u) => u.id === msg.senderId)
-                  ?.name.charAt(0)}
+                  ?.username?.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <span className='text-xs font-medium'>
-              {collaborators.find((u) => u.id === msg.senderId)?.name}
+              {collaborators.find((u) => u.id === msg.senderId)?.username}
             </span>
           </div>
         )}
