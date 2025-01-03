@@ -109,6 +109,17 @@ class DBClient {
       return result;
     }
   }
+
+  async deleteData(collectionType, details) {
+    if (this.db) {
+      if (!this.DBCollections.includes(collectionType)) {
+        throw new Error('Collection type does not exist');
+      }
+      const collection = this.db.collection(collectionType);
+      const result = await collection.deleteOne(details);
+      return result;
+    }
+  }
 }
 
 const dbClient = new DBClient();
