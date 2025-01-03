@@ -43,8 +43,11 @@ import Document from '@tiptap/extension-document';
 import Paragraph from '@tiptap/extension-paragraph';
 import { TiptapCollabProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
+import DynamicTextarea from '@/app/(main)/new-blog/DynamicTextarea';
 
 interface TipTapEditorProps {
+  title: string;
+  setTitle: (title: string) => void;
   content: string;
   onChange: (content: string) => void;
   provider: TiptapCollabProvider;
@@ -59,6 +62,8 @@ const defaultContent = `
 console.log(defaultContent);
 
 const TipTapEditor = ({
+  title,
+  setTitle,
   content,
   onChange,
   provider,
@@ -144,7 +149,7 @@ const TipTapEditor = ({
   ];
 
   return (
-    <div className=''>
+    <div className='space-y-4'>
       <div className='rounded-lg flex flex-wrap items-center border p-2 gap-2 sticky top-20 z-10 bg-background/50 backdrop-blur-md shadow'>
         <Button
           variant='ghost'
@@ -317,7 +322,11 @@ const TipTapEditor = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <EditorContent editor={editor} className='py-4 px-2' />
+      <DynamicTextarea
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <EditorContent editor={editor} className='px-2' />
     </div>
   );
 };

@@ -1,3 +1,5 @@
+'use server';
+
 import { SignJWT } from 'jose';
 import { getUserBlogs } from '../actions/blogs';
 

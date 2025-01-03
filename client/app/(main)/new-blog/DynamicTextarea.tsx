@@ -11,7 +11,7 @@ interface DynamicTextareaProps {
 export default function DynamicTextarea({
   value,
   onChange,
-  maxRows = 5,
+  maxRows = 10,
 }: DynamicTextareaProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -26,6 +26,11 @@ export default function DynamicTextarea({
   };
   useEffect(() => {
     adjustTextareaHeight();
+
+    window.addEventListener('resize', adjustTextareaHeight);
+    return () => {
+      window.removeEventListener('resize', adjustTextareaHeight);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -41,7 +46,7 @@ export default function DynamicTextarea({
       onChange={handleInput}
       placeholder='Title'
       rows={1} // Start with a single line
-      className='w-full p-2 text-5xl font-semibold resize-none focus:outline-none'
+      className='w-full p-2 text-2xl md:text-3xl  lg:text-4xl font-bold resize-none focus:outline-none leading-tight'
       style={{
         backgroundColor: 'transparent', // Make it transparent
         border: 'none', // Remove the border
