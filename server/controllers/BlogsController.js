@@ -275,3 +275,18 @@ export async function manageInvitation(req, res) {
     return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
+
+export async function deleteBlog(req, res) {
+  let { blogId } = req.params;
+  try {
+    blogId = new ObjectId(blogId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect Id' });
+  }
+
+  const blog = await dbClient.deleteData('blogs', { _id: blogId, authorId: new ObjectId(req.user.userId) });
+  if (blog.deletedCount === 0) {
+    return res.status(404).json({ status: 'error', message: 'Blog not found for this user' });
+  }
+  return res.status(200).json({ status: 'success', message: 'Blog successfully deleted' });
+}
