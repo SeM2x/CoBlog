@@ -7,7 +7,7 @@ import {
 import { authenticate } from '../middlewares/authenticate';
 import { getUserNotifications, markNotificationRead } from '../controllers/NotificationsController';
 import {
-  suggestTopics, getUserBlogs, createBlog, inviteUsers,
+  suggestTopics, getUserBlogs, createBlog, inviteUsers, publishBlog, getBlogById, manageInvitation
 } from '../controllers/BlogsController';
 import { createMessage, getAllMessages } from '../controllers/MessagesController';
 
@@ -19,7 +19,6 @@ export const userRouter = Router();
 export const notificationRouter = Router();
 export const blogRouter = Router();
 export const messageRouter = Router();
-
 
 // Protect router
 userRouter.use(authenticate);
@@ -53,6 +52,9 @@ blogRouter.get('/topics', suggestTopics);
 blogRouter.get('/me', getUserBlogs);
 blogRouter.post('/create', createBlog);
 blogRouter.put('/:blogId/invite', inviteUsers);
+blogRouter.put('/:blogId/publish', publishBlog);
+blogRouter.get('/:blogId', getBlogById);
+blogRouter.put('/accept|reject', manageInvitation);
 
 // Manages all messages routes
 messageRouter.post('/create', createMessage);
