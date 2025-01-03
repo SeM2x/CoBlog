@@ -92,7 +92,6 @@ export async function inviteUsers(req, res) {
   }
 
   if (!Array.isArray(users) || typeof users[0] !== 'object') {
-	  console.log(users)
     return res.status(400).json({
       status: 'error',
       message: 'Invalid input format. Expected an array of user objects.',
@@ -271,7 +270,7 @@ export async function manageInvitation(req, res) {
     };
     await dbClient.insertData('notifications', notificationData);
 
-    return res.status(200).json({ status: 'success', message: `Invite ${url}ed` });
+    return res.status(200).json({ status: 'success', message: `Invite successfully ${url}ed` });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
