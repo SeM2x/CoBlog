@@ -17,7 +17,7 @@ import { useAction } from 'next-safe-action/hooks';
 import { inviteCollaborator } from '@/lib/actions/blogs';
 import { toast } from '@/hooks/use-toast';
 import { useParams } from 'next/navigation';
-import { Search, UserPlus, X } from 'lucide-react';
+import { LoaderCircle, Search, UserPlus, X } from 'lucide-react';
 import { getUsers } from '@/lib/actions/users';
 import { PartialUser } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -91,15 +91,18 @@ export default function InviteModal({
     setSearchQuery('');
   };
 
-  const { execute } = useAction(getUsers, {
-    onSuccess: ({ data }) => {
-      if (data) setAvailableUsers((prev) => [...prev, ...data]);
-    },
-  });
+  const { execute: executeSearch, isPending: isSearchPending } = useAction(
+    getUsers,
+    {
+      onSuccess: ({ data }) => {
+        if (data) setAvailableUsers(data);
+      },
+    }
+  );
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    execute(searchQuery);
+    executeSearch(searchQuery);
   };
 
   return (
@@ -133,31 +136,35 @@ export default function InviteModal({
                   </div>
                 </form>
                 <ScrollArea className='h-[300px] mt-4'>
-                  {filteredUsers.map((user) => (
-                    <div
-                      key={user.id}
-                      className='flex items-center space-x-4 py-2'
-                    >
-                      <Checkbox
-                        id={`user-${user.id}`}
-                        checked={selectedUsers.some((u) => u.id === user.id)}
-                        onCheckedChange={() => handleUserSelect(user)}
-                      />
-                      <Label
-                        htmlFor={`user-${user.id}`}
-                        className='flex items-center space-x-4 cursor-pointer flex-1'
+                  {isSearchPending ? (
+                    <LoaderCircle className='animate-spin h-8 w-8 mx-auto' />
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        className='flex items-center space-x-4 py-2'
                       >
-                        <Avatar>
-                          <AvatarImage
-                            src={user.profileUrl}
-                            alt={user.username}
-                          />
-                          <AvatarFallback>{user.username[0]}</AvatarFallback>
-                        </Avatar>
-                        <span className='flex-1'>{user.username}</span>
-                      </Label>
-                    </div>
-                  ))}
+                        <Checkbox
+                          id={`user-${user.id}`}
+                          checked={selectedUsers.some((u) => u.id === user.id)}
+                          onCheckedChange={() => handleUserSelect(user)}
+                        />
+                        <Label
+                          htmlFor={`user-${user.id}`}
+                          className='flex items-center space-x-4 cursor-pointer flex-1'
+                        >
+                          <Avatar>
+                            <AvatarImage
+                              src={user.profileUrl}
+                              alt={user.username}
+                            />
+                            <AvatarFallback>{user.username[0]}</AvatarFallback>
+                          </Avatar>
+                          <span className='flex-1'>{user.username}</span>
+                        </Label>
+                      </div>
+                    ))
+                  )}
                   {availableUsers.length === 0 && (
                     <div className='text-center text-muted-foreground py-4'>
                       No users found
