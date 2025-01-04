@@ -69,6 +69,7 @@ export default function InviteModal({
     {
       onSuccess: ({ data }) => {
         toast({ title: data });
+        onInvite(selectedUsers);
       },
       onError: ({ error }) => {
         console.log(error);
@@ -83,10 +84,9 @@ export default function InviteModal({
     console.log(selectedUsers);
 
     await executeInvite({
-      users: selectedUsers.map((user) => user.id),
+      users: selectedUsers.map((user) => ({ id: user.id })),
       blogId: params.id ? params.id[0] : '',
     });
-    onInvite(selectedUsers);
     setSelectedUsers([]);
     setSearchQuery('');
   };

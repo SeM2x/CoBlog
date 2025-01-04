@@ -29,6 +29,9 @@ import {
 import InviteModal from './InviteModal';
 import DeleteModal from './DeleteModal';
 import PermissionsModal from './PermissionsModal';
+import { useAction } from 'next-safe-action/hooks';
+import { publishBlog } from '@/lib/actions/blogs';
+import { toast } from '@/hooks/use-toast';
 
 const currentUser = {
   id: '1',
@@ -39,7 +42,7 @@ const currentUser = {
 export default function CreateBlog({
   blog,
   coAuthors,
-  invitedUsers
+  invitedUsers,
 }: {
   blog?: Blog;
   coAuthors: PartialUser[];
@@ -51,10 +54,16 @@ export default function CreateBlog({
   const [provider, setProvider] = useState<TiptapCollabProvider | null>(null);
   const [doc, setDoc] = useState<Y.Doc | null>(null);
 
-  const handlePublish = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically send the blog post to your backend
-    console.log('Blog post:', { title, content });
+  const { execute, isPending } = useAction(publishBlog, {
+    onSuccess: ({ data }) => {
+      toast({ title: data });
+    },
+    onError: () => {
+      toast({ title: 'Failed to publish blog post', variant: 'destructive' });
+    },
+  });
+  const handlePublish = () => {
+    execute(blog?._id || '');
   };
 
   const user = useUserStore((state) => state.user);
@@ -156,7 +165,9 @@ export default function CreateBlog({
         </div>
         <div className='flex items-center space-x-4'>
           <Button variant='outline'>Save Draft</Button>
-          <Button onClick={handlePublish}>Publish</Button>
+          <Button onClick={handlePublish} loading={isPending}>
+            Publish
+          </Button>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' size='icon'>
