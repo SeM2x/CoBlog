@@ -1,4 +1,4 @@
-import { getUserBlogs } from '@/lib/actions/blogs';
+import { getBlog, getUserBlogs } from '@/lib/actions/blogs';
 import React, { Suspense } from 'react';
 import CreateBlog from '../CreateBlog';
 import { getUserProfile } from '@/lib/actions/users';
@@ -25,6 +25,7 @@ const getUsersProfiles = async (userIds: string[]) => {
 };
 
 const BlogsGetter = async ({ blogId }: { blogId?: string }) => {
+  if (blogId) console.log('fetching blog', (await getBlog(blogId)).data?.title);
   const blogs = (await getUserBlogs()).data;
 
   const blog = blogs ? blogs.find((blog) => blog._id === blogId) : undefined;

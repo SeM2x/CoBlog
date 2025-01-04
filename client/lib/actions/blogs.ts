@@ -36,6 +36,8 @@ const createBlog = actionClient
   .action(async ({ parsedInput: data }) => {
     const res = (await apiRequest.post('/blogs/create', data)).data;
     revalidatePath('/new-blog');
+    revalidatePath(`/new-blog/${res.data._id}`);
+    revalidatePath('/(main)/new-blog/[[...id]]');
     return res.data as Partial<Blog>;
   });
 
@@ -85,13 +87,24 @@ const deleteBlog = actionClient
   .schema(z.string().nonempty())
   .action(async ({ parsedInput: blogId }) => {
     const res = (await apiRequest.delete(`/blogs/${blogId}/delete`)).data;
+    revalidatePath('/new-blog');
+    revalidatePath('/(main)/new-blog/[[...id]]');
     return res.message;
   });
 
 const publishBlog = actionClient
-  .schema(z.string().nonempty())
-  .action(async ({ parsedInput: blogId }) => {
-    const res = (await apiRequest.put(`/blogs/${blogId}/publish`)).data;
+  .schema(
+    z.object({
+      blogId: z.string().nonempty(),
+      title: z.string().nonempty(),
+      content: z.string().nonempty(),
+      topics: z.array(z.string().nonempty()),
+      subtopics: z.array(z.string().nonempty()),
+    })
+  )
+  .action(async ({ parsedInput }) => {
+    const { blogId, ...data } = parsedInput;
+    const res = (await apiRequest.put(`/blogs/${blogId}/publish`, data)).data;
     return res.message;
   });
 

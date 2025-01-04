@@ -32,6 +32,7 @@ import PermissionsModal from './PermissionsModal';
 import { useAction } from 'next-safe-action/hooks';
 import { publishBlog } from '@/lib/actions/blogs';
 import { toast } from '@/hooks/use-toast';
+import { TopicSelector } from './TopicsSelector';
 
 const currentUser = {
   id: '1',
@@ -63,7 +64,16 @@ export default function CreateBlog({
     },
   });
   const handlePublish = () => {
-    execute(blog?._id || '');
+    if (!blog) return;
+    const data = {
+      blogId: blog?._id,
+      title,
+      content,
+      topics: [],
+      subtopics: [],
+    };
+    console.log('data', data);
+    execute(data);
   };
 
   const user = useUserStore((state) => state.user);
@@ -141,6 +151,10 @@ export default function CreateBlog({
     );
   };
 
+  const [selectedTopics, setSelectedTopics] = useState<
+    { value: string; label: string }[]
+  >([]);
+
   return (
     <div className='relative min-h-screen border container mx-auto px-4 py-8 max-w-4xl space-y-4'>
       <div className='flex gap-4 flex-col sm:flex-row sm:justify-between sm:items-center'>
@@ -202,7 +216,10 @@ export default function CreateBlog({
           </DropdownMenu>
         </div>
       </div>
-
+      <TopicSelector
+        selectedTopics={selectedTopics}
+        setSelectedTopics={setSelectedTopics}
+      />
       <div className='space-y-2'>
         {provider && doc && (
           <TipTapEditor
