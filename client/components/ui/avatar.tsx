@@ -29,9 +29,12 @@ const AvatarImage = React.forwardRef<
     ref={ref}
     className={cn('aspect-square object-contain h-full w-full', className)}
     {...props}
-    src={`/api/images/${
-      props.src?.startsWith('https://') ? getImageId(props.src) : props.src
-    }`}
+    src={
+      props.src &&
+      `/api/images/${
+        props.src?.startsWith('https://') ? getImageId(props.src) : props.src
+      }`
+    }
   />
 ));
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;

@@ -1,6 +1,7 @@
 import { getUserBlogs } from '@/lib/actions/blogs';
 import React, { Suspense } from 'react';
 import CreateBlog from '../CreateBlog';
+import { getUserProfile } from '@/lib/actions/users';
 
 export default async function CreateBlogPage({
   params,
@@ -17,9 +18,20 @@ export default async function CreateBlogPage({
   );
 }
 
+const getUsersProfiles = async (userIds: string[]) => {
+  return (await Promise.all(userIds.map((id) => getUserProfile(id)))).filter(
+    (user) => user !== undefined
+  );
+};
+
 const BlogsGetter = async ({ blogId }: { blogId?: string }) => {
   const blogs = (await getUserBlogs()).data;
-  const blog = blogs ? blogs.find((blog) => blog._id === blogId) : undefined;
 
-  return <CreateBlog blog={blog} />;
+  const blog = blogs ? blogs.find((blog) => blog._id === blogId) : undefined;
+  const coAuthors = await getUsersProfiles(blog?.CoAuthors || []);
+  const invitedUsers = await getUsersProfiles(blog?.invitedUsers || []);
+
+  return (
+    <CreateBlog blog={blog} coAuthors={coAuthors} invitedUsers={invitedUsers} />
+  );
 };

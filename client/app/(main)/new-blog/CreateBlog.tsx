@@ -36,13 +36,15 @@ const currentUser = {
   profileUrl: '/avatars/john-doe.jpg',
 };
 
-const intialCollaborators = [
-  { id: '2', username: 'Alice Johnson', profileUrl: '/profileUrls/alice-johnson.jpg' },
-  { id: '3', username: 'Bob Smith', profileUrl: '/profileUrls/bob-smith.jpg' },
-  { id: '4', username: 'Charlie Brown', profileUrl: '/profileUrls/charlie-brown.jpg' },
-];
-
-export default function CreateBlog({ blog }: { blog?: Blog }) {
+export default function CreateBlog({
+  blog,
+  coAuthors,
+  invitedUsers
+}: {
+  blog?: Blog;
+  coAuthors: PartialUser[];
+  invitedUsers: PartialUser[];
+}) {
   const [title, setTitle] = useState(blog?.title || '');
   const [content, setContent] = useState(blog?.content || '');
 
@@ -99,17 +101,12 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
   const [managePermissionsOpen, setManagePermissionsOpen] = useState(false);
   //const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [collaborators, setCollaborators] =
-    useState<PartialUser[]>(
-      intialCollaborators
-    );
+  const [collaborators, setCollaborators] = useState<PartialUser[]>(coAuthors);
   const handleVisibilityChange = () => {
     setIsPublic(!isPublic);
   };
 
-  const handleInviteCollaborators = (
-    newCollaborators: PartialUser[]
-  ) => {
+  const handleInviteCollaborators = (newCollaborators: PartialUser[]) => {
     setCollaborators([...collaborators, ...newCollaborators]);
     setIsInviteModalOpen(false);
   };
@@ -141,7 +138,10 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
         <div className='flex items-center space-x-2'>
           {collaborators.map((collaborator) => (
             <Avatar key={collaborator.id} className='h-8 w-8'>
-              <AvatarImage src={collaborator.profileUrl} alt={collaborator.username} />
+              <AvatarImage
+                src={collaborator.profileUrl}
+                alt={collaborator.username}
+              />
               <AvatarFallback>{collaborator.username[0]}</AvatarFallback>
             </Avatar>
           ))}
@@ -217,6 +217,7 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
         onClose={() => setIsInviteModalOpen(false)}
         onInvite={handleInviteCollaborators}
         existingCollaborators={collaborators}
+        invitedUsers={invitedUsers}
       />
       <DeleteModal
         isOpen={isDeleteModalOpen}

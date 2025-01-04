@@ -62,4 +62,14 @@ const getUsers = actionClient
     return res.data as PartialUser[];
   });
 
-export { updateProfile, getUsers };
+const getUserProfile = async (userId: string) => {
+  try {
+    const res = (await apiRequest.get(`/users/${userId}/profile`)).data;
+    return res.data as PartialUser;
+    return;
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+  }
+};
+
+export { updateProfile, getUsers, getUserProfile };

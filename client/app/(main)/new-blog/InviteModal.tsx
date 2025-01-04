@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,61 +17,26 @@ import { useAction } from 'next-safe-action/hooks';
 import { inviteCollaborator } from '@/lib/actions/blogs';
 import { toast } from '@/hooks/use-toast';
 import { useParams } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { Search, UserPlus, X } from 'lucide-react';
 import { getUsers } from '@/lib/actions/users';
 import { PartialUser } from '@/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface InviteCollaboratorsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onInvite: (collaborators: PartialUser[]) => void;
   existingCollaborators: PartialUser[];
+  invitedUsers: PartialUser[];
 }
-
-const mockUsers: PartialUser[] = [
-  {
-    id: '1',
-    username: 'Alice Johnson',
-    profileUrl: '/profileUrls/alice-johnson.jpg',
-  },
-  { id: '2', username: 'Bob Smith', profileUrl: '/profileUrls/bob-smith.jpg' },
-  {
-    id: '3',
-    username: 'Charlie Brown',
-    profileUrl: '/profileUrls/charlie-brown.jpg',
-  },
-  {
-    id: '4',
-    username: 'Diana Prince',
-    profileUrl: '/profileUrls/diana-prince.jpg',
-  },
-  {
-    id: '5',
-    username: 'Ethan Hunt',
-    profileUrl: '/profileUrls/ethan-hunt.jpg',
-  },
-  {
-    id: '6',
-    username: 'Fiona Gallagher',
-    profileUrl: '/profileUrls/fiona-gallagher.jpg',
-  },
-  {
-    id: '7',
-    username: 'George Lucas',
-    profileUrl: '/profileUrls/george-lucas.jpg',
-  },
-  {
-    id: '8',
-    username: 'Hannah Montana',
-    profileUrl: '/profileUrls/hannah-montana.jpg',
-  },
-];
 
 export default function InviteModal({
   isOpen,
   onClose,
   onInvite,
   existingCollaborators,
+  invitedUsers,
 }: InviteCollaboratorsModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<PartialUser[]>([]);
@@ -79,10 +44,12 @@ export default function InviteModal({
 
   useEffect(() => {
     setAvailableUsers(
-      mockUsers.filter(
+      availableUsers.filter(
         (user) => !existingCollaborators.some((c) => c.id === user.id)
       )
     );
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingCollaborators]);
 
   const filteredUsers = availableUsers.filter((user) =>
@@ -130,62 +97,117 @@ export default function InviteModal({
     },
   });
 
-  const handleSearch = () => {
+  const handleSearch = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     execute(searchQuery);
   };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-[425px]'>
+      <DialogContent className='sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle>Invite Collaborators</DialogTitle>
           <DialogDescription>
-            Search and select users to invite as collaborators for your blog
-            post.
+            Invite users to collaborate on your blog post.
           </DialogDescription>
         </DialogHeader>
-        <div className='grid gap-4 py-4'>
-          <div className='flex gap-2'>
-            <Input
-              placeholder='Search users...'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Button
-              size='icon'
-              className='rounded-full aspect-square'
-              onClick={handleSearch}
-            >
-              <Search />
-            </Button>
-          </div>
-          <ScrollArea className='h-[300px] border rounded-md p-2'>
-            {filteredUsers.map((user) => (
-              <div key={user.id} className='flex items-center space-x-2 py-2'>
-                <Checkbox
-                  id={`user-${user.id}`}
-                  checked={selectedUsers.some((u) => u.id === user.id)}
-                  onCheckedChange={() => handleUserSelect(user)}
-                />
-                <Label
-                  htmlFor={`user-${user.id}`}
-                  className='flex items-center space-x-2 cursor-pointer'
-                >
-                  <Avatar className='h-8 w-8'>
-                    <AvatarImage src={user.profileUrl} alt={user.username} />
-                    <AvatarFallback>{user.username[0]}</AvatarFallback>
-                  </Avatar>
-                  <span>{user.username}</span>
-                </Label>
-              </div>
-            ))}
-          </ScrollArea>
-        </div>
+        <Tabs defaultValue='search' className='w-full'>
+          <TabsList className='grid w-full grid-cols-2'>
+            <TabsTrigger value='search'>Search Users</TabsTrigger>
+            <TabsTrigger value='invited'>
+              Invited ({invitedUsers.length})
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value='search'>
+            <Card>
+              <CardContent className='p-4'>
+                <form action='' onSubmit={handleSearch}>
+                  <div className='relative'>
+                    <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+                    <Input
+                      placeholder='Search users...'
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className='pl-8'
+                    />
+                  </div>
+                </form>
+                <ScrollArea className='h-[300px] mt-4'>
+                  {filteredUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className='flex items-center space-x-4 py-2'
+                    >
+                      <Checkbox
+                        id={`user-${user.id}`}
+                        checked={selectedUsers.some((u) => u.id === user.id)}
+                        onCheckedChange={() => handleUserSelect(user)}
+                      />
+                      <Label
+                        htmlFor={`user-${user.id}`}
+                        className='flex items-center space-x-4 cursor-pointer flex-1'
+                      >
+                        <Avatar>
+                          <AvatarImage
+                            src={user.profileUrl}
+                            alt={user.username}
+                          />
+                          <AvatarFallback>{user.username[0]}</AvatarFallback>
+                        </Avatar>
+                        <span className='flex-1'>{user.username}</span>
+                      </Label>
+                    </div>
+                  ))}
+                  {availableUsers.length === 0 && (
+                    <div className='text-center text-muted-foreground py-4'>
+                      No users found
+                    </div>
+                  )}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value='invited'>
+            <Card>
+              <CardContent className='p-4'>
+                <ScrollArea className='h-[300px]'>
+                  {invitedUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className='flex items-center justify-between py-2'
+                    >
+                      <div className='flex items-center space-x-4'>
+                        <Avatar>
+                          <AvatarImage
+                            src={user.profileUrl}
+                            alt={user.username}
+                          />
+                          <AvatarFallback>{user.username[0]}</AvatarFallback>
+                        </Avatar>
+                        <span>{user.username}</span>
+                      </div>
+                      <Button variant='ghost' size='sm' onClick={() => {}}>
+                        <X className='h-4 w-4' />
+                      </Button>
+                    </div>
+                  ))}
+                  {invitedUsers.length === 0 && (
+                    <div className='text-center text-muted-foreground py-4'>
+                      No users invited yet
+                    </div>
+                  )}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
         <DialogFooter>
           <Button
-            loading={isInvitePending}
             onClick={handleInvite}
+            loading={isInvitePending}
             disabled={selectedUsers.length === 0}
           >
+            <UserPlus className='mr-2 h-4 w-4' />
             Invite Selected ({selectedUsers.length})
           </Button>
         </DialogFooter>

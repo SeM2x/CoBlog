@@ -38,6 +38,8 @@ type Blog = {
   updatedAt: string;
   publishedAt: string;
   blogId?: string;
+  invitedUsers: string[];
+  CoAuthors: string[];
 };
 
 interface PartialUser {
