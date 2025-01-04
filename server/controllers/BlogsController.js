@@ -178,19 +178,25 @@ export async function publishBlog(req, res) {
     minutesRead: minuteRead || Math.floor(Math.random() * 10),
     nComments: 0,
     nShares: 0,
-    nLikes: 0,
+    nReactions: 0,
     content,
     imagesUrl,
     isPublished: true,
     status: 'published',
   };
 
-  const result = await dbClient.updateData('blogs', { _id: blogId }, { $set: details });
-  if (result.matchedCount === 0) {
-    return res.status(404).json({ status: 'error', message: 'Blog not found' });
-  }
+  try {
+    const result = await dbClient.updateData('blogs', { _id: blogId }, { $set: details });
+    await dbClient.insertData('reactions', { blogId, reactions: [] });
 
-  return res.status(200).json({ status: 'success', message: 'Blog is published' });
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ status: 'error', message: 'Blog not found' });
+    }
+
+    return res.status(200).json({ status: 'success', message: 'Blog is published' });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+  }
 }
 
 export async function getBlogById(req, res) {
@@ -289,4 +295,32 @@ export async function deleteBlog(req, res) {
     return res.status(404).json({ status: 'error', message: 'Blog not found for this user' });
   }
   return res.status(200).json({ status: 'success', message: 'Blog successfully deleted' });
+}
+
+export async function updateBlogReaction(req, res) {
+  let { blogId } = req.params;
+  let { userId } = req.user;
+  try {
+    blogId = new ObjectId(blogId);
+    userId = new ObjectId(userId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect Id' });
+  }
+
+  const result = await dbClient.updateData('reactions', { blogId }, { $addToSet: { reactions: userId } });
+  console.log(result);
+  if (result.matchedCount === 0) {
+    return res.status(404).json({ status: 'error', message: 'Blog does not exist' });
+  }
+
+  if (result.modifiedCount === 0) {
+    return res.status(409).json({ status: 'error', message: 'user already liked this blog.' });
+  }
+
+  try {
+    const resp = await dbClient.updateData('blogs', { _id: blogId }, { $inc: { nReactions: 1 } });
+    return res.status(200).json({ status: 'success', message: 'Blog reacted successfully', data: { nReactions: 1 } });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+  }
 }
