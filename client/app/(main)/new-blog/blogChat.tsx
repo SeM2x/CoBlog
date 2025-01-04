@@ -14,60 +14,14 @@ import {
 import { ChevronUp, ChevronDown, Smile, Send, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Message from '@/components/blog-chat/Message';
-import { Blog, Message as MessageType, User } from '@/types';
+import { Blog, Message as MessageType, PartialUser } from '@/types';
+import { mockMessages } from '@/lib/mock';
 
 interface BlogChatProps {
   blog: Blog;
-  currentUser: User;
-  collaborators: User[];
+  currentUser: PartialUser;
+  collaborators: PartialUser[];
 }
-
-// Mock messages data
-const mockMessages: MessageType[] = [
-  {
-    id: '1',
-    senderId: '2',
-    content:
-      "Hey team, I've just added a new section to the blog post. Can you please review it?",
-    timestamp: new Date('2023-06-15T10:30:00'),
-    status: 'read',
-    type: 'text',
-  },
-  {
-    id: '2',
-    senderId: '1',
-    content: "Sure, I'll take a look right away!",
-    timestamp: new Date('2023-06-15T10:32:00'),
-    status: 'read',
-    type: 'text',
-  },
-  {
-    id: '3',
-    senderId: '3',
-    content:
-      "I've noticed a few typos in the introduction. I'll fix them and push the changes.",
-    timestamp: new Date('2023-06-15T10:35:00'),
-    status: 'read',
-    type: 'text',
-  },
-  {
-    id: '4',
-    senderId: '4',
-    content: "Great work everyone! I think we're almost ready to publish.",
-    timestamp: new Date('2023-06-15T10:40:00'),
-    status: 'read',
-    type: 'text',
-  },
-  {
-    id: '5',
-    senderId: '1',
-    content:
-      "Agreed! Let's do a final review tomorrow morning and then we can schedule it for publication.",
-    timestamp: new Date('2023-06-15T10:42:00'),
-    status: 'delivered',
-    type: 'text',
-  },
-];
 
 export function BlogChat({ blog, currentUser, collaborators }: BlogChatProps) {
   const [isMinimized, setIsMinimized] = useState(false);
@@ -181,14 +135,17 @@ export function BlogChat({ blog, currentUser, collaborators }: BlogChatProps) {
                   <Tooltip key={user.id}>
                     <TooltipTrigger>
                       <Avatar className='h-6 w-6 border-2 border-primary'>
-                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarImage
+                          src={user.profileUrl}
+                          alt={user.username}
+                        />
                         <AvatarFallback className='text-gray-800 dark:text-gray-300'>
-                          {user.name.charAt(0)}
+                          {user.username?.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                     </TooltipTrigger>
                     <TooltipContent className='border'>
-                      {user.name}
+                      {user.username}
                     </TooltipContent>
                   </Tooltip>
                 ))}

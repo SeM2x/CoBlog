@@ -7,7 +7,7 @@ import { TiptapCollabProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
 import { BlogChat } from './blogChat';
 import { CreateBlogModal } from '@/components/createBlogModal';
-import { Blog } from '@/types';
+import { Blog, PartialUser } from '@/types';
 import { useUserStore } from '@/lib/store';
 import generateTipTapToken from '@/lib/utils/tiptap-token';
 import {
@@ -29,30 +29,51 @@ import {
 import InviteModal from './InviteModal';
 import DeleteModal from './DeleteModal';
 import PermissionsModal from './PermissionsModal';
+import { useAction } from 'next-safe-action/hooks';
+import { publishBlog } from '@/lib/actions/blogs';
+import { toast } from '@/hooks/use-toast';
+import { TopicSelector } from './TopicsSelector';
 
 const currentUser = {
   id: '1',
-  name: 'John Doe',
-  avatar: '/avatars/john-doe.jpg',
+  username: 'John Doe',
+  profileUrl: '/avatars/john-doe.jpg',
 };
 
-const intialCollaborators = [
-  { id: '2', name: 'Alice Johnson', avatar: '/avatars/alice-johnson.jpg' },
-  { id: '3', name: 'Bob Smith', avatar: '/avatars/bob-smith.jpg' },
-  { id: '4', name: 'Charlie Brown', avatar: '/avatars/charlie-brown.jpg' },
-];
-
-export default function CreateBlog({ blog }: { blog?: Blog }) {
+export default function CreateBlog({
+  blog,
+  coAuthors,
+  invitedUsers,
+}: {
+  blog?: Blog;
+  coAuthors: PartialUser[];
+  invitedUsers: PartialUser[];
+}) {
   const [title, setTitle] = useState(blog?.title || '');
   const [content, setContent] = useState(blog?.content || '');
 
   const [provider, setProvider] = useState<TiptapCollabProvider | null>(null);
   const [doc, setDoc] = useState<Y.Doc | null>(null);
 
-  const handlePublish = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically send the blog post to your backend
-    console.log('Blog post:', { title, content });
+  const { execute, isPending } = useAction(publishBlog, {
+    onSuccess: ({ data }) => {
+      toast({ title: data });
+    },
+    onError: () => {
+      toast({ title: 'Failed to publish blog post', variant: 'destructive' });
+    },
+  });
+  const handlePublish = () => {
+    if (!blog) return;
+    const data = {
+      blogId: blog?._id,
+      title,
+      content,
+      topics: [],
+      subtopics: [],
+    };
+    console.log('data', data);
+    execute(data);
   };
 
   const user = useUserStore((state) => state.user);
@@ -99,17 +120,12 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
   const [managePermissionsOpen, setManagePermissionsOpen] = useState(false);
   //const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [collaborators, setCollaborators] =
-    useState<{ id: string; name: string; avatar: string }[]>(
-      intialCollaborators
-    );
+  const [collaborators, setCollaborators] = useState<PartialUser[]>(coAuthors);
   const handleVisibilityChange = () => {
     setIsPublic(!isPublic);
   };
 
-  const handleInviteCollaborators = (
-    newCollaborators: { id: string; name: string; avatar: string }[]
-  ) => {
+  const handleInviteCollaborators = (newCollaborators: PartialUser[]) => {
     setCollaborators([...collaborators, ...newCollaborators]);
     setIsInviteModalOpen(false);
   };
@@ -135,14 +151,21 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
     );
   };
 
+  const [selectedTopics, setSelectedTopics] = useState<
+    { value: string; label: string }[]
+  >([]);
+
   return (
     <div className='relative min-h-screen border container mx-auto px-4 py-8 max-w-4xl space-y-4'>
       <div className='flex gap-4 flex-col sm:flex-row sm:justify-between sm:items-center'>
         <div className='flex items-center space-x-2'>
           {collaborators.map((collaborator) => (
             <Avatar key={collaborator.id} className='h-8 w-8'>
-              <AvatarImage src={collaborator.avatar} alt={collaborator.name} />
-              <AvatarFallback>{collaborator.name[0]}</AvatarFallback>
+              <AvatarImage
+                src={collaborator.profileUrl}
+                alt={collaborator.username}
+              />
+              <AvatarFallback>{collaborator.username[0]}</AvatarFallback>
             </Avatar>
           ))}
           <Button
@@ -156,7 +179,9 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
         </div>
         <div className='flex items-center space-x-4'>
           <Button variant='outline'>Save Draft</Button>
-          <Button onClick={handlePublish}>Publish</Button>
+          <Button onClick={handlePublish} loading={isPending}>
+            Publish
+          </Button>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' size='icon'>
@@ -191,7 +216,10 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
           </DropdownMenu>
         </div>
       </div>
-
+      <TopicSelector
+        selectedTopics={selectedTopics}
+        setSelectedTopics={setSelectedTopics}
+      />
       <div className='space-y-2'>
         {provider && doc && (
           <TipTapEditor
@@ -217,6 +245,7 @@ export default function CreateBlog({ blog }: { blog?: Blog }) {
         onClose={() => setIsInviteModalOpen(false)}
         onInvite={handleInviteCollaborators}
         existingCollaborators={collaborators}
+        invitedUsers={invitedUsers}
       />
       <DeleteModal
         isOpen={isDeleteModalOpen}

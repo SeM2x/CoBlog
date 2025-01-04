@@ -5,6 +5,7 @@ import { actionClient } from '../safe-action';
 import apiRequest from '../utils/apiRequest';
 import { AxiosError } from 'axios';
 import storageRequest from '../utils/storageRequest';
+import { PartialUser } from '@/types';
 
 const profileSchema = z.object({
   firstName: z.string(),
@@ -53,4 +54,22 @@ const uploadImage = async (formData: FormData) => {
   }
 };
 
-export { updateProfile };
+const getUsers = actionClient
+  .schema(z.string())
+  .action(async ({ parsedInput: username }) => {
+    const res = (await apiRequest.get(`/users/search?username=${username}`))
+      .data;
+    return res.data as PartialUser[];
+  });
+
+const getUserProfile = async (userId: string) => {
+  try {
+    const res = (await apiRequest.get(`/users/${userId}/profile`)).data;
+    return res.data as PartialUser;
+    return;
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+  }
+};
+
+export { updateProfile, getUsers, getUserProfile };

@@ -16,11 +16,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { X } from 'lucide-react';
+import { PartialUser } from '@/types';
 
-interface Collaborator {
-  id: string;
-  name: string;
-  avatar: string;
+interface Collaborator extends PartialUser{
   role?: 'owner' | 'editor' | 'viewer';
 }
 
@@ -59,12 +57,12 @@ export default function PermissionsModal({
             <div key={collaborator.id} className='flex items-center space-x-4'>
               <Avatar className='h-8 w-8'>
                 <AvatarImage
-                  src={collaborator.avatar}
-                  alt={collaborator.name}
+                  src={collaborator.profileUrl}
+                  alt={collaborator.username}
                 />
-                <AvatarFallback>{collaborator.name[0]}</AvatarFallback>
+                <AvatarFallback>{collaborator.username[0]}</AvatarFallback>
               </Avatar>
-              <span className='flex-grow'>{collaborator.name}</span>
+              <span className='flex-grow'>{collaborator.username}</span>
               <Select
                 value={collaborator.role || 'viewer'}
                 onValueChange={(value: 'owner' | 'editor' | 'viewer') =>

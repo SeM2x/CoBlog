@@ -55,7 +55,10 @@ const BlogCard = ({ blog }: { blog: Blog }) => {
           <div className='flex justify-between items-start'>
             <div className='space-y-2'>
               <CardTitle>{blog.title}</CardTitle>
-              <CardDescription className=' line-clamp-3'>{blog.content}</CardDescription>
+              <CardDescription
+                dangerouslySetInnerHTML={{ __html: blog.content }}
+                className=' line-clamp-3'
+              />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -100,7 +103,9 @@ const BlogCard = ({ blog }: { blog: Blog }) => {
                 {blog.status === 'published' ? 'Published' : 'Draft'}
               </Label>
             </div>
-            <Button variant='outline'>Preview</Button>
+            <Link href={`/blogs/${blog._id}`} passHref>
+              <Button variant='outline'>Preview</Button>
+            </Link>
           </div>
         </CardFooter>
       </Card>

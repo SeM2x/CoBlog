@@ -38,12 +38,16 @@ type Blog = {
   updatedAt: string;
   publishedAt: string;
   blogId?: string;
+  invitedUsers: string[];
+  CoAuthors: string[];
 };
 
-interface User {
+interface PartialUser {
   id: string;
-  name: string;
-  avatar: string;
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  profileUrl: string;
 }
 
 interface Message {
@@ -57,4 +61,15 @@ interface Message {
   fileName?: string;
 }
 
-export type { Profile, Blog, User, Message };
+type Notification = {
+  _id: string;
+  userId: string;
+  blogId: string;
+  type: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type { Profile, Blog, PartialUser, Message, Notification };
