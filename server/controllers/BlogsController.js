@@ -344,3 +344,36 @@ export async function updateBlogReaction(req, res) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
   }
 }
+
+export async function saveBlogCurrentStatus(req, res) {
+  let { blogId } = req.params;
+  try {
+    blogId = new ObjectId(blogId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect id' });
+  }
+
+  const blog = await dbClient.findData('blogs', { _id: blogId });
+  if (!blog) {
+    return res.status(404).json({ status: 'error', message: 'Blog does not exist for this user' });
+  }
+
+  const {
+    topics, subTopics, imagesUrl, content, title,
+  } = req.body;
+
+  const details = {
+    topics,
+    subTopics,
+    content,
+    imagesUrl,
+    title,
+  };
+
+  try {
+    await dbClient.updateData('blogs', { _id: blogId }, { $set: details });
+    return res.status(200).json({ status: 'success', message: 'Blog is published' });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+  }
+}
