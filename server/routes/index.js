@@ -7,7 +7,8 @@ import {
 import { authenticate } from '../middlewares/authenticate';
 import { getUserNotifications, markNotificationRead } from '../controllers/NotificationsController';
 import {
-  suggestTopics, getUserBlogs, createBlog, inviteUsers, publishBlog, getBlogById, manageInvitation, deleteBlog
+  suggestTopics, getUserBlogs, createBlog, inviteUsers, publishBlog,
+  getBlogById, manageInvitation, deleteBlog, updateBlogReaction,
 } from '../controllers/BlogsController';
 import { createMessage, getAllMessages } from '../controllers/MessagesController';
 
@@ -56,6 +57,7 @@ blogRouter.put('/:blogId/publish', publishBlog);
 blogRouter.get('/:blogId', getBlogById);
 blogRouter.put('/accept|reject', manageInvitation);
 blogRouter.delete('/:blogId/delete', deleteBlog);
+blogRouter.put('/:blogId/like', updateBlogReaction);
 
 // Manages all messages routes
 messageRouter.post('/create', createMessage);
