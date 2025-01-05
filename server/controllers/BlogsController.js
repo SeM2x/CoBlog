@@ -1,3 +1,6 @@
+/* eslint-disable prefer-const */
+/* eslint-disable no-plusplus */
+
 import dbClient from '../utils/db';
 import generateId from '../utils/uuid';
 
@@ -98,7 +101,7 @@ export async function inviteUsers(req, res) {
     });
   }
 
-  if (users.length > 3 || blog.invitedUsers.length === 3 || users.length + blog.invitedUsers.length > 3) {
+  if ((users.length + blog.invitedUsers.length) > 3 || blog.invitedUsers.length === 3) {
     return res.status(400).json({
       status: 'error',
       message: 'invited user cannot exceed 3',
@@ -134,6 +137,7 @@ export async function inviteUsers(req, res) {
       'blogs',
       { _id: new ObjectId(blog._id) },
       { $addToSet: { invitedUsers: { $each: invitedUsersData } } },
+      false,
     );
     if (appendInvitedUser.modifiedCount === 0) {
       return res.status(200).json({ status: 'success', message: 'Invitation previously sent' });
@@ -334,7 +338,7 @@ export async function updateBlogReaction(req, res) {
   }
 
   try {
-    const resp = await dbClient.updateData('blogs', { _id: blogId }, { $inc: { nReactions: 1 } });
+    await dbClient.updateData('blogs', { _id: blogId }, { $inc: { nReactions: 1 } });
     return res.status(200).json({ status: 'success', message: 'Blog reacted successfully' });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
