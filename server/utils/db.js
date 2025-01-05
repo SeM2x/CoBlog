@@ -17,6 +17,7 @@ class DBClient {
     this.DBCollections = ['users', 'followers', 'messages', 'followings',
       'blogs', 'conversations', 'notifications', 'topics', 'subtopics',
       'comments', 'reactions', 'viewhistory'];
+    this.excludeUpdatedAt = ['followers', 'followings', 'reactions'];
   }
 
   async init() {
@@ -82,13 +83,14 @@ class DBClient {
     }
   }
 
-  async updateData(collectionType, filter, update) {
+  async updateData(collectionType, filter, update, includeUpdatedAt = true) {
     if (this.db) {
       if (!this.DBCollections.includes(collectionType)) {
         throw new Error('Collection type does not exist');
       }
       const collection = this.db.collection(collectionType);
-      if (collectionType !== 'reactions' && collectionType !== 'followers' && collectionType !== 'followings') {
+
+      if (!this.excludeUpdatedAt.includes(collectionType) && includeUpdatedAt === true) {
         const nUpdate = { ...update.$set, updatedAt: `${new Date().toISOString().split('.')[0]}Z` };
         update.$set = nUpdate;
       }
