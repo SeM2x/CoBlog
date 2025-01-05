@@ -6,6 +6,7 @@ import { Blog } from '@/types';
 import { actionClient } from '../safe-action';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import getServerError from '../utils/getServerError';
 
 const getTopics = async () => {
   try {
@@ -103,9 +104,33 @@ const publishBlog = actionClient
     })
   )
   .action(async ({ parsedInput }) => {
-    const { blogId, ...data } = parsedInput;
-    const res = (await apiRequest.put(`/blogs/${blogId}/publish`, data)).data;
-    return res.message;
+    try {
+      const { blogId, ...data } = parsedInput;
+      const res = (await apiRequest.put(`/blogs/${blogId}/publish`, data)).data;
+      return res.message;
+    } catch (error) {
+      throw getServerError(error);
+    }
+  });
+
+const saveBlog = actionClient
+  .schema(
+    z.object({
+      blogId: z.string().nonempty(),
+      title: z.string().nonempty(),
+      content: z.string().nonempty(),
+      topics: z.array(z.string().nonempty()),
+      subtopics: z.array(z.string().nonempty()),
+    })
+  )
+  .action(async ({ parsedInput }) => {
+    try {
+      const { blogId, ...data } = parsedInput;
+      const res = (await apiRequest.put(`/blogs/${blogId}/save`, data)).data;
+      return res.message;
+    } catch (error) {
+      throw getServerError(error);
+    }
   });
 
 export {
@@ -118,4 +143,5 @@ export {
   getBlog,
   deleteBlog,
   publishBlog,
+  saveBlog,
 };
