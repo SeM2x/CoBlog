@@ -30,7 +30,7 @@ export async function createBlog(req, res) {
     resp.blogId = result.insertedId;
     return res.status(200).json({ status: 'success', data: resp });
   } catch (err) {
-    return res.status(500).json({ status: 'error', Message: 'Something went wrong' });
+    return res.status(500).json({ status: 'error', Message: 'Something went wrong', data: { inviteCount: 0 } });
   }
 }
 
@@ -98,7 +98,7 @@ export async function inviteUsers(req, res) {
     });
   }
 
-  if (users.length > 3 || blog.invitedUsers > 3 || users.length + blog.invitedUsers.length > 3) {
+  if (users.length > 3 || blog.invitedUsers.length === 3 || users.length + blog.invitedUsers.length > 3) {
     return res.status(400).json({
       status: 'error',
       message: 'invited user cannot exceed 3',
@@ -130,11 +130,14 @@ export async function inviteUsers(req, res) {
     }));
 
     // Update Blog invited users
-    await dbClient.updateData(
+    const appendInvitedUser = await dbClient.updateData(
       'blogs',
       { _id: new ObjectId(blog._id) },
       { $addToSet: { invitedUsers: { $each: invitedUsersData } } },
     );
+    if (appendInvitedUser.modifiedCount === 0) {
+      return res.status(200).json({ status: 'success', message: 'Invitation previously sent' });
+    }
 
     // Create notification for invited users
     const userNotificationsPromise = result.map((user) => dbClient.insertData('notifications', {
@@ -146,7 +149,11 @@ export async function inviteUsers(req, res) {
     }));
     await Promise.all(userNotificationsPromise);
 
-    return res.status(200).json({ status: 'success', message: 'User invited successfully' });
+    return res.status(200).json({
+      status: 'success',
+      message: 'User invited successfully',
+      data: { inviteCount: blog.invitedUsers.length + 1 },
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
@@ -161,8 +168,21 @@ export async function publishBlog(req, res) {
     return res.status(400).json({ status: 'error', message: 'Incorrect id' });
   }
 
+  const blog = await dbClient.findData('blogs', { _id: blogId });
+  if (!blog) {
+    return res.status(404).json({ status: 'error', message: 'Blog does not exist for this user' });
+  }
+
+  if (!(ObjectId(req.user.userId).equals(blog.authorId))) {
+    return res.status(400).json({ status: 'error', message: 'Only author can publish blog' });
+  }
+
+  if (blog.isPublished) {
+    return res.status(400).json({ statusu: 'error', message: 'Blog has previously been published' });
+  }
+
   const {
-    topics, subTopics, imagesUrl, minuteRead, content,
+    topics, subTopics, imagesUrl, minuteRead, content, title,
   } = req.body;
   if (!topics && !subTopics) {
     return res.status(400).json({ status: 'error', message: 'topics or subtopics must be included' });
@@ -174,6 +194,7 @@ export async function publishBlog(req, res) {
 
   const details = {
     topics,
+    title,
     subTopics,
     minutesRead: minuteRead || Math.floor(Math.random() * 10),
     nComments: 0,
@@ -186,12 +207,8 @@ export async function publishBlog(req, res) {
   };
 
   try {
-    const result = await dbClient.updateData('blogs', { _id: blogId }, { $set: details });
+    await dbClient.updateData('blogs', { _id: blogId }, { $set: details });
     await dbClient.insertData('reactions', { blogId, reactions: [] });
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ status: 'error', message: 'Blog not found' });
-    }
 
     return res.status(200).json({ status: 'success', message: 'Blog is published' });
   } catch (err) {
@@ -243,7 +260,7 @@ export async function manageInvitation(req, res) {
   }
 
   if (!user) {
-    return res.status(404).json({ status: 'error', message: 'User invitation was not found' });
+    return res.status(404).json({ status: 'error', message: 'User invitation is not found' });
   }
 
   // Check if user already acknowledge invitation
@@ -308,7 +325,6 @@ export async function updateBlogReaction(req, res) {
   }
 
   const result = await dbClient.updateData('reactions', { blogId }, { $addToSet: { reactions: userId } });
-  console.log(result);
   if (result.matchedCount === 0) {
     return res.status(404).json({ status: 'error', message: 'Blog does not exist' });
   }
@@ -319,7 +335,7 @@ export async function updateBlogReaction(req, res) {
 
   try {
     const resp = await dbClient.updateData('blogs', { _id: blogId }, { $inc: { nReactions: 1 } });
-    return res.status(200).json({ status: 'success', message: 'Blog reacted successfully', data: { nReactions: 1 } });
+    return res.status(200).json({ status: 'success', message: 'Blog reacted successfully' });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
   }
