@@ -14,7 +14,9 @@ class DBClient {
     this.dbClient = null;
     this.db = null;
     this.verifyConnection = false;
-    this.DBCollections = ['users', 'followers', 'messages', 'followings', 'blogs', 'conversations', 'notifications', 'topics', 'subtopics'];
+    this.DBCollections = ['users', 'followers', 'messages', 'followings',
+      'blogs', 'conversations', 'notifications', 'topics', 'subtopics',
+      'comments', 'reactions', 'viewhistory'];
   }
 
   async init() {
@@ -86,8 +88,10 @@ class DBClient {
         throw new Error('Collection type does not exist');
       }
       const collection = this.db.collection(collectionType);
-      const nUpdate = { ...update.$set, updatedAt: `${new Date().toISOString().split('.')[0]}Z` };
-      update.$set = nUpdate;
+      if (collectionType !== 'reactions' && collectionType !== 'followers' && collectionType !== 'followings') {
+        const nUpdate = { ...update.$set, updatedAt: `${new Date().toISOString().split('.')[0]}Z` };
+        update.$set = nUpdate;
+      }
       const result = await collection.updateOne(filter, update);
       return result;
     }
