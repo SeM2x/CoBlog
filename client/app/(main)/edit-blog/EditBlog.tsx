@@ -6,7 +6,6 @@ import TipTapEditor from '@/components/tiptap';
 import { TiptapCollabProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
 import { BlogChat } from './blogChat';
-import { CreateBlogModal } from '@/components/createBlogModal';
 import { Blog, PartialUser } from '@/types';
 import { useUserStore } from '@/lib/store';
 import generateTipTapToken from '@/lib/utils/tiptap-token';
@@ -42,7 +41,7 @@ const currentUser = {
   profileUrl: '/avatars/john-doe.jpg',
 };
 
-export default function CreateBlog({
+export default function EditBlog({
   blog,
   coAuthors,
   invitedUsers,
@@ -59,6 +58,13 @@ export default function CreateBlog({
 
   const router = useRouter();
 
+  useEffect(() => {
+    if (!blog) {
+      toast({ title: 'Unable to open blog', variant: 'destructive' });
+      router.push('/new-blog');
+    }
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blog]);
   const { handlePublish, isPublishPending } = usePublish({
     blogId: blog?._id,
     title,
@@ -273,7 +279,6 @@ export default function CreateBlog({
           collaborators={collaborators}
         />
       )}
-      <CreateBlogModal isOpen={!blog} />
       <InviteModal
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}

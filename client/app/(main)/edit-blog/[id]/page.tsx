@@ -1,6 +1,6 @@
-import { getBlog, getUserBlogs } from '@/lib/actions/blogs';
+import { getBlog } from '@/lib/actions/blogs';
 import React, { Suspense } from 'react';
-import CreateBlog from '../CreateBlog';
+import CreateBlog from '../EditBlog';
 import { getUserProfile } from '@/lib/actions/users';
 
 export default async function CreateBlogPage({
@@ -25,10 +25,8 @@ const getUsersProfiles = async (userIds: string[]) => {
 };
 
 const BlogsGetter = async ({ blogId }: { blogId?: string }) => {
-  if (blogId) console.log('fetching blog', (await getBlog(blogId)).data?.title);
-  const blogs = (await getUserBlogs()).data;
-
-  const blog = blogs ? blogs.find((blog) => blog._id === blogId) : undefined;
+  if (!blogId) return null;
+  const blog = (await getBlog(blogId)).data;
   const coAuthors = await getUsersProfiles(blog?.CoAuthors || []);
   const invitedUsers = await getUsersProfiles(blog?.invitedUsers || []);
 
