@@ -9,7 +9,6 @@ export async function createMessage(req, res) {
   }
 
   try {
-    conversationId = ObjectId(conversationId);
     blogId = ObjectId(blogId);
   } catch (err) {
     return res.status(400).json({ status: 'error', message: 'Incorrect Id' });
@@ -36,14 +35,19 @@ export async function createMessage(req, res) {
 
 export async function getAllMessages(req, res) {
   const { conversationId } = req.params;
-  try {
-    conversationId = ObjectId(conversationId);
-  } catch (err) {
-    return res.status(400).json({ status: 'error', message: 'Incorrect Id' });
-  }
 
   try {
     const result = await dbClient.findManyData('messages', { conversationId });
+    return res.status(200).json({ status: 'success', data: result });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  }
+}
+
+export async function getMessageById(req, res) {
+  const { conversationId, messageId } = req.params;
+  try {
+    const result = await dbClient.findData('messages', { conversationId, messageId });
     return res.status(200).json({ status: 'success', data: result });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'Something went wrong' });
