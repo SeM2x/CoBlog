@@ -144,8 +144,9 @@ export async function inviteUsers(req, res) {
     }
 
     // Create notification for invited users
-    const userNotificationsPromise = result.map((user) => dbClient.insertData('notifications', {
-      userId: user._id,
+    const userNotificationsPromise = invitedUsersData.map((user) => dbClient.insertData('notifications', {
+      userId: user.id,
+      role: user.role,
       blogId: { id: blog._id, title: blog.title },
       type: 'invite',
       author: { id: blog.authorId, username: blog.authorUsername },
@@ -262,7 +263,7 @@ export async function getBlogById(req, res) {
 export async function manageInvitation(req, res) {
   let { blogId, notificationId } = req.body;
   if (!blogId || !notificationId) {
-    return res.status(400).json({ status: 'error', message: 'Notification or Blog id missing'});
+    return res.status(400).json({ status: 'error', message: 'Notification or Blog id missing' });
   }
   try {
     blogId = new ObjectId(blogId);
@@ -366,14 +367,14 @@ export async function updateBlogReaction(req, res) {
     }
 
     const result = await dbClient.updateData('reactions', { blogId }, { $addToSet: { reactions: userId } });
-    // user already reacted blog
+    // unreact if user already reacted
     if (result.modifiedCount === 0) {
       await dbClient.updateData('reactions', { blogId }, { $pull: { reactions: userId } });
       await dbClient.updateData('blogs', { _id: blogId }, { $inc: { nReactions: -1 } });
       return res.status(200).json({
         status: 'success',
         message: 'Reaction successfully updated.',
-        data: { userReaction: 'unlike', nLikes: blog.nLikes + 1 },
+        data: { userReaction: 'unlike', nLikes: blog.nLikes - 1 },
       });
     }
     await dbClient.updateData('blogs', { _id: blogId }, { $inc: { nReactions: 1 } });
