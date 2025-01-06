@@ -427,7 +427,9 @@ export async function saveBlogCurrentStatus(req, res) {
 }
 
 export async function blogComment(req, res) {
-  let { blogId, content } = req.body;
+  let { blogId } = req.params;
+  let { content } = req.body;
+
   try {
     blogId = new ObjectId(blogId);
   } catch (err) {
@@ -470,7 +472,7 @@ export async function blogComment(req, res) {
 }
 
 export async function getBlogComments(req, res) {
-  let { blogId } = req.body;
+  let { blogId } = req.params;
   try {
     blogId = new ObjectId(blogId);
   } catch (err) {
