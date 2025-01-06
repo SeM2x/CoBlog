@@ -60,7 +60,7 @@ blogRouter.put('/:blogId/publish', publishBlog);
 blogRouter.get('/:blogId', getBlogById);
 blogRouter.put('/accept|reject', manageInvitation);
 blogRouter.delete('/:blogId/delete', deleteBlog);
-blogRouter.put('/:blogId/like', updateBlogReaction);
+blogRouter.put('/:blogId/react', updateBlogReaction);
 blogRouter.put('/:blogId/save', saveBlogCurrentStatus);
 blogRouter.post('/:blogId/comment', blogComment);
 blogRouter.get('/:blogId/comments', getBlogComments);
