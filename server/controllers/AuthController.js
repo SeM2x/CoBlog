@@ -74,7 +74,7 @@ export async function userSignIn(req, res) {
 
     // Create JWT Token
     const secretKey = process.env.JWT_SECRET_KEY;
-    const payload = { userId: user._id.toString(), userEmail: user.email, username: user.username };
+    const payload = { userId: user._id.toString(), userEmail: user.email, username: user.username, userProfileUrl: user.profileUrl };
     const plOptions = { expiresIn: '24h' };
     const token = jwt.sign(payload, secretKey, plOptions);
     const {
