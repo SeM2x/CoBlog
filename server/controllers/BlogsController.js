@@ -328,18 +328,29 @@ export async function updateBlogReaction(req, res) {
     return res.status(400).json({ status: 'error', message: 'Incorrect Id' });
   }
 
-  const result = await dbClient.updateData('reactions', { blogId }, { $addToSet: { reactions: userId } });
-  if (result.matchedCount === 0) {
-    return res.status(404).json({ status: 'error', message: 'Blog does not exist' });
-  }
-
-  if (result.modifiedCount === 0) {
-    return res.status(409).json({ status: 'error', message: 'user already liked this blog.' });
-  }
-
   try {
+    const blog = await dbClient.deleteData('blogs', { _id: blogId });
+    if (!blog) {
+      return res.status(404).json({ status: 'error', message: 'Blog does not exist' });
+    }
+
+    const result = await dbClient.updateData('reactions', { blogId }, { $addToSet: { reactions: userId } });
+    // user already reacted blog
+    if (result.modifiedCount === 0) {
+      await dbClient.updateData('reactions', { blogId }, { $pull: { reactions: userId } });
+      await dbClient.updateData('blogs', { _id: blogId }, { $inc: { nReactions: -1 } });
+      return res.status(200).json({
+        status: 'success',
+        message: 'Reaction successfully updated.',
+        data: { userReaction: 'unlike', nLikes: blog.nLikes + 1 },
+      });
+    }
     await dbClient.updateData('blogs', { _id: blogId }, { $inc: { nReactions: 1 } });
-    return res.status(200).json({ status: 'success', message: 'Blog reacted successfully' });
+    return res.status(200).json({
+      status: 'success',
+      message: 'Reaction successfully updated.',
+      data: { userReaction: 'like', nLikes: blog.nLikes + 1 },
+    });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
   }
@@ -375,5 +386,73 @@ export async function saveBlogCurrentStatus(req, res) {
     return res.status(200).json({ status: 'success', message: 'Blog is published' });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
+  }
+}
+
+export async function blogComment(req, res) {
+  let { blogId, content } = req.body;
+  try {
+    blogId = new ObjectId(blogId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect id' });
+  }
+
+  if (!content) {
+    return res.status(400).json({ status: 'error', message: 'content is missing' });
+  }
+
+  const blog = await dbClient.findData('blogs', { _id: blogId });
+  if (!blogId) {
+    return res.status(404).json({ status: 'error', message: 'Blog does not exist' });
+  }
+
+  if (!blog.isPublished) {
+    return res.status(400).json({ status: 'error', message: 'Blog is yet to be published' });
+  }
+
+  const details = {
+    blogId,
+    userId: new ObjectId(req.user.userId),
+    username: req.user.username,
+    content,
+  };
+
+  try {
+    await dbClient.insertData('comments', details);
+    const { _id, ...data } = details;
+    data.id = _id.toString();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Blog is published',
+      data,
+    });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+  }
+}
+
+export async function getBlogComments(req, res) {
+  let { blogId } = req.body;
+  try {
+    blogId = new ObjectId(blogId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect id' });
+  }
+
+  const blog = await dbClient.findData('blogs', { _id: blogId });
+  if (!blog) {
+    return res.status(404).json({ status: 'error', message: 'Blog does not exist' });
+  }
+
+  if (!blog.isPublished) {
+    return res.status(400).json({ status: 'error', message: 'Blog is yet to be published' });
+  }
+
+  try {
+    const result = await dbClient.findManyData('comments', { blogId });
+    return res.status(200).json({ status: 'success', data: result });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Somethong went wrong' });
   }
 }
