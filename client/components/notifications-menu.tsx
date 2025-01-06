@@ -24,7 +24,7 @@ const NotificationsMenu = () => {
   useEffect(() => {
     try {
       getNotifications().then((data) => {
-        setNotifications(data || []);
+        setNotifications(data?.reverse() || []);
         const unread = data?.filter((notification) => !notification.read);
         setNotificationsCount(unread?.length || 0);
       });
@@ -71,7 +71,9 @@ const NotificationsMenu = () => {
           notifications.map((notification, index) => (
             <DropdownMenuItem
               key={index}
-              className='flex items-center gap-4 p-4'
+              className={`flex items-center gap-4 p-4 ${
+                !notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+              }`}
             >
               <Mail className='h-9 w-9' />
               <div className='flex-1 space-y-1'>
