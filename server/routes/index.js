@@ -5,11 +5,11 @@ import {
   getUserFollowings, editUserData, searchUser,
 } from '../controllers/UsersController';
 import { authenticate } from '../middlewares/authenticate';
-import { getUserNotifications, markNotificationRead } from '../controllers/NotificationsController';
+import { getUserNotifications, markNotificationRead, deleteNotification } from '../controllers/NotificationsController';
 import {
   suggestTopics, getUserBlogs, createBlog, inviteUsers, publishBlog,
   getBlogById, manageInvitation, deleteBlog, updateBlogReaction,
-  saveBlogCurrentStatus, blogComment, getBlogComments
+  saveBlogCurrentStatus, blogComment, getBlogComments, getCoAuthoredHistory,
 } from '../controllers/BlogsController';
 import { createMessage, getAllMessages } from '../controllers/MessagesController';
 
@@ -48,9 +48,11 @@ userRouter.get('/search', searchUser);
 // Manages all Notification routes
 notificationRouter.get('/me', getUserNotifications);
 notificationRouter.put('/:id', markNotificationRead);
+notificationRouter.delete('/:notificationId', deleteNotification);
 
 // Manages all Blogs routes
 blogRouter.get('/topics', suggestTopics);
+blogRouter.get('/co-authored', getCoAuthoredHistory);
 blogRouter.get('/me', getUserBlogs);
 blogRouter.post('/create', createBlog);
 blogRouter.put('/:blogId/invite', inviteUsers);
