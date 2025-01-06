@@ -9,7 +9,7 @@ import { getUserNotifications, markNotificationRead } from '../controllers/Notif
 import {
   suggestTopics, getUserBlogs, createBlog, inviteUsers, publishBlog,
   getBlogById, manageInvitation, deleteBlog, updateBlogReaction,
-  saveBlogCurrentStatus,
+  saveBlogCurrentStatus, blogComment, getBlogComments
 } from '../controllers/BlogsController';
 import { createMessage, getAllMessages } from '../controllers/MessagesController';
 
@@ -60,6 +60,8 @@ blogRouter.put('/accept|reject', manageInvitation);
 blogRouter.delete('/:blogId/delete', deleteBlog);
 blogRouter.put('/:blogId/like', updateBlogReaction);
 blogRouter.put('/:blogId/save', saveBlogCurrentStatus);
+blogRouter.post('/:blogId/comment', blogComment);
+blogRouter.get('/:blogId/comments', getBlogComments);
 
 // Manages all messages routes
 messageRouter.post('/create', createMessage);
