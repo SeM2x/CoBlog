@@ -108,8 +108,8 @@ const deleteBlog = actionClient
   .schema(z.string().nonempty())
   .action(async ({ parsedInput: blogId }) => {
     const res = (await apiRequest.delete(`/blogs/${blogId}/delete`)).data;
-    revalidatePath('/new-blog');
-    revalidatePath('/(main)/new-blog/[[...id]]');
+    revalidatePath('/edit-blog');
+    revalidatePath('/my-blogs');
     return res.message;
   });
 

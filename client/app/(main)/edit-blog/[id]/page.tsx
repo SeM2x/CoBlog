@@ -6,10 +6,10 @@ import { getUserProfile } from '@/lib/actions/users';
 export default async function CreateBlogPage({
   params,
 }: {
-  params: Promise<{ id: string[] }>;
+  params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const blogId = id ? id[0] : undefined;
+  const blogId = id;
 
   return (
     <Suspense fallback={<div>Loading...</div>}>

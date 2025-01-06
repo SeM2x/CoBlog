@@ -30,10 +30,11 @@ import InviteModal from './InviteModal';
 import DeleteModal from './DeleteModal';
 import PermissionsModal from './PermissionsModal';
 import { useAction } from 'next-safe-action/hooks';
-import { publishBlog, saveBlog } from '@/lib/actions/blogs';
+import { saveBlog } from '@/lib/actions/blogs';
 import { toast } from '@/hooks/use-toast';
 import { TopicSelector } from './TopicsSelector';
 import { useRouter } from 'next/navigation';
+import usePublish from '@/hooks/usePublish';
 
 const currentUser = {
   id: '1',
@@ -58,31 +59,11 @@ export default function CreateBlog({
 
   const router = useRouter();
 
-  const { execute: executePublish, isPending: isPublishPending } = useAction(
-    publishBlog,
-    {
-      onSuccess: ({ data }) => {
-        toast({ title: data });
-        router.push(`/blogs/${blog?._id}`);
-      },
-      onError: ({ error: { serverError } }) => {
-        if (serverError) toast({ title: serverError, variant: 'destructive' });
-      },
-    }
-  );
-
-  const handlePublish = () => {
-    if (!blog) return;
-    const data = {
-      blogId: blog?._id,
-      title,
-      content,
-      topics: [],
-      subtopics: [],
-    };
-    console.log('data', data);
-    executePublish(data);
-  };
+  const { handlePublish, isPublishPending } = usePublish({
+    blogId: blog?._id,
+    title,
+    content,
+  });
 
   const { execute: executeSave, isPending: isSavePending } = useAction(
     saveBlog,

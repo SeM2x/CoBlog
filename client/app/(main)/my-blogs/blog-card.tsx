@@ -18,9 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Edit, Trash2, MoreVertical } from 'lucide-react';
+import { Edit, Trash2, MoreHorizontal, Globe, Eye } from 'lucide-react';
 import { useState } from 'react';
 import { Blog } from '@/types';
 
@@ -32,81 +30,95 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import useDeleteBlog from '@/hooks/useDeleteBlog';
+import usePublish from '@/hooks/usePublish';
 
 const BlogCard = ({ blog }: { blog: Blog }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
 
-  const handleDelete = (id: string) => {
-    setBlogToDelete(id);
-    setIsDeleteDialogOpen(true);
-  };
+  const { handleDelete, isPending } = useDeleteBlog({
+    blogId: blog._id,
+    onClose: () => setIsDeleteDialogOpen(false),
+  });
 
-  const confirmDelete = () => {
-    // Here you would typically call an API to delete the blog
-    console.log(`Deleting blog with id: ${blogToDelete}`);
-    setIsDeleteDialogOpen(false);
-  };
+  const { handlePublish, isPublishPending } = usePublish({
+    blogId: blog._id,
+    title: blog.title,
+    content: blog.content,
+  });
 
   return (
     <>
-      <Card key={blog._id}>
+      <Card className='mb-4 shadow-none'>
         <CardHeader>
           <div className='flex justify-between items-start'>
-            <div className='space-y-2'>
-              <CardTitle>{blog.title}</CardTitle>
+            <div>
+              <Link href={`/blogs/${blog._id}`} passHref>
+                <CardTitle className='text-xl line-clamp-1'>
+                  {blog.title}
+                </CardTitle>
+              </Link>
               <CardDescription
+                className='mt-2 line-clamp-2'
                 dangerouslySetInnerHTML={{ __html: blog.content }}
-                className=' line-clamp-3'
               />
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant='ghost' className='h-8 w-8 p-0'>
-                  <MoreVertical className='h-4 w-4' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end'>
-                <DropdownMenuItem>
-                  <Link
-                    href={`/new-blog/${blog._id}`}
-                    className='flex items-center w-full'
-                  >
-                    <Edit className='mr-2 h-4 w-4' /> Edit
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleDelete(blog._id)}>
-                  <Trash2 className='mr-2 h-4 w-4' /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Badge
+              variant={blog.status === 'published' ? 'default' : 'secondary'}
+            >
+              {blog.status === 'published' ? 'Published' : 'Draft'}
+            </Badge>
           </div>
         </CardHeader>
         <CardContent>
-          <div className='flex justify-between text-sm text-gray-500'>
-            <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
-            <span>
-              {blog.status === 'published'
-                ? `0 views • ${blog.nComments} comments`
-                : 'Draft'}
-            </span>
+          <div className='flex justify-between text-sm text-muted-foreground'>
+            <span>{format(blog.createdAt, 'dd-mm-yyyy')}</span>
+            {blog.status === 'published' && (
+              <span>0 views • {blog.nComments} comments</span>
+            )}
           </div>
         </CardContent>
-        <CardFooter>
-          <div className='flex justify-between items-center w-full'>
-            <div className='flex items-center space-x-2'>
-              <Switch
-                id={`publish-${blog._id}`}
-                checked={blog.status === 'published'}
-              />
-              <Label htmlFor={`publish-${blog._id}`}>
-                {blog.status === 'published' ? 'Published' : 'Draft'}
-              </Label>
-            </div>
-            <Link href={`/blogs/${blog._id}`} passHref>
-              <Button variant='outline'>Preview</Button>
-            </Link>
-          </div>
+        <CardFooter className='flex justify-between'>
+          <Link href={`/edit-blog/${blog._id}`}>
+            <Button variant='outline'>
+              <Edit className='mr-2 h-4 w-4' /> Edit
+            </Button>
+          </Link>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost'>
+                <MoreHorizontal className='h-4 w-4' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              {blog.status === 'draft' && (
+                <DropdownMenuItem
+                  onClick={handlePublish}
+                  disabled={isPublishPending || !blog.content || !blog.title}
+                  aria-disabled={
+                    isPublishPending || !blog.content || !blog.title
+                  }
+                >
+                  <Globe className='mr-2 h-4 w-4' /> Publish
+                </DropdownMenuItem>
+              )}
+              {blog.status === 'published' && (
+                <Link href={`/blogs/${blog._id}`} passHref>
+                  <DropdownMenuItem>
+                    <Eye className='mr-2 h-4 w-4' /> View
+                  </DropdownMenuItem>
+                </Link>
+              )}
+              <DropdownMenuItem
+                className='text-red-500 hover:!text-red-500 hover:!bg-red-50'
+                onSelect={() => setIsDeleteDialogOpen(true)}
+              >
+                <Trash2 className='mr-2 h-4 w-4' /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </CardFooter>
       </Card>
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -127,7 +139,11 @@ const BlogCard = ({ blog }: { blog: Blog }) => {
             >
               Cancel
             </Button>
-            <Button variant='destructive' onClick={confirmDelete}>
+            <Button
+              variant='destructive'
+              loading={isPending}
+              onClick={handleDelete}
+            >
               Delete
             </Button>
           </DialogFooter>
