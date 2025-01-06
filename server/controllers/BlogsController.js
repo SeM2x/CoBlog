@@ -222,8 +222,11 @@ export async function publishBlog(req, res) {
 
 export async function getBlogById(req, res) {
   let { blogId } = req.params;
+  let { userId } = req.user;
+
   try {
     blogId = new ObjectId(blogId);
+    userId = new ObjectId(userId);
   } catch (err) {
     return res.status(400).json({ status: 'error', message: 'Incorrect Id' });
   }
@@ -233,7 +236,23 @@ export async function getBlogById(req, res) {
     return res.status(404).json({ status: 'error', message: 'Blog not found' });
   }
 
-  // Remove invited users from blog
+  let access = userId.equals(blog.authorId);
+  if (!blog.isPublished && !access) {
+    let coauthorId;
+    for (const coauthor of blog.CoAuthors) {
+      coauthorId = new ObjectId(coauthor.id);
+      if (coauthorId.equals(userId)) {
+        access = true;
+        break;
+      }
+    }
+  }
+
+  if (!access) {
+    return res.status(404).json({ status: 'error', message: 'You cannot view this blog' });
+  }
+
+  // Remove invited users details from blog
   const { invitedUsers, ...data } = blog;
   return res.status(200).json({ status: 'success', data });
 }
@@ -372,6 +391,10 @@ export async function saveBlogCurrentStatus(req, res) {
   const {
     topics, subTopics, imagesUrl, content, title,
   } = req.body;
+
+  if (!topics) {
+    return res.status(400).json({ status: 'error', message: 'topics cannot be empty' });
+  }
 
   const details = {
     topics,
