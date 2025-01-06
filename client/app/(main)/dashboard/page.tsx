@@ -128,7 +128,7 @@ export default function DashboardPage() {
               {blogPosts.map((post) => (
                 <Card key={post.id} className='overflow-hidden'>
                   <div className='flex flex-col md:flex-row'>
-                    <div className='md:w-1/3 bg-gray-50 flex items-center justify-center'>
+                    <div className='md:w-1/3 bg-gray-50 dark:bg-gray-900 flex items-center justify-center'>
                       <Image />
                     </div>
                     <div className='flex-1 p-6'>
