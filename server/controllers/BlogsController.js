@@ -146,9 +146,11 @@ export async function inviteUsers(req, res) {
     // Create notification for invited users
     const userNotificationsPromise = result.map((user) => dbClient.insertData('notifications', {
       userId: user._id,
-      blogId: blog._id,
+      blogId: { id: blog._id, title: blog.title },
       type: 'invite',
+      author: { id: blog.authorId, username: blog.authorUsername },
       message: `${blog.authorUsername} invites you to co-write a blog: ${blog.title}`,
+      status: 'pending',
       read: false,
     }));
     await Promise.all(userNotificationsPromise);
@@ -258,11 +260,15 @@ export async function getBlogById(req, res) {
 }
 
 export async function manageInvitation(req, res) {
-  let { blogId } = req.body;
+  let { blogId, notificationId } = req.body;
+  if (!blogId || !notificationId) {
+    return res.status(400).json({ status: 'error', message: 'Notification or Blog id missing'});
+  }
   try {
     blogId = new ObjectId(blogId);
+    notificationId = new ObjectId(notificationId);
   } catch (err) {
-    return res.status(400).json({ status: 'error', message: 'Incorrect Id' });
+    return res.status(400).json({ status: 'error', message: 'Incorrect notification or blog Id' });
   }
 
   const blog = await dbClient.findData('blogs', { _id: blogId });
@@ -315,6 +321,12 @@ export async function manageInvitation(req, res) {
       blogId,
     };
     await dbClient.insertData('notifications', notificationData);
+
+    await dbClient.updateData(
+      'notifications',
+      { _id: notificationId },
+      { $set: { status: `${url}ed` } },
+    );
 
     return res.status(200).json({ status: 'success', message: `Invite successfully ${url}ed` });
   } catch (err) {
@@ -477,5 +489,33 @@ export async function getBlogComments(req, res) {
     return res.status(200).json({ status: 'success', data: result });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'Somethong went wrong' });
+  }
+}
+
+export async function getCoAuthoredHistory(req, res) {
+  let { cursor, limit } = req.query;
+  if (cursor === 'null') {
+    return res.status(200).json({ status: 'success', message: 'No more data to fetch', data: [] });
+  }
+
+  limit = limit ? (limit + 0) / 10 : 10;
+  cursor = cursor ? (cursor + 0) / 10 : 0;
+
+  const details = { userId: new ObjectId(req.user.userId), type: 'invite' };
+  try {
+    const result = await dbClient.findManyData('notifications', details);
+
+    const endIdx = cursor + limit;
+    const paginatedNotifications = result.slice(cursor, endIdx);
+    const pageInfo = {
+      cursor: result[endIdx] ? endIdx : null,
+      hasNext: !!result[endIdx],
+    };
+
+    return res.status(200).json(
+      { status: 'success', data: paginatedNotifications, pageInfo },
+    );
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'something went wrong' });
   }
 }
