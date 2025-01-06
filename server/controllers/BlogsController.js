@@ -424,7 +424,7 @@ export async function blogComment(req, res) {
 
     return res.status(200).json({
       status: 'success',
-      message: 'Blog is published',
+      message: 'comment created',
       data,
     });
   } catch (err) {
