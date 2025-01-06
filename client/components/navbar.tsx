@@ -20,8 +20,9 @@ import NotificationsMenu from './notifications-menu';
 import { useUserStore } from '@/lib/store';
 import getImageId from '@/lib/utils/get-image-id';
 import { usePathname } from 'next/navigation';
+import { Notification } from '@/types';
 
-export function Navbar() {
+export function Navbar({ notifications }: { notifications?: Notification[] }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
@@ -67,7 +68,7 @@ export function Navbar() {
             <ModeToggle />
           </div>
           <div>
-            <NotificationsMenu />
+            <NotificationsMenu notifications={notifications} />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

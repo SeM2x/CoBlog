@@ -14,24 +14,19 @@ import {
 import { Button } from './ui/button';
 import { Bell, Mail } from 'lucide-react';
 import Link from 'next/link';
-import { getNotifications } from '@/lib/actions/notifications';
 import { Notification } from '@/types';
 
-const NotificationsMenu = () => {
+const NotificationsMenu = ({
+  notifications,
+}: {
+  notifications?: Notification[];
+}) => {
   const [notificationCount, setNotificationsCount] = useState(0);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    try {
-      getNotifications().then((data) => {
-        setNotifications(data?.reverse() || []);
-        const unread = data?.filter((notification) => !notification.read);
-        setNotificationsCount(unread?.length || 0);
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }, []);
+    const unread = notifications?.filter((notification) => !notification.read);
+    setNotificationsCount(unread?.length || 0);
+  }, [notifications]);
 
   return (
     <DropdownMenu>
@@ -61,7 +56,7 @@ const NotificationsMenu = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {notifications.length === 0 ? (
+        {!notifications || notifications.length === 0 ? (
           <div className='flex items-center justify-center p-4'>
             <p className='text-sm text-muted-foreground'>
               You&apos;re all caught up
@@ -69,22 +64,23 @@ const NotificationsMenu = () => {
           </div>
         ) : (
           notifications.map((notification, index) => (
-            <DropdownMenuItem
-              key={index}
-              className={`flex items-center gap-4 p-4 ${
-                !notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-              }`}
-            >
-              <Mail className='h-9 w-9' />
-              <div className='flex-1 space-y-1'>
-                <p className='text-sm font-medium leading-none'>
-                  {notification.message.split(' ')[0]}
-                </p>
-                <p className='text-xs text-muted-foreground'>
-                  {notification.message.split(' ').slice(1).join(' ')}
-                </p>
-              </div>
-            </DropdownMenuItem>
+            <Link key={index} href={'/notifications'} passHref>
+              <DropdownMenuItem
+                className={`flex items-center gap-4 p-4 ${
+                  !notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                }`}
+              >
+                <Mail className='h-9 w-9' />
+                <div className='flex-1 space-y-1'>
+                  <p className='text-sm font-medium leading-none'>
+                    {notification.message.split(' ')[0]}
+                  </p>
+                  <p className='text-xs text-muted-foreground'>
+                    {notification.message.split(' ').slice(1).join(' ')}
+                  </p>
+                </div>
+              </DropdownMenuItem>
+            </Link>
           ))
         )}
         <DropdownMenuSeparator />

@@ -64,12 +64,22 @@ interface Message {
 type Notification = {
   _id: string;
   userId: string;
-  blogId: string;
+  blogId?: {
+    id: string;
+    title: string;
+  };
+  author?: {
+    id: string;
+    username: string;
+    profileUrl: string;
+  };
   type: string;
   message: string;
   read: boolean;
   createdAt: string;
   updatedAt: string;
+  role: string;
+  status?: 'accepted' | 'rejected' | 'pending';
 };
 
 export type { Profile, Blog, PartialUser, Message, Notification };

@@ -7,6 +7,7 @@ import { actionClient } from '../safe-action';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import getServerError from '../utils/getServerError';
+import { markNotificationRead } from './notifications';
 
 const getTopics = async () => {
   try {
@@ -60,18 +61,37 @@ const inviteCollaborator = actionClient
     return res.message;
   });
 
+const invitationResponseSchema = z.object({
+  notificationId: z.string().nonempty(),
+  blogId: z.string().nonempty(),
+});
+
 const acceptCollaboration = actionClient
-  .schema(z.string().nonempty())
-  .action(async ({ parsedInput: blogId }) => {
-    const res = (await apiRequest.put(`/blogs/accept`, { blogId })).data;
-    return res.message;
+  .schema(invitationResponseSchema)
+  .action(async ({ parsedInput: data }) => {
+    try {
+      const res = (await apiRequest.put(`/blogs/accept`, data)).data;
+      await markNotificationRead(data.notificationId);
+      revalidatePath('/', 'layout');
+      revalidatePath('/notifications');
+      return res.message;
+    } catch (error) {
+      throw getServerError(error);
+    }
   });
 
 const rejectCollaboration = actionClient
-  .schema(z.string().nonempty())
-  .action(async ({ parsedInput: blogId }) => {
-    const res = (await apiRequest.put(`/blogs/reject`, { blogId })).data;
-    return res.message;
+  .schema(invitationResponseSchema)
+  .action(async ({ parsedInput: data }) => {
+    try {
+      const res = (await apiRequest.put(`/blogs/reject`, data)).data;
+      await markNotificationRead(data.notificationId);
+      revalidatePath('/', 'layout');
+      revalidatePath('/notifications');
+      return res.message;
+    } catch (error) {
+      throw getServerError(error);
+    }
   });
 
 const getBlog = async (blogId: string) => {
