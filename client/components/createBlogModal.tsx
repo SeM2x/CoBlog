@@ -37,7 +37,7 @@ export function CreateBlogModal({ isOpen }: CreateBlogModalProps) {
         variant: 'default',
         title: 'Blog post created successfully',
       });
-      router.push(`/new-blog/${data?.blogId}`);
+      router.push(`/edit-blog/${data?.blogId}`);
     },
     onError: () => {
       toast({
@@ -83,7 +83,7 @@ export function CreateBlogModal({ isOpen }: CreateBlogModalProps) {
             onClick={handleCreate}
             disabled={!title.trim()}
           >
-            Create Post
+            Create Blog
           </Button>
         </DialogFooter>
       </DialogContent>

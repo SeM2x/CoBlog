@@ -43,7 +43,7 @@ import Document from '@tiptap/extension-document';
 import Paragraph from '@tiptap/extension-paragraph';
 import { TiptapCollabProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
-import DynamicTextarea from '@/app/(main)/new-blog/DynamicTextarea';
+import DynamicTextarea from '@/app/(main)/edit-blog/DynamicTextarea';
 
 interface TipTapEditorProps {
   title: string;
