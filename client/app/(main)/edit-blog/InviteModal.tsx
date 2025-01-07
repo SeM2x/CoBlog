@@ -85,7 +85,7 @@ export default function InviteModal({
 
     await executeInvite({
       users: selectedUsers.map((user) => ({ id: user.id })),
-      blogId: params.id ? params.id[0] : '',
+      blogId: params.id as string,
     });
     setSelectedUsers([]);
     setSearchQuery('');

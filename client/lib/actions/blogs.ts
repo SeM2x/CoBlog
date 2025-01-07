@@ -56,9 +56,13 @@ const inviteCollaborator = actionClient
     })
   )
   .action(async ({ parsedInput: { blogId, users } }) => {
-    const res = (await apiRequest.put(`/blogs/${blogId}/invite`, { users }))
-      .data;
-    return res.message;
+    try {
+      const res = (await apiRequest.put(`/blogs/${blogId}/invite`, { users }))
+        .data;
+      return res.message;
+    } catch (error) {
+      throw getServerError(error);
+    }
   });
 
 const invitationResponseSchema = z.object({
