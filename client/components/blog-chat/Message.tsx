@@ -1,7 +1,7 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Check, CheckCheck, Paperclip } from 'lucide-react';
-import { Message as MessageType, PartialUser } from '@/types';
+import { CoAuthor, Message as MessageType, PartialUser } from '@/types';
 import { format } from 'date-fns';
 
 const Message = ({
@@ -11,7 +11,7 @@ const Message = ({
 }: {
   message: MessageType;
   currentUser: PartialUser;
-  collaborators: PartialUser[];
+  collaborators: CoAuthor[];
 }) => {
   return (
     <div
@@ -31,7 +31,7 @@ const Message = ({
           <div className='flex items-center mb-1'>
             <Avatar className='h-5 w-5 mr-2'>
               <AvatarImage
-                src={collaborators.find((u) => u.id === msg.senderId)?.profileUrl}
+                src={collaborators.find((u) => u.id === msg.senderId)?.profileUrl || ''}
               />
               <AvatarFallback>
                 {collaborators

@@ -22,7 +22,7 @@ type Blog = {
   nComments: number;
   nShares: number;
   conversationId: string;
-  isPublished: true;
+  isPublished: string;
   status: 'published' | 'draft';
   content: string;
   Topics: string[];
@@ -39,7 +39,8 @@ type Blog = {
   publishedAt: string;
   blogId?: string;
   invitedUsers: string[];
-  CoAuthors: string[];
+  CoAuthors: CoAuthor[];
+  authorProfileUrl: string;
 };
 
 interface PartialUser {
@@ -49,6 +50,10 @@ interface PartialUser {
   lastName?: string;
   profileUrl: string;
 }
+
+interface CoAuthor extends PartialUser {
+  role?: string;
+};
 
 interface Message {
   id: string;
@@ -82,4 +87,4 @@ type Notification = {
   status?: 'accepted' | 'rejected' | 'pending';
 };
 
-export type { Profile, Blog, PartialUser, Message, Notification };
+export type { Profile, Blog, CoAuthor, PartialUser, Message, Notification };

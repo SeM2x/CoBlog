@@ -19,7 +19,7 @@ import { toast } from '@/hooks/use-toast';
 import { useParams } from 'next/navigation';
 import { LoaderCircle, Search, UserPlus, X } from 'lucide-react';
 import { getUsers } from '@/lib/actions/users';
-import { PartialUser } from '@/types';
+import { CoAuthor, PartialUser } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -27,7 +27,7 @@ interface InviteCollaboratorsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onInvite: (collaborators: PartialUser[]) => void;
-  existingCollaborators: PartialUser[];
+  existingCollaborators: CoAuthor[];
   invitedUsers: PartialUser[];
 }
 
@@ -186,7 +186,7 @@ export default function InviteModal({
                       <div className='flex items-center space-x-4'>
                         <Avatar>
                           <AvatarImage
-                            src={user.profileUrl}
+                            src={user.profileUrl || ''}
                             alt={user.username}
                           />
                           <AvatarFallback>{user.username[0]}</AvatarFallback>

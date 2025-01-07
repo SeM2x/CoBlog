@@ -6,7 +6,7 @@ import TipTapEditor from '@/components/tiptap';
 import { TiptapCollabProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
 import { BlogChat } from './blogChat';
-import { Blog, PartialUser } from '@/types';
+import { Blog, CoAuthor, PartialUser } from '@/types';
 import { useUserStore } from '@/lib/store';
 import generateTipTapToken from '@/lib/utils/tiptap-token';
 import {
@@ -47,7 +47,7 @@ export default function EditBlog({
   invitedUsers,
 }: {
   blog?: Blog;
-  coAuthors: PartialUser[];
+  coAuthors: CoAuthor[];
   invitedUsers: PartialUser[];
 }) {
   const [title, setTitle] = useState(blog?.title || '');
@@ -63,7 +63,7 @@ export default function EditBlog({
       toast({ title: 'Unable to open blog', variant: 'destructive' });
       router.push('/new-blog');
     }
-   // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blog]);
   const { handlePublish, isPublishPending } = usePublish({
     blogId: blog?._id,
@@ -141,7 +141,7 @@ export default function EditBlog({
   const [managePermissionsOpen, setManagePermissionsOpen] = useState(false);
   //const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [collaborators, setCollaborators] = useState<PartialUser[]>(coAuthors);
+  const [collaborators, setCollaborators] = useState<CoAuthor[]>(coAuthors);
   const handleVisibilityChange = () => {
     setIsPublic(!isPublic);
   };
@@ -185,7 +185,7 @@ export default function EditBlog({
           {collaborators.map((collaborator) => (
             <Avatar key={collaborator.id} className='h-8 w-8'>
               <AvatarImage
-                src={collaborator.profileUrl}
+                src={collaborator.profileUrl || ''}
                 alt={collaborator.username}
               />
               <AvatarFallback>{collaborator.username[0]}</AvatarFallback>
