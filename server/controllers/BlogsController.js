@@ -362,7 +362,7 @@ export async function updateBlogReaction(req, res) {
   }
 
   try {
-    const blog = await dbClient.deleteData('blogs', { _id: blogId });
+    const blog = await dbClient.findData('blogs', { _id: blogId });
     if (!blog) {
       return res.status(404).json({ status: 'error', message: 'Blog does not exist' });
     }
