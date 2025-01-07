@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import {
   Dialog,
@@ -15,17 +17,12 @@ import { useAction } from 'next-safe-action/hooks';
 import { createBlog } from '@/lib/actions/blogs';
 import { toast } from '@/hooks/use-toast';
 
-interface CreateBlogModalProps {
-  isOpen: boolean;
-}
 
-export function CreateBlogModal({ isOpen }: CreateBlogModalProps) {
+export default function CreateBlogModal() {
   const [title, setTitle] = useState('');
-  const [open, setOpen] = useState(isOpen);
 
   const onClose = () => {
     setTitle('');
-    setOpen(isOpen);
     router.push('/dashboard');
   };
 
@@ -53,7 +50,7 @@ export function CreateBlogModal({ isOpen }: CreateBlogModalProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open onOpenChange={onClose}>
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
           <DialogTitle>Create New Blog Post</DialogTitle>

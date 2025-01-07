@@ -1,33 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Heart,
-  MessageCircle,
-  UserPlus,
-  Share2,
-  AlertCircle,
-  Bell,
-  Mail,
-} from 'lucide-react';
-import { Notification } from '@/types';
-import { markNotificationRead } from '@/lib/actions/notifications';
-import { toast } from '@/hooks/use-toast';
 
-export default function Notifications({
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import { Notification } from '@/types';
+import InvitationModal from './InvitationModal';
+import { useAction } from 'next-safe-action/hooks';
+import { acceptCollaboration, rejectCollaboration } from '@/lib/actions/blogs';
+import { toast } from '@/hooks/use-toast';
+import { markNotificationRead } from '@/lib/actions/notifications';
+import { useRouter } from 'next/navigation';
+import NotificationCard from './NotificationCard';
+
+export default function NotificationsPage({
   notifications,
 }: {
   notifications: Notification[];
 }) {
   const [activeTab, setActiveTab] = useState('all');
   const [notificationList, setNotificationList] = useState(notifications);
+  const [selectedInvitation, setSelectedInvitation] =
+    useState<Notification | null>(null);
 
   const filteredNotifications = notificationList.filter(
     (notification) =>
-      activeTab === 'all' || (activeTab === 'unread' && !notification.read)
+      activeTab === 'all' ||
+      (activeTab === 'unread' && !notification.read) ||
+      (activeTab === 'invites' && notification.type === 'invite')
   );
+
+  useEffect(() => {
+    setNotificationList(notifications);
+  }, [notifications]);
 
   const markAllAsRead = async () => {
     setNotificationList((prevList) => {
@@ -56,24 +62,55 @@ export default function Notifications({
     }
   };
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'like':
-        return <Heart className='h-4 w-4 text-red-500' />;
-      case 'comment':
-        return <MessageCircle className='h-4 w-4 text-blue-500' />;
-      case 'follow':
-        return <UserPlus className='h-4 w-4 text-green-500' />;
-      case 'share':
-        return <Share2 className='h-4 w-4 text-purple-500' />;
-      case 'mention':
-        return <AlertCircle className='h-4 w-4 text-yellow-500' />;
-      case 'invite':
-        return <Mail className='h-4 w-4' />;
-      default:
-        return null;
-    }
+  const router = useRouter();
+
+  const onSettled = (res: boolean) => ({
+    onSuccess: ({ input }: { input: { blogId: string } }) => {
+      toast({
+        title: res
+          ? 'Collaboration request accepted'
+          : 'Collaboration request rejected',
+      });
+      if (res) router.push(`/new-blog/${input.blogId}`);
+    },
+    onError: ({
+      error: { serverError },
+    }: {
+      error: { serverError?: string };
+    }) => {
+      toast({
+        title: res
+          ? `Failed to accept collaboration request${
+              serverError ? ': ' + serverError : ''
+            }`
+          : `Failed to reject collaboration request${
+              serverError ? ': ' + serverError : ''
+            }`,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const { executeAsync: executeAccept, isPending: isAcceptPending } = useAction(
+    acceptCollaboration,
+    onSettled(true)
+  );
+  const { executeAsync: executeReject, isPending: isRejectPending } = useAction(
+    rejectCollaboration,
+    onSettled(false)
+  );
+
+  const handleInvitationResponse = async (
+    accept: boolean,
+    { notificationId, blogId }: { notificationId?: string; blogId?: string }
+  ) => {
+    if (!notificationId || !blogId) return;
+    if (accept) await executeAccept({ notificationId, blogId });
+    else await executeReject({ notificationId, blogId });
+    setSelectedInvitation(null);
   };
+
+  console.log(notifications[1]);
 
   return (
     <div className='container mx-auto px-4 py-8 max-w-2xl'>
@@ -89,41 +126,34 @@ export default function Notifications({
         onValueChange={setActiveTab}
         className='w-full mb-6'
       >
-        <TabsList className='grid w-full grid-cols-2'>
+        <TabsList className='grid w-full grid-cols-3'>
           <TabsTrigger value='all'>All</TabsTrigger>
           <TabsTrigger value='unread'>Unread</TabsTrigger>
+          <TabsTrigger value='invites'>Invites</TabsTrigger>
         </TabsList>
       </Tabs>
 
-      <div className='space-y-1'>
-        {filteredNotifications.map((notification) => (
-          <div
-            key={notification._id}
-            className={`flex items-start p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150 ${
-              !notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-            }`}
-          >
-            <Bell className='h-9 w-9 mr-4 flex-shrink-0' />
-            <div className='flex-grow min-w-0'>
-              <p className='text-sm'>
-                {notification.message}
-                {/* {notification.post && (
-                  <span className='font-medium text-gray-700 dark:text-gray-300'>
-                    {' '}
-                    &quot;{notification.post}&quot;
-                  </span>
-                )} */}
-              </p>
-              <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-                {notification.createdAt}
-              </p>
-            </div>
-            <div className='ml-4 flex-shrink-0'>
-              {getNotificationIcon(notification.type)}
-            </div>
+      <div className='space-y-4'>
+        {filteredNotifications.length === 0 ? (
+          <div className='text-center text-gray-500 dark:text-gray-400'>
+            You&apos;re all caught up!
           </div>
-        ))}
+        ) : (
+          filteredNotifications.map((notification) => (
+            <NotificationCard
+              key={notification._id}
+              notification={notification}
+              setSelectedInvitation={setSelectedInvitation}
+            />
+          ))
+        )}
       </div>
+      <InvitationModal
+        loading={{ accept: isAcceptPending, reject: isRejectPending }}
+        selectedInvitation={selectedInvitation}
+        setSelectedInvitation={setSelectedInvitation}
+        handleInvitationResponse={handleInvitationResponse}
+      />
     </div>
   );
 }

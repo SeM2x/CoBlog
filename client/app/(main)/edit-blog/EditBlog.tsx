@@ -6,7 +6,6 @@ import TipTapEditor from '@/components/tiptap';
 import { TiptapCollabProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
 import { BlogChat } from './blogChat';
-import { CreateBlogModal } from '@/components/createBlogModal';
 import { Blog, PartialUser } from '@/types';
 import { useUserStore } from '@/lib/store';
 import generateTipTapToken from '@/lib/utils/tiptap-token';
@@ -30,9 +29,11 @@ import InviteModal from './InviteModal';
 import DeleteModal from './DeleteModal';
 import PermissionsModal from './PermissionsModal';
 import { useAction } from 'next-safe-action/hooks';
-import { publishBlog } from '@/lib/actions/blogs';
+import { saveBlog } from '@/lib/actions/blogs';
 import { toast } from '@/hooks/use-toast';
 import { TopicSelector } from './TopicsSelector';
+import { useRouter } from 'next/navigation';
+import usePublish from '@/hooks/usePublish';
 
 const currentUser = {
   id: '1',
@@ -40,7 +41,7 @@ const currentUser = {
   profileUrl: '/avatars/john-doe.jpg',
 };
 
-export default function CreateBlog({
+export default function EditBlog({
   blog,
   coAuthors,
   invitedUsers,
@@ -55,15 +56,35 @@ export default function CreateBlog({
   const [provider, setProvider] = useState<TiptapCollabProvider | null>(null);
   const [doc, setDoc] = useState<Y.Doc | null>(null);
 
-  const { execute, isPending } = useAction(publishBlog, {
-    onSuccess: ({ data }) => {
-      toast({ title: data });
-    },
-    onError: () => {
-      toast({ title: 'Failed to publish blog post', variant: 'destructive' });
-    },
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!blog) {
+      toast({ title: 'Unable to open blog', variant: 'destructive' });
+      router.push('/new-blog');
+    }
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blog]);
+  const { handlePublish, isPublishPending } = usePublish({
+    blogId: blog?._id,
+    title,
+    content,
   });
-  const handlePublish = () => {
+
+  const { execute: executeSave, isPending: isSavePending } = useAction(
+    saveBlog,
+    {
+      onSuccess: ({ data }) => {
+        toast({ title: data });
+        router.push(`/blogs/${blog?._id}`);
+      },
+      onError: ({ error: { serverError } }) => {
+        if (serverError) toast({ title: serverError, variant: 'destructive' });
+      },
+    }
+  );
+
+  const handleSave = () => {
     if (!blog) return;
     const data = {
       blogId: blog?._id,
@@ -73,7 +94,7 @@ export default function CreateBlog({
       subtopics: [],
     };
     console.log('data', data);
-    execute(data);
+    executeSave(data);
   };
 
   const user = useUserStore((state) => state.user);
@@ -155,6 +176,8 @@ export default function CreateBlog({
     { value: string; label: string }[]
   >([]);
 
+  console.log(blog?.content, content);
+
   return (
     <div className='relative min-h-screen border container mx-auto px-4 py-8 max-w-4xl space-y-4'>
       <div className='flex gap-4 flex-col sm:flex-row sm:justify-between sm:items-center'>
@@ -178,10 +201,27 @@ export default function CreateBlog({
           </Button>
         </div>
         <div className='flex items-center space-x-4'>
-          <Button variant='outline'>Save Draft</Button>
-          <Button onClick={handlePublish} loading={isPending}>
-            Publish
-          </Button>
+          {blog?.status === 'published' ? (
+            <Button
+              disabled={
+                !content ||
+                !title ||
+                (content === blog.content && title === blog.title)
+              }
+              onClick={handleSave}
+              loading={isSavePending}
+            >
+              Save & Publish
+            </Button>
+          ) : (
+            <Button
+              disabled={!content || !title}
+              onClick={handlePublish}
+              loading={isPublishPending}
+            >
+              Publish
+            </Button>
+          )}
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' size='icon'>
@@ -239,7 +279,6 @@ export default function CreateBlog({
           collaborators={collaborators}
         />
       )}
-      <CreateBlogModal isOpen={!blog} />
       <InviteModal
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}

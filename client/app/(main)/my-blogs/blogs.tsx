@@ -17,8 +17,8 @@ export default function Blogs({ blogs }: { blogs: Blog[] }) {
   const filteredBlogs = blogs.filter(
     (blog) =>
       (activeTab === 'all' || blog.status === activeTab) &&
-      (blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        blog.content.toLowerCase().includes(searchQuery.toLowerCase()))
+      (blog.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        blog.content?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (

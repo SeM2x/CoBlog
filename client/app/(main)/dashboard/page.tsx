@@ -6,23 +6,26 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
   CardFooter,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ThumbsUp,
   MessageCircle,
   Share2,
   BookOpen,
-  Edit3,
   User,
   Bell,
+  Bookmark,
+  TrendingUp,
+  Image,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useUserStore } from '@/lib/store';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const blogPosts = [
   {
@@ -30,281 +33,293 @@ const blogPosts = [
     title: 'Getting Started with Next.js 14',
     excerpt:
       'Learn how to build modern web applications with Next.js 14 and its new app directory structure.',
-    author: { name: 'John Doe', avatar: '/avatars/john-doe.png' },
+    author: { name: 'John Doe', avatar: '/placeholder.svg?height=32&width=32' },
     likes: 42,
     comments: 15,
     category: 'Web Development',
     readTime: '5 min read',
     publishDate: '2023-05-15',
+    image: '/placeholder.svg?height=400&width=600',
   },
   {
     id: 2,
     title: 'Mastering TypeScript for React Development',
     excerpt:
       'Discover how TypeScript can improve your React development experience and catch errors early.',
-    author: { name: 'Jane Smith', avatar: '/avatars/jane-smith.png' },
+    author: {
+      name: 'Jane Smith',
+      avatar: '/placeholder.svg?height=32&width=32',
+    },
     likes: 38,
     comments: 22,
     category: 'JavaScript',
     readTime: '7 min read',
     publishDate: '2023-05-12',
+    image: '/placeholder.svg?height=400&width=600',
   },
   {
     id: 3,
     title: 'Building Responsive UIs with Tailwind CSS',
     excerpt:
       'Learn how to create beautiful and responsive user interfaces using Tailwind CSS utility classes.',
-    author: { name: 'Bob Johnson', avatar: '/avatars/bob-johnson.png' },
+    author: {
+      name: 'Bob Johnson',
+      avatar: '/placeholder.svg?height=32&width=32',
+    },
     likes: 55,
     comments: 18,
     category: 'CSS',
     readTime: '6 min read',
     publishDate: '2023-05-10',
+    image: '/placeholder.svg?height=400&width=600',
   },
 ];
 
-const suggestedFollowers = [
+const suggestedUsers = [
   {
     id: 1,
     name: 'Alice Cooper',
-    avatar: '/avatars/alice-cooper.png',
+    avatar: '/placeholder.svg?height=40&width=40',
     bio: 'Tech enthusiast & blogger',
-    followers: 1200,
   },
   {
     id: 2,
     name: 'David Lee',
-    avatar: '/avatars/david-lee.png',
+    avatar: '/placeholder.svg?height=40&width=40',
     bio: 'Full-stack developer',
-    followers: 980,
   },
   {
     id: 3,
     name: 'Emma Watson',
-    avatar: '/avatars/emma-watson.png',
+    avatar: '/placeholder.svg?height=40&width=40',
     bio: 'UI/UX designer & writer',
-    followers: 1500,
   },
 ];
 
-const trendingTags = [
-  { id: 1, name: 'NextJS', count: 1234 },
-  { id: 2, name: 'React', count: 987 },
+const trendingTopics = [
+  { id: 1, name: 'React', count: 1234 },
+  { id: 2, name: 'Next.js', count: 987 },
   { id: 3, name: 'TypeScript', count: 876 },
   { id: 4, name: 'TailwindCSS', count: 765 },
-  { id: 5, name: 'WebDev', count: 654 },
+  { id: 5, name: 'GraphQL', count: 654 },
 ];
-
-
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('feed');
 
-  const user = useUserStore((state) => state.user);
-
-  const userStats = {
-    posts: user?.postCount,
-    followers: user?.followerCount,
-    following: user?.followingCount,
-    views: user?.viewsCount,
-  };
-
   return (
     <div className='container mx-auto px-4 py-8'>
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-        <div className='lg:col-span-2 space-y-6'>
-          <Card>
-            <CardHeader>
-              <CardTitle>Welcome back, {user?.firstName}!</CardTitle>
-              <CardDescription>
-                Here&apos;s what&apos;s happening in your blog world today.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='flex flex-wrap justify-between items-center gap-4'>
-                <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
-                  <div className='text-center'>
-                    <p className='text-2xl font-bold'>{userStats.posts}</p>
-                    <p className='text-sm text-gray-500'>Posts</p>
-                  </div>
-                  <div className='text-center'>
-                    <p className='text-2xl font-bold'>{userStats.followers}</p>
-                    <p className='text-sm text-gray-500'>Followers</p>
-                  </div>
-                  <div className='text-center'>
-                    <p className='text-2xl font-bold'>{userStats.following}</p>
-                    <p className='text-sm text-gray-500'>Following</p>
-                  </div>
-                  <div className='text-center'>
-                    <p className='text-2xl font-bold'>{userStats.views}</p>
-                    <p className='text-sm text-gray-500'>Views</p>
-                  </div>
-                </div>
-                <Link href={'/new-blog'}>
-                  <Button>
-                    <Edit3 className='w-4 h-4 mr-2' />
-                    New Post
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        <div className='lg:col-span-2 space-y-8'>
+          <div className='flex justify-between items-center'>
+            <h1 className='text-3xl font-bold'>Welcome to CoBlog</h1>
+          </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className='grid w-full grid-cols-2'>
-              <TabsTrigger value='feed'>Your Feed</TabsTrigger>
-              <TabsTrigger value='trending'>Trending</TabsTrigger>
+            <TabsList className='w-full border-b'>
+              <TabsTrigger value='feed' className='flex-1'>
+                Your Feed
+              </TabsTrigger>
+              <TabsTrigger value='discover' className='flex-1'>
+                Discover
+              </TabsTrigger>
             </TabsList>
-            <TabsContent value='feed' className='space-y-4'>
+            <TabsContent value='feed' className='space-y-6 pt-6'>
               {blogPosts.map((post) => (
-                <Card key={post.id}>
-                  <CardHeader>
-                    <div className='flex flex-col sm:flex-row justify-between items-start gap-2'>
-                      <div>
-                        <Link
-                          href={'/blogs/123'}
-                          className='hover:underline underline-offset-2'
-                        >
-                          <CardTitle>{post.title}</CardTitle>
-                        </Link>
-                        <CardDescription>{post.excerpt}</CardDescription>
-                      </div>
-                      <Button variant='outline' size='sm'>
-                        {post.category}
-                      </Button>
+                <Card key={post.id} className='overflow-hidden'>
+                  <div className='flex flex-col md:flex-row'>
+                    <div className='md:w-1/3 bg-gray-50 dark:bg-gray-900 flex items-center justify-center'>
+                      <Image />
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className='flex items-center space-x-4'>
-                      <Avatar>
-                        <AvatarImage
-                          src={post.author.avatar}
-                          alt={post.author.name}
-                        />
-                        <AvatarFallback>
-                          {post.author.name
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className='text-sm font-medium'>
-                          {post.author.name}
+                    <div className='flex-1 p-6'>
+                      <CardHeader className='p-0 mb-4'>
+                        <div className='flex items-center space-x-4 mb-2'>
+                          <Avatar>
+                            <AvatarImage
+                              src={post.author.avatar}
+                              alt={post.author.name}
+                            />
+                            <AvatarFallback>
+                              {post.author.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <CardTitle className='text-lg'>
+                              {post.title}
+                            </CardTitle>
+                            <CardDescription>
+                              {post.author.name} · {post.publishDate} ·{' '}
+                              {post.readTime}
+                            </CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className='p-0'>
+                        <p className='text-sm text-muted-foreground'>
+                          {post.excerpt}
                         </p>
-                        <p className='text-xs text-gray-500'>
-                          {post.publishDate} · {post.readTime}
-                        </p>
-                      </div>
+                      </CardContent>
+                      <CardFooter className='p-0 mt-4 flex justify-between items-center'>
+                        <div className='flex space-x-4'>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='text-muted-foreground hover:text-primary'
+                          >
+                            <ThumbsUp className='w-4 h-4 mr-2' />
+                            {post.likes}
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='text-muted-foreground hover:text-primary'
+                          >
+                            <MessageCircle className='w-4 h-4 mr-2' />
+                            {post.comments}
+                          </Button>
+                        </div>
+                        <div className='flex space-x-2'>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='text-muted-foreground hover:text-primary'
+                          >
+                            <Bookmark className='w-4 h-4' />
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='text-muted-foreground hover:text-primary'
+                          >
+                            <Share2 className='w-4 h-4' />
+                          </Button>
+                        </div>
+                      </CardFooter>
                     </div>
-                  </CardContent>
-                  <CardFooter className='flex flex-wrap justify-between gap-2'>
-                    <div className='flex space-x-4'>
-                      <Button variant='ghost' size='sm'>
-                        <ThumbsUp className='w-4 h-4 mr-2' />
-                        {post.likes}
-                      </Button>
-                      <Button variant='ghost' size='sm'>
-                        <MessageCircle className='w-4 h-4 mr-2' />
-                        {post.comments}
-                      </Button>
-                    </div>
-                    <Button variant='ghost' size='sm'>
-                      <Share2 className='w-4 h-4 mr-2' />
-                      Share
-                    </Button>
-                  </CardFooter>
+                  </div>
                 </Card>
               ))}
             </TabsContent>
-            <TabsContent value='trending'>
+            <TabsContent value='discover' className='pt-6'>
               <Card>
                 <CardHeader>
-                  <CardTitle>Trending Posts</CardTitle>
+                  <CardTitle>Discover New Content</CardTitle>
                   <CardDescription>
-                    See what&apos;s popular in the community right now.
+                    Find interesting articles and bloggers based on your
+                    interests.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {/* Add trending posts content here */}
-                  <p>Trending posts will be displayed here.</p>
+                  <Input
+                    placeholder='Search for topics, authors, or keywords'
+                    className='mb-6'
+                  />
+                  <div className='space-y-4'>
+                    <h3 className='font-semibold'>Trending Topics</h3>
+                    <div className='flex flex-wrap gap-2'>
+                      {trendingTopics.map((topic) => (
+                        <Button key={topic.id} variant='outline' size='sm'>
+                          #{topic.name}
+                          <span className='ml-2 text-xs bg-muted text-muted-foreground rounded-full px-2 py-1'>
+                            {topic.count}
+                          </span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
         </div>
 
-        <div className='space-y-6'>
-          <Card>
-            <CardHeader>
-              <CardTitle>Suggested Followers</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              {suggestedFollowers.map((follower) => (
-                <div
-                  key={follower.id}
-                  className='flex items-center justify-between'
-                >
-                  <div className='flex items-center space-x-4'>
-                    <Avatar>
-                      <AvatarImage src={follower.avatar} alt={follower.name} />
-                      <AvatarFallback>
-                        {follower.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className='text-sm font-medium'>{follower.name}</p>
-                      <p className='text-xs text-gray-500'>{follower.bio}</p>
+        <div className='border rounded-lg overflow-hidden'>
+          <div className='bg-background p-6 border-b'>
+            <h2 className='text-xl font-semibold mb-4'>Suggested Users</h2>
+            <ScrollArea className='h-[250px] pr-4'>
+              <div className='space-y-4'>
+                {suggestedUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className='flex items-center justify-between py-2'
+                  >
+                    <div className='flex items-center space-x-3'>
+                      <Avatar>
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback>
+                          {user.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className='font-medium'>{user.name}</p>
+                        <p className='text-xs text-muted-foreground'>
+                          {user.bio}
+                        </p>
+                      </div>
                     </div>
+                    <Button variant='outline' size='sm'>
+                      Follow
+                    </Button>
                   </div>
-                  <Button variant='outline' size='sm'>
-                    Follow
-                  </Button>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Trending Tags</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='flex flex-wrap gap-2'>
-                {trendingTags.map((tag) => (
-                  <Button key={tag.id} variant='outline' size='sm'>
-                    #{tag.name}
-                    <span className='ml-2 text-xs bg-primary text-primary-foreground rounded-full px-2 py-1'>
-                      {tag.count}
-                    </span>
-                  </Button>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </ScrollArea>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-2'>
-              <Button className='w-full justify-start' variant='outline'>
-                <BookOpen className='w-4 h-4 mr-2' />
-                My Drafts
-              </Button>
-              <Button className='w-full justify-start' variant='outline'>
-                <User className='w-4 h-4 mr-2' />
-                Edit Profile
-              </Button>
-              <Button className='w-full justify-start' variant='outline'>
-                <Bell className='w-4 h-4 mr-2' />
-                Notifications
-              </Button>
-            </CardContent>
-          </Card>
+          <div className='bg-background p-6 border-b'>
+            <h2 className='text-xl font-semibold mb-4'>Quick Links</h2>
+            <div className='space-y-2'>
+              <Link href='/my-blogs'>
+                <Button variant='ghost' className='w-full justify-start'>
+                  <BookOpen className='mr-2 h-4 w-4' />
+                  My Blogs
+                </Button>
+              </Link>
+              <Link href='/profile'>
+                <Button variant='ghost' className='w-full justify-start'>
+                  <User className='mr-2 h-4 w-4' />
+                  Profile
+                </Button>
+              </Link>
+              <Link href='/notifications'>
+                <Button variant='ghost' className='w-full justify-start'>
+                  <Bell className='mr-2 h-4 w-4' />
+                  Notifications
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className='bg-background rounded-lg p-6'>
+            <h2 className='text-xl font-semibold mb-4'>Trending Now</h2>
+            <ScrollArea className='h-[200px]'>
+              <div className='space-y-4'>
+                {blogPosts.map((post, index) => (
+                  <div
+                    key={post.id}
+                    className='flex items-center space-x-4 py-2'
+                  >
+                    <div className='flex-shrink-0 text-2xl font-bold text-muted-foreground w-8 text-center'>
+                      {index + 1}
+                    </div>
+                    <div className='flex-grow'>
+                      <h4 className='font-medium line-clamp-1'>{post.title}</h4>
+                      <p className='text-sm text-muted-foreground'>
+                        {post.author.name}
+                      </p>
+                    </div>
+                    <TrendingUp className='w-4 h-4 text-primary' />
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
         </div>
       </div>
     </div>

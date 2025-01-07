@@ -7,10 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { toast } from '@/hooks/use-toast';
-import { deleteBlog } from '@/lib/actions/blogs';
-import { useAction } from 'next-safe-action/hooks';
-import { useParams, useRouter } from 'next/navigation';
+import useDeleteBlog from '@/hooks/useDeleteBlog';
+import { useParams } from 'next/navigation';
 import React from 'react';
 
 const DeleteModal = ({
@@ -20,24 +18,11 @@ const DeleteModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const router = useRouter();
-
-  const { executeAsync, isPending } = useAction(deleteBlog, {
-    onSuccess: ({ data }) => {
-      toast({ title: data });
-      router.push('/new-blog');
-      onClose();
-    },
-
-    onError: () => {
-      toast({ title: 'Failed to delete blog post', variant: 'destructive' });
-    },
+  const { id } = useParams();
+  const { handleDelete, isPending } = useDeleteBlog({
+    blogId: id as string,
+    onClose,
   });
-  const params = useParams();
-
-  const handleDelete = async () => {
-    await executeAsync(params.id ? params.id[0] : '');
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
