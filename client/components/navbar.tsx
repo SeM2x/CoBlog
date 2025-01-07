@@ -20,6 +20,7 @@ import NotificationsMenu from './notifications-menu';
 import { useUserStore } from '@/lib/store';
 import { Notification } from '@/types';
 import { useTheme } from 'next-themes';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export function Navbar({ notifications }: { notifications?: Notification[] }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,6 +34,9 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
   const user = useUserStore((state) => state.user);
 
   const { theme, setTheme } = useTheme();
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
   return (
     <nav className='sticky top-0 z-40 w-full border-b border-light-border dark:border-dark-border bg-light-bg/80 dark:bg-dark-bg/80 backdrop-blur-md'>
       <div className='container mx-auto flex h-16 items-center justify-between px-4 gap-4'>
@@ -48,6 +52,12 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
               <Input
                 placeholder='Search blogs, tags, or users...'
                 className='pl-8'
+                defaultValue={searchParams.get('keyword') || ''}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    router.push(`/search?keyword=${e.currentTarget.value}`);
+                  }
+                }}
               />
             </div>
           </div>
