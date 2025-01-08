@@ -54,13 +54,16 @@ interface PartialUser {
 
 interface CoAuthor extends PartialUser {
   role?: string;
-};
+}
 
 interface Message {
-  id: string;
+  _id: string;
   senderId: string;
-  content: string;
-  timestamp: Date;
+  senderUsername: string;
+  message: string;
+  blogId: string;
+  createdAt: Date;
+
   status: 'sent' | 'delivered' | 'read';
   type: 'text' | 'file';
   fileUrl?: string;

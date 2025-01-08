@@ -1,21 +1,24 @@
+'use client';
+
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Check, CheckCheck, Paperclip } from 'lucide-react';
-import { CoAuthor, Message as MessageType, PartialUser } from '@/types';
+import { CoAuthor, Message as MessageType } from '@/types';
 import { format } from 'date-fns';
+import { useUserStore } from '@/lib/store';
 
 const Message = ({
   message: msg,
-  currentUser,
   collaborators,
 }: {
   message: MessageType;
-  currentUser: PartialUser;
   collaborators: CoAuthor[];
 }) => {
+  const currentUser = useUserStore((state) => state.user);
+
+  if (!currentUser) return null;
   return (
     <div
-      key={msg.id}
       className={`mb-4 flex flex-col ${
         msg.senderId === currentUser.id ? 'items-end' : 'items-start'
       }`}
@@ -31,7 +34,10 @@ const Message = ({
           <div className='flex items-center mb-1'>
             <Avatar className='h-5 w-5 mr-2'>
               <AvatarImage
-                src={collaborators.find((u) => u.id === msg.senderId)?.profileUrl || ''}
+                src={
+                  collaborators.find((u) => u.id === msg.senderId)
+                    ?.profileUrl || ''
+                }
               />
               <AvatarFallback>
                 {collaborators
@@ -44,7 +50,7 @@ const Message = ({
             </span>
           </div>
         )}
-        {msg.type === 'text' && <p className='text-sm'>{msg.content}</p>}
+        {<p className='text-sm'>{msg.message}</p>}
         {msg.type === 'file' && (
           <a
             href={msg.fileUrl}
@@ -57,7 +63,7 @@ const Message = ({
         )}
       </div>
       <div className='text-xs mt-2 gap-1 flex justify-between items-center'>
-        <span>{format(msg.timestamp, 'h:mm a')}</span>
+        <span>{format(msg.createdAt, 'h:mm a')}</span>
         {msg.senderId === currentUser.id && (
           <span>
             {msg.status === 'sent' && <Check className='inline h-3 w-3' />}
