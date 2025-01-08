@@ -16,7 +16,7 @@ export async function createMessage(req, res) {
 
   const details = {
     conversationId,
-    senderId: new ObjectId(req.user.UserId),
+    senderId: new ObjectId(req.user.userId),
     senderUsername: req.user.username,
     blogId,
     message,
