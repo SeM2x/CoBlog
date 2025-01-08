@@ -11,7 +11,7 @@ import {
   getBlogById, manageInvitation, deleteBlog, updateBlogReaction, getUserFeed,
   saveBlogCurrentStatus, blogComment, getBlogComments, getCoAuthoredHistory,
 } from '../controllers/BlogsController';
-import { createMessage, getAllMessages } from '../controllers/MessagesController';
+import { createMessage, getAllMessages, getMessageById } from '../controllers/MessagesController';
 
 const { Router } = require('express');
 
@@ -69,3 +69,5 @@ blogRouter.get('/:blogId/comments', getBlogComments);
 // Manages all messages routes
 messageRouter.post('/create', createMessage);
 messageRouter.get('/:conversationId', getAllMessages);
+mesageRouter.get('/:conversationId/:messageId', getMessageById);
+
