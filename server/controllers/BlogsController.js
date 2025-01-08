@@ -3,6 +3,7 @@
 
 import dbClient from '../utils/db';
 import generateId from '../utils/uuid';
+import redisClient from '../utils/redis';
 
 const { ObjectId } = require('mongodb');
 
@@ -150,7 +151,11 @@ export async function inviteUsers(req, res) {
       role: user.role,
       blogId: { id: blog._id, title: blog.title },
       type: 'invite',
-      author: { id: blog.authorId, username: blog.authorUsername, profileUrl: blog.authorProfileUrl },
+      author: {
+        id: blog.authorId,
+        username: blog.authorUsername,
+        profileUrl: blog.authorProfileUrl,
+      },
       message: `${blog.authorUsername} invites you to co-write a blog: ${blog.title}`,
       status: 'pending',
       read: false,
@@ -367,6 +372,10 @@ export async function updateBlogReaction(req, res) {
       return res.status(404).json({ status: 'error', message: 'Blog does not exist' });
     }
 
+    if (!blog.isPublished) {
+      return res.status(400).json({ status: 'error', message: 'Blog is yet to be published' });
+    }
+
     const result = await dbClient.updateData('reactions', { blogId }, { $addToSet: { reactions: userId } });
     // unreact if user already reacted
     if (result.modifiedCount === 0) {
@@ -522,4 +531,93 @@ export async function getCoAuthoredHistory(req, res) {
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
   }
+}
+
+export async function getUserFeed(req, res) {
+  let { userId } = req.user;
+  userId = new ObjectId(userId);
+
+  let { limit, cursor } = req.query;
+  if (cursor === 'null') {
+    return res.status(200).json({
+      status: 'success',
+      data: [],
+      message: 'No more data to fetch',
+      pageInfo: { cursor: null, hasNext: false },
+    });
+  }
+  limit = limit ? (limit + 0) / 10 : 10;
+  cursor = cursor ? (cursor + 0) / 10 : 0;
+
+  let cachedBlog = await redisClient.get(`Blog_${req.user.userId}`);
+  let hasNext;
+
+  if (!cachedBlog || !cachedBlog[cursor]) {
+    let userViewHistory = await dbClient.findData('viewshistory', { userId });
+    let { blogHistory } = userViewHistory;
+    if (!blogHistory) {
+      blogHistory = [generateId()]; // Generate random id for blog exclusion
+    }
+
+    const pipeline = [
+      { $match: { _id: { $nin: blogHistory } } },
+      { $limit: 51 }, // Query extra data for hasNext
+    ];
+
+    let result = await dbClient.findManyData('blogs', pipeline, true);
+    if (!result) {
+      return res.status(200).json({
+        status: 'success',
+        data: [],
+        message: 'No more data to fetch',
+        pageInfo: { cursor: null, hasNext: false },
+      });
+    }
+    hasNext = !!result[50]; // Tracks db hasNext
+    result = JSON.stringify(result);
+    await redisClient.set(`Blog_${req.user.userId}`, result, 60); // cache feed for 30 min
+    cursor = 0; // reset cursor
+    cachedBlog = result;
+  }
+
+  // Paginate feed
+  const endIdx = cursor + limit;
+  let feeds = JSON.parse(cachedBlog);
+
+  const pageInfo = {
+    cursor: (feeds[endIdx] || hasNext) ? endIdx : null,
+    hasNext: !!(feeds[endIdx] || hasNext), // Computes hasNext for redis && db 
+  };
+
+  feeds = feeds.slice(cursor, endIdx);
+
+  // Filter blogs
+  const postId = [];
+  const filteredPost = feeds.map((feed) => {
+    postId.push(new ObjectId(feed._id));
+    const result = {
+      id: feed._id,
+      title: feed.title,
+      content: feed.content,
+      author: {
+        id: feed.authorId,
+        username: feed.authorUsername,
+        profileUrl: feed.authorProfileUrl,
+      },
+      CoAuthors: feed.CoAuthors,
+      status: feed.status,
+      topics: feed.topics,
+      subTopics: feed.subTopics,
+      minutesRead: feed.minutesRead,
+      nComments: feed.nComments,
+      nLikes: feed.nLikes,
+      nShares: feed.nShares,
+      nReactions: feed.nReactions,
+      imagesUrl: feed.imagesUrl,
+    };
+
+    return result;
+  });
+  dbClient.updateData('viewshistory', { userId }, { $addToSet: { blogHistory: { $each: postId } } });  // Mark user view blog
+  return res.status(200).json({ status: 'success', data: filteredPost, pageInfo });
 }
