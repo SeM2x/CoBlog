@@ -72,4 +72,51 @@ const getUserProfile = async (userId: string) => {
   }
 };
 
-export { updateProfile, getUsers, getUserProfile };
+const getUserFollowings = async (userId: string) => {
+  try {
+    const res = (await apiRequest.get(`/users/${userId}/followings`)).data;
+    console.log(res.data);
+    return res.data as PartialUser[];
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+  }
+};
+
+const getUserFollowers = async (userId: string) => {
+  try {
+    const res = (await apiRequest.get(`/users/${userId}/followers`)).data;
+    return res.data as PartialUser[];
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+  }
+};
+
+const followUser = async (userId: string) => {
+  try {
+    await apiRequest.put(`/users/${userId}/follow`);
+    return { success: true };
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+    return { success: false };
+  }
+};
+
+const unfollowUser = async (userId: string) => {
+  try {
+    await apiRequest.put(`/users/${userId}/unfollow`);
+    return { success: true };
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+    return { success: false };
+  }
+};
+
+export {
+  updateProfile,
+  getUsers,
+  getUserProfile,
+  followUser,
+  unfollowUser,
+  getUserFollowers,
+  getUserFollowings,
+};

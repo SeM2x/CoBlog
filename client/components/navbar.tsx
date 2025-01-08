@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +37,12 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
 
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const [search, setSearch] = useState(searchParams.get('keyword'));
+
+  useEffect(() => {
+    setSearch(searchParams.get('keyword'));
+  }, [searchParams]);
   return (
     <nav className='sticky top-0 z-40 w-full border-b border-light-border dark:border-dark-border bg-light-bg/80 dark:bg-dark-bg/80 backdrop-blur-md'>
       <div className='container mx-auto flex h-16 items-center justify-between px-4 gap-4'>
@@ -52,7 +58,8 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
               <Input
                 placeholder='Search blogs, tags, or users...'
                 className='pl-8'
-                defaultValue={searchParams.get('keyword') || ''}
+                value={search || ''}
+                onChange={(e) => setSearch(e.currentTarget.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     router.push(`/search?keyword=${e.currentTarget.value}`);
