@@ -16,7 +16,7 @@ class DBClient {
     this.verifyConnection = false;
     this.DBCollections = ['users', 'followers', 'messages', 'followings',
       'blogs', 'conversations', 'notifications', 'topics', 'subtopics',
-      'comments', 'reactions', 'viewhistory'];
+      'comments', 'reactions', 'viewshistory'];
     this.excludeUpdatedAt = ['followers', 'followings', 'reactions'];
   }
 
