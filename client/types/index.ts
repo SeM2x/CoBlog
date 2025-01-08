@@ -76,7 +76,7 @@ type Notification = {
   blogId?: {
     id: string;
     title: string;
-  };
+  } & string;
   author?: {
     id: string;
     username: string;
