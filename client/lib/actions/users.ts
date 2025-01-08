@@ -5,7 +5,7 @@ import { actionClient } from '../safe-action';
 import apiRequest from '../utils/apiRequest';
 import { AxiosError } from 'axios';
 import storageRequest from '../utils/storageRequest';
-import { PartialUser } from '@/types';
+import { PartialUser, Profile } from '@/types';
 
 const profileSchema = z.object({
   firstName: z.string(),
@@ -65,8 +65,7 @@ const getUsers = actionClient
 const getUserProfile = async (userId: string) => {
   try {
     const res = (await apiRequest.get(`/users/${userId}/profile`)).data;
-    return res.data as PartialUser;
-    return;
+    return res.data as Profile;
   } catch (error) {
     console.log((error as AxiosError).response?.data);
   }

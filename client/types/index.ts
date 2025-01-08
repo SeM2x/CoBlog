@@ -13,6 +13,7 @@ type Profile = {
   updatedAt: string;
   id: string;
   profileUrl: string;
+  relationship: 'following' | 'follower' | 'me';
 };
 
 type Blog = {
