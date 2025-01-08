@@ -1,7 +1,7 @@
 import { getBlog } from '@/lib/actions/blogs';
 import React, { Suspense } from 'react';
 import CreateBlog from '../EditBlog';
-import { getUserProfile } from '@/lib/actions/users';
+import { CoAuthor, PartialUser } from '@/types';
 
 export default async function CreateBlogPage({
   params,
@@ -18,19 +18,26 @@ export default async function CreateBlogPage({
   );
 }
 
-const getUsersProfiles = async (userIds: string[]) => {
-  return (await Promise.all(userIds.map((id) => getUserProfile(id)))).filter(
-    (user) => user !== undefined
-  );
-};
-
 const BlogsGetter = async ({ blogId }: { blogId?: string }) => {
   if (!blogId) return null;
   const blog = (await getBlog(blogId)).data;
-  const coAuthors = await getUsersProfiles(blog?.CoAuthors || []);
-  const invitedUsers = await getUsersProfiles(blog?.invitedUsers || []);
+  const coAuthors = blog?.CoAuthors || [];
+  const author = {
+    id: blog?.authorId,
+    username: blog?.authorUsername,
+    profileUrl: blog?.authorProfileUrl,
+    role: 'author',
+  } as CoAuthor;
+
+  const invitedUsers = [] as PartialUser[];
+
+  console.log(coAuthors);
 
   return (
-    <CreateBlog blog={blog} coAuthors={coAuthors} invitedUsers={invitedUsers} />
+    <CreateBlog
+      blog={blog}
+      coAuthors={[author, ...coAuthors]}
+      invitedUsers={invitedUsers}
+    />
   );
 };

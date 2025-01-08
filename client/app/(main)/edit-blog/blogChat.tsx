@@ -14,13 +14,13 @@ import {
 import { ChevronUp, ChevronDown, Smile, Send, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Message from '@/components/blog-chat/Message';
-import { Blog, Message as MessageType, PartialUser } from '@/types';
+import { Blog, CoAuthor, Message as MessageType, PartialUser } from '@/types';
 import { mockMessages } from '@/lib/mock';
 
 interface BlogChatProps {
   blog: Blog;
   currentUser: PartialUser;
-  collaborators: PartialUser[];
+  collaborators: CoAuthor[];
 }
 
 export function BlogChat({ blog, currentUser, collaborators }: BlogChatProps) {
@@ -136,7 +136,7 @@ export function BlogChat({ blog, currentUser, collaborators }: BlogChatProps) {
                     <TooltipTrigger>
                       <Avatar className='h-6 w-6 border-2 border-primary'>
                         <AvatarImage
-                          src={user.profileUrl}
+                          src={user.profileUrl || ''}
                           alt={user.username}
                         />
                         <AvatarFallback className='text-gray-800 dark:text-gray-300'>

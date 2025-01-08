@@ -16,16 +16,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { X } from 'lucide-react';
-import { PartialUser } from '@/types';
-
-interface Collaborator extends PartialUser{
-  role?: 'owner' | 'editor' | 'viewer';
-}
-
+import { CoAuthor } from '@/types';
 interface ManagePermissionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  collaborators: Collaborator[];
+  collaborators: CoAuthor[];
   handleRoleChange: (
     collaboratorId: string,
     newRole: 'owner' | 'editor' | 'viewer'
@@ -57,7 +52,7 @@ export default function PermissionsModal({
             <div key={collaborator.id} className='flex items-center space-x-4'>
               <Avatar className='h-8 w-8'>
                 <AvatarImage
-                  src={collaborator.profileUrl}
+                  src={collaborator.profileUrl || ''}
                   alt={collaborator.username}
                 />
                 <AvatarFallback>{collaborator.username[0]}</AvatarFallback>

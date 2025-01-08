@@ -71,7 +71,7 @@ export default function NotificationsPage({
           ? 'Collaboration request accepted'
           : 'Collaboration request rejected',
       });
-      if (res) router.push(`/new-blog/${input.blogId}`);
+      if (res) router.push(`/edit-blog/${input.blogId}`);
     },
     onError: ({
       error: { serverError },
@@ -109,8 +109,6 @@ export default function NotificationsPage({
     else await executeReject({ notificationId, blogId });
     setSelectedInvitation(null);
   };
-
-  console.log(notifications[1]);
 
   return (
     <div className='container mx-auto px-4 py-8 max-w-2xl'>
