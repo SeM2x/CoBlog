@@ -47,6 +47,7 @@ export async function createUserAccount(req, res) {
     const newUser = await dbClient.insertData('users', newUserData);
     await dbClient.insertData('followings', { userId: newUser.insertedId, followings: [] });
     await dbClient.insertData('followers', { userId: newUser.insertedId, followers: [] });
+    await dbClient.insertData('viewshistory', { userId: newUser.insertedId });
 
     return res.status(201).json({ status: 'success', message: 'User created' });
   } catch (err) {
