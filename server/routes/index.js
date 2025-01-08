@@ -69,5 +69,5 @@ blogRouter.get('/:blogId/comments', getBlogComments);
 // Manages all messages routes
 messageRouter.post('/create', createMessage);
 messageRouter.get('/:conversationId', getAllMessages);
-mesageRouter.get('/:conversationId/:messageId', getMessageById);
+messageRouter.get('/:conversationId/:messageId', getMessageById);
 
