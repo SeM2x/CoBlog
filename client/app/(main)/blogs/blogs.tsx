@@ -2,10 +2,12 @@
 
 //import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from '@/hooks/use-toast';
 //import { Button } from '@/components/ui/button';
 //import { ThumbsUp, MessageCircle, Share2 } from 'lucide-react';
 import { Blog } from '@/types';
-import { notFound } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 const blogPost = {
   id: 1,
@@ -53,10 +55,23 @@ const blogPost = {
   ],
 };
 
-export default function BlogDetails({ blog }: { blog?: Blog }) {
-  if (!blog) {
-    notFound();
-  }
+export default function BlogDetails({
+  blog,
+  error,
+}: {
+  blog?: Blog;
+  error?: string;
+}) {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (error) {
+      toast({ title: error, variant: 'destructive' });
+      router.back();
+    }
+  }, [router, error]);
+
+  if (!blog) return;
   return (
     <div className='max-w-3xl mx-auto space-y-8'>
       <article className='prose dark:prose-invert lg:prose-xl'>

@@ -91,4 +91,30 @@ type Notification = {
   status?: 'accepted' | 'rejected' | 'pending';
 };
 
-export type { Profile, Blog, CoAuthor, PartialUser, Message, Notification };
+type FeedPost = {
+  id: string;
+  title: string;
+  content: string;
+  author: {
+    id: string;
+    username: string;
+    profileUrl: string;
+  };
+  status: 'published';
+  topics: string[];
+  subTopics: string[];
+  nComments: number;
+  nLikes: number;
+  nShares: number;
+  imagesUrl: string[];
+};
+
+export type {
+  Profile,
+  Blog,
+  CoAuthor,
+  PartialUser,
+  Message,
+  Notification,
+  FeedPost,
+};

@@ -2,7 +2,7 @@
 
 import { AxiosError } from 'axios';
 import apiRequest from '../utils/apiRequest';
-import { Blog } from '@/types';
+import { Blog, FeedPost } from '@/types';
 import { actionClient } from '../safe-action';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
@@ -103,8 +103,13 @@ const getBlog = async (blogId: string) => {
     const res = (await apiRequest(`/blogs/${blogId}`)).data;
     return { success: true, data: res.data as Blog };
   } catch (error) {
-    console.log((error as AxiosError).response?.data || error);
-    return { success: false, message: 'Failed to fetch blog' };
+    const message = (
+      (error as AxiosError).response?.data as { message: string }
+    )?.message;
+    return {
+      success: false,
+      message: message || 'Failed to fetch blog',
+    };
   }
 };
 
@@ -157,6 +162,15 @@ const saveBlog = actionClient
     }
   });
 
+const getFeed = async () => {
+  try {
+    const res = (await apiRequest('/blogs/feed')).data;
+    return res.data as FeedPost[];
+  } catch (error) {
+    console.log((error as AxiosError).response?.data || error);
+  }
+};
+
 export {
   getTopics,
   getUserBlogs,
@@ -168,4 +182,5 @@ export {
   deleteBlog,
   publishBlog,
   saveBlog,
+  getFeed,
 };

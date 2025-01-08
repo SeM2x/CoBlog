@@ -14,6 +14,7 @@ const BlogPage = async ({ params }: { params: Promise<{ id: string }> }) => {
 export default BlogPage;
 
 const BlogGetter = async ({ blogId }: { blogId: string }) => {
-  const blog = (await getBlog(blogId)).data;
-  return <BlogDetails blog={blog} />;
+  const blog = await getBlog(blogId);
+
+  return <BlogDetails blog={blog.data} error={blog.message} />;
 };
