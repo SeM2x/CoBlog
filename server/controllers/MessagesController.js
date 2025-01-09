@@ -35,10 +35,13 @@ export async function createMessage(req, res) {
 
 export async function getAllMessages(req, res) {
   const { conversationId } = req.params;
-
+  
   try {
-    const result = await dbClient.findManyData('messages', { conversationId });
-    return res.status(200).json({ status: 'success', data: result });
+    const conversation = await dbClient.findManyData('messages', { conversationId });
+    if (conversation.length === 0) {
+      return res.status.json({ status: 'error', message: 'conversation not found' });
+    }
+    return res.status(200).json({ status: 'success', data: conversation });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
@@ -47,8 +50,11 @@ export async function getAllMessages(req, res) {
 export async function getMessageById(req, res) {
   const { conversationId, messageId } = req.params;
   try {
-    const result = await dbClient.findData('messages', { conversationId, messageId });
-    return res.status(200).json({ status: 'success', data: result });
+    const message = await dbClient.findData('messages', { conversationId, messageId });
+    if (!message) {
+      return res.status.json({ status: 'error', message: 'message not found' });
+    }
+    return res.status(200).json({ status: 'success', data: message });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
