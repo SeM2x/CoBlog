@@ -119,7 +119,7 @@ export default function BlogDetailsPage({
             <div className='flex items-center space-x-4'>
               <Badge variant='secondary'>
                 <Clock className='w-4 h-4 mr-1' />
-                {blog.minuteRead} min read
+                {blog.minutesRead} min read
               </Badge>
               <Badge variant='secondary'>
                 <Users className='w-4 h-4 mr-1' />

@@ -35,7 +35,7 @@ type Blog = {
   roomId: string;
   imagesUrl: string[];
   CoAuthorId: string[];
-  minuteRead: number;
+  minutesRead: number;
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
