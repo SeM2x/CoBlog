@@ -16,7 +16,7 @@ class DBClient {
     this.verifyConnection = false;
     this.DBCollections = ['users', 'followers', 'messages', 'followings',
       'blogs', 'conversations', 'notifications', 'topics', 'subtopics',
-      'comments', 'reactions', 'viewshistory'];
+      'comments', 'reactions', 'viewshistory', 'coauthored',];
     this.excludeUpdatedAt = ['followers', 'followings', 'reactions'];
   }
 
@@ -32,7 +32,7 @@ class DBClient {
       this.db = this.dbClient.db(this.dbName);
       console.log(`mongo successfully connected to ${this.dbName}`);
     } catch (err) {
-      console.log('Mongo encountered an error');
+      console.log(`Mongo encountered an error: ${err.message}`);
     }
   }
 
