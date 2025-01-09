@@ -10,6 +10,7 @@ import {
   suggestTopics, getUserBlogs, createBlog, inviteUsers, publishBlog,
   getBlogById, manageInvitation, deleteBlog, updateBlogReaction, getUserFeed,
   saveBlogCurrentStatus, blogComment, getBlogComments, getCoAuthoredHistory,
+  getInvitationHistory,
 } from '../controllers/BlogsController';
 import { createMessage, getAllMessages, getMessageById } from '../controllers/MessagesController';
 
@@ -52,7 +53,8 @@ notificationRouter.delete('/:notificationId', deleteNotification);
 
 // Manages all Blogs routes
 blogRouter.get('/topics', suggestTopics);
-blogRouter.get('/co-authored', getCoAuthoredHistory);
+blogRouter.get('/view_invitation', getInvitationHistory);
+blogRouter.get('co-authored', getCoAuthoredHistory);
 blogRouter.get('/me', getUserBlogs);
 blogRouter.post('/create', createBlog);
 blogRouter.put('/:blogId/invite', inviteUsers);
