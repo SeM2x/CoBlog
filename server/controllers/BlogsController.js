@@ -122,10 +122,9 @@ export async function inviteUsers(req, res) {
 
   try {
     const result = await Promise.all(usersPromise);
-console.log(result);
-    if (!result.every(value => value)) {
+    console.log(result);
+    if (!result.every((value) => value)) {
       return res.status(404).json({ status: 'error', message: 'Some users does not exist' });
-console.log(result);
     }
     const invitedUsersData = result.map((user, index) => ({
       id: user._id,
@@ -261,14 +260,14 @@ export async function getBlogById(req, res) {
   if (!blog.isPublished && !access) {
     return res.status(404).json({ status: 'error', message: 'You cannot view this blog' });
   }
-  
+
   if (!userId.equals(blog.authorId)) {
-    delete blog.invitedUsers
+    delete blog.invitedUsers;
   }
 
   if (blog.isPublished) {
-    delete blog.roomId
-    delete blog.conversationId
+    delete blog.roomId;
+    delete blog.conversationId;
   }
 
   return res.status(200).json({ status: 'success', data: blog });
@@ -321,7 +320,7 @@ export async function manageInvitation(req, res) {
     const url = req.url.toLowerCase().slice(1);
     if (url === 'accept') {
       await dbClient.updateData('blogs', { _id: blogId }, { $addToSet: { CoAuthors: userData } });
-      await dbClient.insertData('coauthored', { userId, blogId })
+      await dbClient.insertData('coauthored', { userId, blogId });
     }
 
     // Update user ack status
@@ -541,7 +540,7 @@ export async function getInvitationHistory(req, res) {
       { status: 'success', data: paginatedNotifications, pageInfo },
     );
   } catch (err) {
-console.log(err)
+    console.log(err);
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
   }
 }
@@ -632,7 +631,7 @@ export async function getUserFeed(req, res) {
       nShares: feed.nShares,
       nReactions: feed.nReactions,
       imagesUrl: feed.imagesUrl,
-      createdAt: feed.createdAt, 
+      createdAt: feed.createdAt,
       updatedAt: feed.updatedAt,
     };
 
@@ -646,28 +645,28 @@ export async function getCoAuthoredHistory(req, res) {
   let { userId } = req.user;
   try {
     userId = new ObjectId(userId);
-  } catch(err) {
-    return res.status(400).json({ status: 'error', message: 'Incorrect id'})
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect id' });
   }
 
   const sharedBlogs = await dbClient.findManyData('coauthored', { userId });
   if (sharedBlogs.length === 0) {
     return res.status(200).json({
-      status: success,
+      status: 'success',
       data: [],
-      message: 'User has no shared blogs'
-    })
+      message: 'User has no shared blogs',
+    });
   }
   const data = [];
   // FInd each blogs with thier id
-  const blogPromise = sharedBlogs.map(blog => dbClient.findData('blogs', { _id: blog.blogId}));
+  const blogPromise = sharedBlogs.map((blog) => dbClient.findData('blogs', { _id: blog.blogId }));
   const results = await Promise.all(blogPromise);
   for (const result of results) {
     if (result) { // If blog is not null (deleted)
-      delete result.invitedUsers
+      delete result.invitedUsers;
       data.push(result);
     }
   }
 
-  return res.status(200).json({ status: 'success', data })
+  return res.status(200).json({ status: 'success', data });
 }
