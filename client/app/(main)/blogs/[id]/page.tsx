@@ -1,4 +1,4 @@
-import { getBlog } from '@/lib/actions/blogs';
+import { getBlog, getBlogComments } from '@/lib/actions/blogs';
 import React, { Suspense } from 'react';
 import BlogDetails from '../blogs';
 
@@ -15,6 +15,8 @@ export default BlogPage;
 
 const BlogGetter = async ({ blogId }: { blogId: string }) => {
   const blog = await getBlog(blogId);
-
-  return <BlogDetails blog={blog.data} error={blog.message} />;
+  const comments = (await getBlogComments(blogId)) || [];
+  return (
+    <BlogDetails blog={blog.data} comments={comments} error={blog.message} />
+  );
 };

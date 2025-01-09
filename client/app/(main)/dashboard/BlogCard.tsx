@@ -1,3 +1,4 @@
+import LikeButton from '@/components/blogs/LikeButton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,7 +15,6 @@ import {
   Image as ImageIcon,
   MessageCircle,
   Share2,
-  ThumbsUp,
 } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
@@ -43,7 +43,9 @@ const BlogCard = ({ post }: { post: FeedPost }) => {
               </Avatar>
               <div>
                 <CardTitle className='text-lg'>
-                  <Link href={`/blogs/${post.id}`} className='hover:underline'>{post.title}</Link>
+                  <Link href={`/blogs/${post.id}`} className='hover:underline'>
+                    {post.title}
+                  </Link>
                 </CardTitle>
                 <CardDescription>
                   {post.author.username} ·
@@ -59,14 +61,12 @@ const BlogCard = ({ post }: { post: FeedPost }) => {
           </CardContent>
           <CardFooter className='p-0 mt-4 flex justify-between items-center'>
             <div className='flex space-x-4'>
-              <Button
-                variant='ghost'
-                size='sm'
+              <LikeButton
                 className='text-muted-foreground hover:text-primary'
-              >
-                <ThumbsUp className='w-4 h-4 mr-2' />
-                {post.nLikes}
-              </Button>
+                nReactions={post.nReactions}
+                blogId={post.id}
+              />
+
               <Button
                 variant='ghost'
                 size='sm'

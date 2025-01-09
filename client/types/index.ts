@@ -20,6 +20,7 @@ type Blog = {
   _id: string;
   title: string;
   nLikes: number;
+  nReactions: number;
   nComments: number;
   nShares: number;
   conversationId: string;
@@ -105,8 +106,19 @@ type FeedPost = {
   subTopics: string[];
   nComments: number;
   nLikes: number;
+  nReactions: number;
   nShares: number;
   imagesUrl: string[];
+};
+
+type Comment = {
+  _id: string;
+  blogId: string;
+  userId: string;
+  username: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type {
@@ -117,4 +129,5 @@ export type {
   Message,
   Notification,
   FeedPost,
+  Comment,
 };
