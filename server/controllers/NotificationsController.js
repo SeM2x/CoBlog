@@ -12,7 +12,7 @@ export async function getUserNotifications(req, res) {
   cursor = cursor ? (cursor + 0) / 10 : 0;
   const { read } = req.query;
 
-  const details = { userId: new ObjectId(req.user.userId), isDeleted: { $ne: true } };
+  const details = { userId: new ObjectId(req.user.userId) };
   if (read) details.read = read === 'true';
   try {
     const result = await dbClient.findManyData('notifications', details);
@@ -82,16 +82,9 @@ export async function deleteNotification(req, res) {
     return res.status(400).json({ status: 'error', message: 'Incorrect Id' });
   }
 
-  const notification = await dbClient.findData('notifications', { _id: notificationId, userId });
-
-  if (!notification) {
+  const notification = await dbClient.deleteData('notifications', { _id: notificationId, userId });
+  if (notification.deletedCount === 0) {
     return res.status(404).json({ status: 'error', message: 'Notification not found for this user' });
-  }
-
-  if (notification.type === 'invite') {
-    await dbClient.updateData('notifications', { _id: notificationId }, { $set: { isDeleted: true } });
-  } else {
-    await dbClient.deleteData('notifications', { _id: notificationId });
   }
   return res.status(200).json({ status: 'success', message: 'Notification successfully deleted' });
 }
