@@ -54,7 +54,7 @@ notificationRouter.delete('/:notificationId', deleteNotification);
 // Manages all Blogs routes
 blogRouter.get('/topics', suggestTopics);
 blogRouter.get('/view_invitation', getInvitationHistory);
-blogRouter.get('co-authored', getCoAuthoredHistory);
+blogRouter.get('/co-authored', getCoAuthoredHistory);
 blogRouter.get('/me', getUserBlogs);
 blogRouter.post('/create', createBlog);
 blogRouter.put('/:blogId/invite', inviteUsers);
