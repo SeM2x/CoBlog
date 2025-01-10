@@ -2,7 +2,7 @@
 
 import { AxiosError } from 'axios';
 import apiRequest from '../utils/apiRequest';
-import { Blog } from '@/types';
+import { Blog, Comment, FeedPost } from '@/types';
 import { actionClient } from '../safe-action';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
@@ -103,8 +103,13 @@ const getBlog = async (blogId: string) => {
     const res = (await apiRequest(`/blogs/${blogId}`)).data;
     return { success: true, data: res.data as Blog };
   } catch (error) {
-    console.log((error as AxiosError).response?.data || error);
-    return { success: false, message: 'Failed to fetch blog' };
+    const message = (
+      (error as AxiosError).response?.data as { message: string }
+    )?.message;
+    return {
+      success: false,
+      message: message || 'Failed to fetch blog',
+    };
   }
 };
 
@@ -157,6 +162,56 @@ const saveBlog = actionClient
     }
   });
 
+const getFeed = async () => {
+  try {
+    const res = (await apiRequest('/blogs/feed')).data;
+    return res.data as FeedPost[];
+  } catch (error) {
+    console.log((error as AxiosError).response?.data || error);
+  }
+};
+
+const getBlogComments = async (blogId: string) => {
+  try {
+    const res = (await apiRequest(`/blogs/${blogId}/comments`)).data;
+    return res.data as Comment[];
+  } catch (error) {
+    console.log((error as AxiosError).response?.data || error);
+  }
+};
+
+const createComment = actionClient
+  .schema(
+    z.object({
+      blogId: z.string().nonempty(),
+      content: z.string().nonempty(),
+    })
+  )
+  .action(async ({ parsedInput }) => {
+    try {
+      const res = (
+        await apiRequest.post(
+          `/blogs/${parsedInput.blogId}/comment`,
+          parsedInput
+        )
+      ).data;
+      revalidatePath(`/blogs/${parsedInput.blogId}`);
+      return res.data as Comment;
+    } catch (error) {
+      throw getServerError(error);
+    }
+  });
+
+const toggleBlogLike = async (blogId: string) => {
+  try {
+    const res = (await apiRequest.put(`/blogs/${blogId}/react`)).data;
+    revalidatePath(`/blogs/${blogId}`);
+    return res.data as Comment[];
+  } catch (error) {
+    console.log((error as AxiosError).response?.data || error);
+  }
+};
+
 export {
   getTopics,
   getUserBlogs,
@@ -168,4 +223,8 @@ export {
   deleteBlog,
   publishBlog,
   saveBlog,
+  getFeed,
+  getBlogComments,
+  createComment,
+  toggleBlogLike,
 };

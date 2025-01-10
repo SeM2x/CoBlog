@@ -42,7 +42,7 @@ const NotificationCard = ({
     }
     if (notification.type === 'invite-response') {
       if (notification.message.includes('accept')) {
-        router.push(`/edit-blog/${notification.blogId?.id}`);
+        router.push(`/edit-blog/${notification.blogId}`);
       }
     }
     if (!notification.read) markNotificationRead(notification._id);

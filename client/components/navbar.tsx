@@ -85,7 +85,7 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
                     src={user?.profileUrl}
                     alt='my-profile-picture'
                   />
-                  <AvatarFallback>SC</AvatarFallback>
+                  <AvatarFallback>{user?.username[0]}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

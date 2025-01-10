@@ -6,7 +6,7 @@ import TipTapEditor from '@/components/tiptap';
 import { TiptapCollabProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
 import { BlogChat } from './blogChat';
-import { Blog, CoAuthor, PartialUser } from '@/types';
+import { Blog, CoAuthor, Message, PartialUser } from '@/types';
 import { useUserStore } from '@/lib/store';
 import generateTipTapToken from '@/lib/utils/tiptap-token';
 import {
@@ -35,20 +35,16 @@ import { TopicSelector } from './TopicsSelector';
 import { useRouter } from 'next/navigation';
 import usePublish from '@/hooks/usePublish';
 
-const currentUser = {
-  id: '1',
-  username: 'John Doe',
-  profileUrl: '/avatars/john-doe.jpg',
-};
-
 export default function EditBlog({
   blog,
   coAuthors,
   invitedUsers,
+  messages,
 }: {
   blog?: Blog;
   coAuthors: CoAuthor[];
   invitedUsers: PartialUser[];
+  messages: Message[];
 }) {
   const [title, setTitle] = useState(blog?.title || '');
   const [content, setContent] = useState(blog?.content || '');
@@ -275,8 +271,8 @@ export default function EditBlog({
       {blog && (
         <BlogChat
           blog={blog}
-          currentUser={currentUser}
           collaborators={collaborators}
+          messages={messages}
         />
       )}
       <InviteModal

@@ -20,6 +20,7 @@ type Blog = {
   _id: string;
   title: string;
   nLikes: number;
+  nReactions: number;
   nComments: number;
   nShares: number;
   conversationId: string;
@@ -34,7 +35,7 @@ type Blog = {
   roomId: string;
   imagesUrl: string[];
   CoAuthorId: string[];
-  minuteRead: number;
+  minutesRead: number;
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
@@ -54,13 +55,16 @@ interface PartialUser {
 
 interface CoAuthor extends PartialUser {
   role?: string;
-};
+}
 
 interface Message {
-  id: string;
+  _id: string;
   senderId: string;
-  content: string;
-  timestamp: Date;
+  senderUsername: string;
+  message: string;
+  blogId: string;
+  createdAt: Date;
+
   status: 'sent' | 'delivered' | 'read';
   type: 'text' | 'file';
   fileUrl?: string;
@@ -73,7 +77,7 @@ type Notification = {
   blogId?: {
     id: string;
     title: string;
-  };
+  } & string;
   author?: {
     id: string;
     username: string;
@@ -88,4 +92,42 @@ type Notification = {
   status?: 'accepted' | 'rejected' | 'pending';
 };
 
-export type { Profile, Blog, CoAuthor, PartialUser, Message, Notification };
+type FeedPost = {
+  id: string;
+  title: string;
+  content: string;
+  author: {
+    id: string;
+    username: string;
+    profileUrl: string;
+  };
+  status: 'published';
+  topics: string[];
+  subTopics: string[];
+  nComments: number;
+  nLikes: number;
+  nReactions: number;
+  nShares: number;
+  imagesUrl: string[];
+};
+
+type Comment = {
+  _id: string;
+  blogId: string;
+  userId: string;
+  username: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type {
+  Profile,
+  Blog,
+  CoAuthor,
+  PartialUser,
+  Message,
+  Notification,
+  FeedPost,
+  Comment,
+};

@@ -14,29 +14,20 @@ import {
 import { ChevronUp, ChevronDown, Smile, Send, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Message from '@/components/blog-chat/Message';
-import { Blog, CoAuthor, Message as MessageType, PartialUser } from '@/types';
-import { mockMessages } from '@/lib/mock';
+import { Blog, CoAuthor, Message as MessageType } from '@/types';
+import { sendMessage } from '@/lib/actions/messages';
 
 interface BlogChatProps {
   blog: Blog;
-  currentUser: PartialUser;
   collaborators: CoAuthor[];
+  messages: MessageType[];
 }
 
-export function BlogChat({ blog, currentUser, collaborators }: BlogChatProps) {
+export function BlogChat({ messages, blog, collaborators }: BlogChatProps) {
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<MessageType[]>(mockMessages);
   const [message, setMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Load messages from local storage or API
-    const savedMessages = localStorage.getItem(`blog-${blog._id}-messages`);
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
-    }
-  }, [blog]);
 
   useEffect(() => {
     // Save messages to local storage
@@ -71,22 +62,29 @@ export function BlogChat({ blog, currentUser, collaborators }: BlogChatProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (message.trim()) {
-      const newMessage: MessageType = {
-        id: Date.now().toString(),
-        senderId: currentUser.id,
-        content: message.trim(),
-        timestamp: new Date(),
-        status: 'sent',
-        type: 'text',
-      };
-      setMessages([...messages, newMessage]);
+      const res = await sendMessage({
+        conversationId: blog.conversationId,
+        blogId: blog._id,
+        message: message.trim(),
+      });
+
+      console.log(res);
+
+      // const newMessage: MessageType = {
+      //   id: Date.now().toString(),
+      //   senderId: currentUser.id,
+      //   content: message.trim(),
+      //   timestamp: new Date(),
+      //   status: 'sent',
+      //   type: 'text',
+      // };
       setMessage('');
 
       // Simulate message status updates
-      setTimeout(() => updateMessageStatus(newMessage.id, 'delivered'), 1000);
-      setTimeout(() => updateMessageStatus(newMessage.id, 'read'), 3000);
+      // setTimeout(() => updateMessageStatus(newMessage.id, 'delivered'), 1000);
+      // setTimeout(() => updateMessageStatus(newMessage.id, 'read'), 3000);
     }
   };
 
@@ -96,31 +94,14 @@ export function BlogChat({ blog, currentUser, collaborators }: BlogChatProps) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
-        const newMessage: MessageType = {
-          id: Date.now().toString(),
-          senderId: currentUser.id,
-          content: file.name,
-          timestamp: new Date(),
-          status: 'sent',
-          type: 'file',
+        const newMessage = {
           fileUrl: content,
           fileName: file.name,
         };
-        setMessages([...messages, newMessage]);
+        console.log(newMessage);
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const updateMessageStatus = (
-    messageId: string,
-    status: 'sent' | 'delivered' | 'read'
-  ) => {
-    setMessages((prevMessages) =>
-      prevMessages.map((msg) =>
-        msg.id === messageId ? { ...msg, status } : msg
-      )
-    );
   };
 
   return (
@@ -175,9 +156,8 @@ export function BlogChat({ blog, currentUser, collaborators }: BlogChatProps) {
                 <ScrollArea className='h-96 px-4 pt-1' ref={scrollAreaRef}>
                   {messages.map((msg) => (
                     <Message
-                      key={msg.id}
+                      key={msg._id}
                       message={msg}
-                      currentUser={currentUser}
                       collaborators={collaborators}
                     />
                   ))}

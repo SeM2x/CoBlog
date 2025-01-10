@@ -2,6 +2,7 @@ import { getBlog } from '@/lib/actions/blogs';
 import React, { Suspense } from 'react';
 import CreateBlog from '../EditBlog';
 import { CoAuthor, PartialUser } from '@/types';
+import { getMessages } from '@/lib/actions/messages';
 
 export default async function CreateBlogPage({
   params,
@@ -31,13 +32,15 @@ const BlogsGetter = async ({ blogId }: { blogId?: string }) => {
 
   const invitedUsers = [] as PartialUser[];
 
-  console.log(coAuthors);
-
+  const messages = blog?.conversationId
+    ? await getMessages(blog?.conversationId)
+    : [];
   return (
     <CreateBlog
       blog={blog}
       coAuthors={[author, ...coAuthors]}
       invitedUsers={invitedUsers}
+      messages={messages}
     />
   );
 };
