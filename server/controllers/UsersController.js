@@ -340,7 +340,7 @@ export async function searchUser(req, res) {
   }
 
   const pipeline = [
-    { $match: { username: { $regex: username, $options: "i" } } },
+    { $match: { username: { $regex: username, $options: 'i' } } },
   ];
 
   const result = await dbClient.findManyData('users', pipeline, true);
