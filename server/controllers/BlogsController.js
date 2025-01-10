@@ -76,7 +76,6 @@ export async function getUserBlogs(req, res) {
       pageInfo,
     });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
   }
 }
@@ -168,7 +167,6 @@ export async function inviteUsers(req, res) {
       data: { inviteCount: blog.invitedUsers.length + users.length },
     });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
   }
 }
@@ -540,7 +538,6 @@ export async function getInvitationHistory(req, res) {
       { status: 'success', data: paginatedNotifications, pageInfo },
     );
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
   }
 }
