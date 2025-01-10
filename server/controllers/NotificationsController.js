@@ -4,27 +4,34 @@ const { ObjectId } = require('mongodb');
 
 export async function getUserNotifications(req, res) {
   let { cursor, limit } = req.query;
+
   if (cursor === 'null') {
     return res.status(200).json({ status: 'success', message: 'No more data to fetch', data: [] });
   }
 
   limit = limit ? (limit + 0) / 10 : 10;
-  cursor = cursor ? (cursor + 0) / 10 : 0;
-  const { read } = req.query;
+  const userId = new ObjectId(req.user.userId);
 
-  const details = { userId: new ObjectId(req.user.userId) };
-  if (read) details.read = read === 'true';
   try {
-    const result = await dbClient.findManyData('notifications', details);
+    const pipeline = [
+      { $match: { userId, createdAt: { $lt: cursor || new Date().toISOString() } } },
+      { $sort: { createdAt: -1 } },
+      { $limit: limit + 1 }, // One more data for page pagination info
+    ];
 
-    const endIdx = cursor + limit;
-    const paginatedNotifications = result.slice(cursor, endIdx);
+    const result = await dbClient.findManyData('notifications', pipeline, true);
+
     const pageInfo = {
-      cursor: result[endIdx] ? endIdx : null,
-      hasNext: !!result[endIdx],
+      cursor: result[limit] ? result[limit - 1].createdAt : null,
+      hasNext: !!result[limit],
     };
+
     return res.status(200).json(
-      { status: 'success', data: paginatedNotifications, pageInfo },
+      {
+        status: 'success',
+        data: result.slice(0, limit),
+        pageInfo,
+      },
     );
   } catch (err) {
     console.log(err);
