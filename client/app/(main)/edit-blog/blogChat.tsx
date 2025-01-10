@@ -64,6 +64,8 @@ export function BlogChat({ messages, blog, collaborators }: BlogChatProps) {
 
   const handleSendMessage = async () => {
     if (message.trim()) {
+      console.log(blog);
+      
       const res = await sendMessage({
         conversationId: blog.conversationId,
         blogId: blog._id,

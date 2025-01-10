@@ -74,10 +74,11 @@ interface Message {
 type Notification = {
   _id: string;
   userId: string;
-  blogId?: {
+  blog?: {
     id: string;
     title: string;
-  } & string;
+  };
+  blogId: string;
   author?: {
     id: string;
     username: string;
