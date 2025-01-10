@@ -209,6 +209,7 @@ export async function publishBlog(req, res) {
     minutesRead: minuteRead || Math.floor(Math.random() * 10),
     nComments: 0,
     nShares: 0,
+    nLikes: 0,
     nReactions: 0,
     content,
     imagesUrl,
