@@ -15,7 +15,7 @@ export async function getUserNotifications(req, res) {
   try {
     const pipeline = [
       { $match: { userId, createdAt: { $lt: cursor || new Date().toISOString() } } },
-      { $sort: { createdAt: -1 } },
+      { $sort: { createdAt: 1 } },
       { $limit: limit + 1 }, // One more data for page pagination info
     ];
 
