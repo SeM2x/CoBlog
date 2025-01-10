@@ -209,7 +209,6 @@ export async function publishBlog(req, res) {
     minutesRead: minuteRead || Math.floor(Math.random() * 10),
     nComments: 0,
     nShares: 0,
-    nLikes: 0,
     nReactions: 0,
     content,
     imagesUrl,
@@ -393,14 +392,14 @@ export async function updateBlogReaction(req, res) {
       return res.status(200).json({
         status: 'success',
         message: 'Reaction successfully updated.',
-        data: { userReaction: 'unlike', nLikes: blog.nLikes - 1 },
+        data: { userReaction: 'unlike', nReactions: blog.nReactions - 1 },
       });
     }
     await dbClient.updateData('blogs', { _id: blogId }, { $inc: { nReactions: 1 } });
     return res.status(200).json({
       status: 'success',
       message: 'Reaction successfully updated.',
-      data: { userReaction: 'like', nLikes: blog.nLikes + 1 },
+      data: { userReaction: 'like', nReactions: blog.nReactions + 1 },
     });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
