@@ -37,7 +37,7 @@ const NotificationCard = ({
   const handleNotificationClick = async (notification: Notification) => {
     if (notification.type === 'invite') {
       if (notification.status === 'accepted') {
-        router.push(`/edit-blog/${notification.blogId?.id}`);
+        router.push(`/edit-blog/${notification.blog?.id}`);
       } else setSelectedInvitation(notification);
     }
     if (notification.type === 'invite-response') {

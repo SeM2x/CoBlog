@@ -11,6 +11,8 @@ const sendMessage = async (data: {
 }) => {
   try {
     const res = await apiRequest.post('/messages/create', data);
+    console.log(data);
+    
     revalidatePath(`/edit-blog/${data.blogId}`);
     console.log(res.data);
   } catch (error) {

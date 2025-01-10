@@ -212,6 +212,16 @@ const toggleBlogLike = async (blogId: string) => {
   }
 };
 
+const getUserCoAuthoredBlogs = async () => {
+  try {
+    const res = (await apiRequest('/blogs/co-authored')).data;
+    return { success: true, data: res.data as Blog[] };
+  } catch (error) {
+    console.log((error as AxiosError).response?.data || error);
+    return { success: false, message: 'Failed to fetch blogs' };
+  }
+};
+
 export {
   getTopics,
   getUserBlogs,
@@ -227,4 +237,5 @@ export {
   getBlogComments,
   createComment,
   toggleBlogLike,
+  getUserCoAuthoredBlogs,
 };

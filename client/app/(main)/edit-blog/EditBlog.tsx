@@ -184,7 +184,7 @@ export default function EditBlog({
                 src={collaborator.profileUrl || ''}
                 alt={collaborator.username}
               />
-              <AvatarFallback>{collaborator.username[0]}</AvatarFallback>
+              <AvatarFallback>{collaborator.username?.charAt(0)}</AvatarFallback>
             </Avatar>
           ))}
           <Button

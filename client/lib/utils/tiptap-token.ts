@@ -1,17 +1,20 @@
 'use server';
 
 import { SignJWT } from 'jose';
-import { getUserBlogs } from '../actions/blogs';
+import { getUserBlogs, getUserCoAuthoredBlogs } from '../actions/blogs';
 
 export default async function generateTipTapToken(
   userId: string,
   secretToken: string
 ) {
   const secret = new TextEncoder().encode(secretToken);
-  const blogs = (await getUserBlogs()).data;
+  const blogs = (await getUserBlogs()).data || [];
+  const coblogs = (await getUserCoAuthoredBlogs()).data || [];
+
+  const allowedDocumentNames = [...blogs, ...coblogs].map((blog) => blog._id);
   const data = {
     sub: userId,
-    allowedDocumentNames: blogs?.map((blog) => blog._id) || [],
+    allowedDocumentNames,
   };
 
   const jwt = await new SignJWT(data)

@@ -39,7 +39,7 @@ const InvitationModal = ({
           <DialogDescription>
             {selectedInvitation?.author?.username} has invited you to
             collaborate on the blog post &quot;
-            {selectedInvitation?.blogId?.title}&quot; as an{' '}
+            {selectedInvitation?.blog?.title}&quot; as an{' '}
             {selectedInvitation?.role}
           </DialogDescription>
         </DialogHeader>
@@ -74,7 +74,7 @@ const InvitationModal = ({
                 onClick={() =>
                   handleInvitationResponse(false, {
                     notificationId: selectedInvitation._id,
-                    blogId: selectedInvitation.blogId?.id,
+                    blogId: selectedInvitation.blog?.id,
                   })
                 }
               >
@@ -85,7 +85,7 @@ const InvitationModal = ({
                 onClick={() =>
                   handleInvitationResponse(true, {
                     notificationId: selectedInvitation._id,
-                    blogId: selectedInvitation.blogId?.id,
+                    blogId: selectedInvitation.blog?.id,
                   })
                 }
               >

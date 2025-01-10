@@ -41,6 +41,8 @@ export default function PermissionsModal({
     onClose();
   };
 
+  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className='sm:max-w-[425px]'>
@@ -55,7 +57,7 @@ export default function PermissionsModal({
                   src={collaborator.profileUrl || ''}
                   alt={collaborator.username}
                 />
-                <AvatarFallback>{collaborator.username[0]}</AvatarFallback>
+                <AvatarFallback>{collaborator.username?.charAt(0)}</AvatarFallback>
               </Avatar>
               <span className='flex-grow'>{collaborator.username}</span>
               <Select
