@@ -39,7 +39,7 @@ export async function getAllMessages(req, res) {
   try {
     const conversation = await dbClient.findManyData('messages', { conversationId });
     if (conversation.length === 0) {
-      return res.status.json({ status: 'error', message: 'conversation not found' });
+      return res.status(404).json({ status: 'error', message: 'conversation not found' });
     }
     return res.status(200).json({ status: 'success', data: conversation });
   } catch (err) {
