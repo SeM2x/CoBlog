@@ -121,7 +121,6 @@ export async function inviteUsers(req, res) {
 
   try {
     const result = await Promise.all(usersPromise);
-    console.log(result);
     if (!result.every((value) => value)) {
       return res.status(404).json({ status: 'error', message: 'Some users does not exist' });
     }
@@ -330,7 +329,7 @@ export async function manageInvitation(req, res) {
 
     // Create notification for the inviter on the invited user resp
     const notificationData = {
-      userId,
+      userId: blog.authorId,
       type: 'invite-response',
       message: `${req.user.username} ${url}ed your invite to co-write ${blog.title}`,
       read: false,
