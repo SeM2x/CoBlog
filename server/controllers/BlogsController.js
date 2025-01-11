@@ -207,7 +207,7 @@ export async function publishBlog(req, res) {
     topics,
     title,
     subTopics,
-    minutesRead: minuteRead || Math.floor(Math.random() * 10),
+    minutesRead: minuteRead || Math.floor(Math.random() * (12 - 4 + 1)) + 4,
     nComments: 0,
     nShares: 0,
     nReactions: 0,
