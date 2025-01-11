@@ -48,7 +48,7 @@ class DBClient {
       const collection = this.db.collection(collectionType);
       try {
         details.createdAt = new Date;
-        details.updatedAt = new Date`;
+        details.updatedAt = new Date;
         const result = await collection.insertOne(details);
         return result;
       } catch (err) {
