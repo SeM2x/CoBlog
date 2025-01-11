@@ -12,9 +12,10 @@ export async function getUserNotifications(req, res) {
   limit = limit ? (limit + 0) / 10 : 10;
   const userId = new ObjectId(req.user.userId);
 
+  cursor = cursor ? new Date(cursor) : new Date();
   try {
     const pipeline = [
-      { $match: { userId, createdAt: { $lt: cursor || new Date().toISOString() } } },
+      { $match: { userId, createdAt: { $lt: cursor } } },
       { $sort: { createdAt: -1 } },
       { $limit: limit + 1 }, // One more data for page pagination info
     ];

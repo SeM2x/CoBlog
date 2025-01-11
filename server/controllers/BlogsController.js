@@ -57,8 +57,9 @@ export async function getUserBlogs(req, res) {
     return res.status(200).json({ status: 'success', message: 'No more data to fetch', data: [] });
   }
 
+  cursor = cursor ? new Date(cursor) : new Date();
   const pipeline = [
-    { $match: { authorId: userId, createdAt: { $lt: cursor || new Date().toISOString() } } },
+    { $match: { authorId: userId, createdAt: { $lt: cursor } } },
     { $sort: { createdAt: -1 } },
     { $limit: limit + 1 }, // Include one more data for page info
   ];
