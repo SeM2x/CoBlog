@@ -667,3 +667,29 @@ export async function getCoAuthoredHistory(req, res) {
 
   return res.status(200).json({ status: 'success', data });
 }
+
+export async function checkReactionStatus(req, res) {
+  let { blogId } = req.params;
+  try {
+    blogId = new ObjectId(blogId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect id' });
+  }
+
+  try {
+    const blog = await dbClient.findData('reactions', { blogId });
+    if (!blog) {
+      return res.status(404).json({ status: 'error', message: 'Blog not found' });
+    }
+
+    const { userId } = req.user;
+
+    let isLike = blog.reactions.some((user) => user.equals(userId));
+    return res.status(200).json({
+      status: 'success',
+      data: { isLike, isBookmark: false },
+    });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', mesage: 'Something went wrong' });
+  }
+}
