@@ -14,5 +14,5 @@ export default NotificationsPage;
 
 const NotificationGetter = async () => {
   const notifications = await getNotifications();
-  return <Notifications notifications={notifications?.reverse() || []} />;
+  return <Notifications notifications={notifications || []} />;
 };

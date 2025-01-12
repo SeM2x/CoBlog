@@ -17,5 +17,5 @@ export default layout;
 
 const NotificationsGetter = async () => {
   const notifications = await getNotifications();
-  return <Navbar notifications={notifications?.reverse()} />;
+  return <Navbar notifications={notifications} />;
 };
