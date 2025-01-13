@@ -212,6 +212,16 @@ const toggleBlogLike = async (blogId: string) => {
   }
 };
 
+const getBlogReactions = async (blogId: string) => {
+  try {
+    const res = (await apiRequest.get(`/blogs/${blogId}/react`)).data;
+    revalidatePath(`/blogs/${blogId}`);
+    return res.data as Comment[];
+  } catch (error) {
+    console.log((error as AxiosError).response?.data || error);
+  }
+};
+
 const getUserCoAuthoredBlogs = async () => {
   try {
     const res = (await apiRequest('/blogs/co-authored')).data;
@@ -237,5 +247,6 @@ export {
   getBlogComments,
   createComment,
   toggleBlogLike,
+  getBlogReactions,
   getUserCoAuthoredBlogs,
 };

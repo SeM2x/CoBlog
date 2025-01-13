@@ -67,4 +67,21 @@ const login = actionClient
     }
   });
 
-export { register, login };
+const validateToken = async () => {
+  try {
+    const res = (await apiRequest.get('/notifications/me')).data;
+    return { success: true, data: res.data as Notification[] };
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.log(error.message);
+      console.log(error.response?.data);
+      return {
+        success: false,
+        status: error.status,
+        message: error.response?.data.message,
+      };
+    }
+  }
+};
+
+export { register, login, validateToken };

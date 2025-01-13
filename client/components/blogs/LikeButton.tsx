@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { startTransition, useOptimistic, useState } from 'react';
 import { Button } from '../ui/button';
 import { ThumbsUp } from 'lucide-react';
 import { toggleBlogLike } from '@/lib/actions/blogs';
@@ -14,18 +14,22 @@ const LikeButton = ({
   variant?: 'icon' | 'text';
   className?: string;
 }) => {
-  const [likes, setLikes] = useState(nReactions || 0);
+  const [likes, setLikes] = useOptimistic(nReactions || 0);
   const [isLiked, setIsLiked] = useState(false);
 
   const handleLike = async () => {
-    if (blogId) await toggleBlogLike(blogId);
-    if (isLiked) {
-      setLikes(likes - 1);
-    } else {
-      setLikes(likes + 1);
-    }
     setIsLiked(!isLiked);
+    startTransition(async () => {
+      if (isLiked) {
+        if (likes === 0) return;
+        setLikes((prev) => prev - 1);
+      } else {
+        setLikes((prev) => prev + 1);
+      }
+      if (blogId) await toggleBlogLike(blogId);
+    });
   };
+
   return (
     <Button
       onClick={handleLike}
@@ -36,7 +40,7 @@ const LikeButton = ({
       <ThumbsUp
         className={`w-4 h-4 mr-2 ${isLiked ? 'fill-current text-primary' : ''}`}
       />
-      {nReactions} {variant === 'text' ? 'Likes' : ''}
+      {likes} {variant === 'text' ? 'Likes' : ''}
     </Button>
   );
 };

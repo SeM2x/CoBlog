@@ -1,10 +1,12 @@
 import { Navbar } from '@/components/navbar';
 import { getNotifications } from '@/lib/actions/notifications';
 import React, { Suspense } from 'react';
+import ValidateToken from './validate-token';
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <>
+      <ValidateToken />
       <Suspense fallback={null}>
         <NotificationsGetter />
       </Suspense>
@@ -17,5 +19,5 @@ export default layout;
 
 const NotificationsGetter = async () => {
   const notifications = await getNotifications();
-  return <Navbar notifications={notifications?.reverse()} />;
+  return <Navbar notifications={notifications || []} />;
 };

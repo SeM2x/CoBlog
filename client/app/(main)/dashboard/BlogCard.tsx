@@ -55,9 +55,10 @@ const BlogCard = ({ post }: { post: FeedPost }) => {
             </div>
           </CardHeader>
           <CardContent className='p-0'>
-            <p className='text-sm text-muted-foreground line-clamp-2'>
-              {post.content}
-            </p>
+            <p
+              dangerouslySetInnerHTML={{ __html: post.content }}
+              className='text-sm text-muted-foreground line-clamp-6'
+            />
           </CardContent>
           <CardFooter className='p-0 mt-4 flex justify-between items-center'>
             <div className='flex space-x-4'>
