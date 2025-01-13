@@ -14,6 +14,9 @@ export default DashboardPage;
 
 const Feed = async () => {
   const feed = (await getFeed()) || [];
+  //const isLikes = getBlogReactions(feed[0].id);
+
+  //console.log(isLikes);
 
   return <Dashboard feed={feed} />;
 };
