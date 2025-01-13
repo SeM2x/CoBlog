@@ -47,6 +47,7 @@ export async function createUserAccount(req, res) {
     const newUser = await dbClient.insertData('users', newUserData);
     await dbClient.insertData('followings', { userId: newUser.insertedId, followings: [] });
     await dbClient.insertData('followers', { userId: newUser.insertedId, followers: [] });
+    await dbClient.insertData('viewshistory', { userId: newUser.insertedId });
 
     return res.status(201).json({ status: 'success', message: 'User created' });
   } catch (err) {
@@ -74,7 +75,7 @@ export async function userSignIn(req, res) {
 
     // Create JWT Token
     const secretKey = process.env.JWT_SECRET_KEY;
-    const payload = { userId: user._id.toString(), userEmail: user.email, username: user.username };
+    const payload = { userId: user._id.toString(), userEmail: user.email, username: user.username, userProfileUrl: user.profileUrl };
     const plOptions = { expiresIn: '24h' };
     const token = jwt.sign(payload, secretKey, plOptions);
     const {

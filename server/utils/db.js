@@ -14,7 +14,10 @@ class DBClient {
     this.dbClient = null;
     this.db = null;
     this.verifyConnection = false;
-    this.DBCollections = ['users', 'followers', 'followings', 'blogs', 'conversations', 'notifications', 'topics', 'subtopics'];
+    this.DBCollections = ['users', 'followers', 'messages', 'followings',
+      'blogs', 'conversations', 'notifications', 'topics', 'subtopics',
+      'comments', 'reactions', 'viewshistory', 'coauthored',];
+    this.excludeUpdatedAt = ['followers', 'followings', 'reactions'];
   }
 
   async init() {
@@ -29,7 +32,7 @@ class DBClient {
       this.db = this.dbClient.db(this.dbName);
       console.log(`mongo successfully connected to ${this.dbName}`);
     } catch (err) {
-      console.log('Mongo encountered an error');
+      console.log(`Mongo encountered an error: ${err.message}`);
     }
   }
 
@@ -80,14 +83,17 @@ class DBClient {
     }
   }
 
-  async updateData(collectionType, filter, update) {
+  async updateData(collectionType, filter, update, includeUpdatedAt = true) {
     if (this.db) {
       if (!this.DBCollections.includes(collectionType)) {
         throw new Error('Collection type does not exist');
       }
       const collection = this.db.collection(collectionType);
-      const nUpdate = { ...update.$set, updatedAt: `${new Date().toISOString().split('.')[0]}Z` };
-      update.$set = nUpdate;
+
+      if (!this.excludeUpdatedAt.includes(collectionType) && includeUpdatedAt === true) {
+        const nUpdate = { ...update.$set, updatedAt: `${new Date().toISOString().split('.')[0]}Z` };
+        update.$set = nUpdate;
+      }
       const result = await collection.updateOne(filter, update);
       return result;
     }
@@ -106,6 +112,17 @@ class DBClient {
       } else {
         result = await collection.find(details).toArray();
       }
+      return result;
+    }
+  }
+
+  async deleteData(collectionType, details) {
+    if (this.db) {
+      if (!this.DBCollections.includes(collectionType)) {
+        throw new Error('Collection type does not exist');
+      }
+      const collection = this.db.collection(collectionType);
+      const result = await collection.deleteOne(details);
       return result;
     }
   }
