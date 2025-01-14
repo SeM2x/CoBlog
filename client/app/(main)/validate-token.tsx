@@ -1,6 +1,8 @@
 'use client';
 
 import { validateToken } from '@/lib/actions/auth';
+import { SocketEvents } from '@/lib/socketEvents';
+import socket from '@/socket';
 import { signOut } from 'next-auth/react';
 import { useEffect } from 'react';
 
@@ -13,6 +15,12 @@ const ValidateToken = () => {
       }
     };
     validate();
+  }, []);
+
+  useEffect(() => {
+    socket.on(SocketEvents.CONNECT, () => {
+      console.log('Socket connected');
+    });
   }, []);
   return null;
 };

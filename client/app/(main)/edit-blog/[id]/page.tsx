@@ -38,7 +38,7 @@ const BlogsGetter = async ({ blogId }: { blogId?: string }) => {
   return (
     <CreateBlog
       blog={blog}
-      coAuthors={coAuthors.length ? [author, ...coAuthors] : []}
+      coAuthors={coAuthors.length ? [author, ...coAuthors] : [author]}
       invitedUsers={invitedUsers}
       messages={messages}
     />
