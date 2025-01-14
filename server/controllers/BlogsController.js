@@ -574,7 +574,7 @@ export async function getUserFeed(req, res) {
     }
 
     const pipeline = [
-      { $match: { _id: { $nin: blogHistory } } },
+      { $match: { _id: { $nin: blogHistory }, isPublished: true  } },
       { $limit: 51 }, // Query extra data for hasNext
     ];
 
