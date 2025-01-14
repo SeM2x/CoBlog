@@ -2,7 +2,12 @@ import { server } from './server';
 
 const socketIo = require('socket.io');
 
-const io = socketIo(server);
+const socketConfig = {
+  cors: {
+    origin: 'http://localhost:3000',
+  },
+};
+const io = socketIo(server, socketConfig);
 
 const hostname = '0.0.0.0';
 const port = '5000';
