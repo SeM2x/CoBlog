@@ -110,6 +110,8 @@ type FeedPost = {
   nReactions: number;
   nShares: number;
   imagesUrl: string[];
+  isLike: boolean;
+  isBookmark: boolean;
 };
 
 type Comment = {

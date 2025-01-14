@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import Dashboard from './dashboard';
-import { getFeed } from '@/lib/actions/blogs';
+import { getBlogReactions, getFeed } from '@/lib/actions/blogs';
+import { FeedPost } from '@/types';
 
 const DashboardPage = async () => {
   return (
@@ -14,9 +15,11 @@ export default DashboardPage;
 
 const Feed = async () => {
   const feed = (await getFeed()) || [];
-  //const isLikes = getBlogReactions(feed[0].id);
+  const feedWithReactions: FeedPost[] = await Promise.all(
+    feed.map(async (post) => {
+      return { ...post, ...(await getBlogReactions(post.id)) };
+    })
+  );
 
-  //console.log(isLikes);
-
-  return <Dashboard feed={feed} />;
+  return <Dashboard feed={feedWithReactions} />;
 };

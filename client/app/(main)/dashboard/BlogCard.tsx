@@ -66,6 +66,7 @@ const BlogCard = ({ post }: { post: FeedPost }) => {
                 className='text-muted-foreground hover:text-primary'
                 nReactions={post.nReactions}
                 blogId={post.id}
+                isLiked={post.isLike}
               />
 
               <Button

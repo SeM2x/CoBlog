@@ -42,10 +42,12 @@ export default function BlogDetailsPage({
   blog,
   error,
   comments,
+  isLiked,
 }: {
   blog?: Blog;
   error?: string;
   comments: Comment[];
+  isLiked?: boolean;
 }) {
   const router = useRouter();
 
@@ -152,6 +154,7 @@ export default function BlogDetailsPage({
               blogId={blog._id}
               nReactions={blog.nReactions}
               variant='text'
+              isLiked={isLiked}
             />
             <Button variant='ghost' size='sm'>
               <MessageCircle className='w-4 h-4 mr-2' />
