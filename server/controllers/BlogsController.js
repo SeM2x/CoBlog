@@ -589,7 +589,7 @@ export async function getUserFeed(req, res) {
     }
     hasNext = !!result[50]; // Tracks db hasNext
     result = JSON.stringify(result);
-    await redisClient.set(`Blog_${req.user.userId}`, result, 1800); // cache feed for 30 min
+    await redisClient.set(`Blog_${req.user.userId}`, result, 900); // cache feed for 15 min
     cursor = 0; // reset cursor
     cachedBlog = result;
   }
