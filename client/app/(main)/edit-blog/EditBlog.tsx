@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { startTransition, useEffect, useOptimistic, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import TipTapEditor from '@/components/tiptap';
 import { TiptapCollabProvider } from '@hocuspocus/provider';
@@ -137,35 +137,42 @@ export default function EditBlog({
   const [managePermissionsOpen, setManagePermissionsOpen] = useState(false);
   //const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [collaborators, setCollaborators] = useState<CoAuthor[]>(coAuthors);
+  const [collaborators, setCollaborators] =
+    useOptimistic<CoAuthor[]>(coAuthors);
   const handleVisibilityChange = () => {
     setIsPublic(!isPublic);
   };
 
   const handleInviteCollaborators = (newCollaborators: PartialUser[]) => {
-    setCollaborators([...collaborators, ...newCollaborators]);
-    setIsInviteModalOpen(false);
+    startTransition(() => {
+      setCollaborators([...collaborators, ...newCollaborators]);
+      setIsInviteModalOpen(false);
+    });
   };
 
   const handleRoleChange = (
     collaboratorId: string,
     newRole: 'owner' | 'editor' | 'viewer'
   ) => {
-    setCollaborators((prevCollaborators) =>
-      prevCollaborators.map((collaborator) =>
-        collaborator.id === collaboratorId
-          ? { ...collaborator, role: newRole }
-          : collaborator
-      )
-    );
+    startTransition(() => {
+      setCollaborators((prevCollaborators) =>
+        prevCollaborators.map((collaborator) =>
+          collaborator.id === collaboratorId
+            ? { ...collaborator, role: newRole }
+            : collaborator
+        )
+      );
+    });
   };
 
   const handleRemoveCollaborator = (collaboratorId: string) => {
-    setCollaborators((prevCollaborators) =>
-      prevCollaborators.filter(
-        (collaborator) => collaborator.id !== collaboratorId
-      )
-    );
+    startTransition(() => {
+      setCollaborators((prevCollaborators) =>
+        prevCollaborators.filter(
+          (collaborator) => collaborator.id !== collaboratorId
+        )
+      );
+    });
   };
 
   const [selectedTopics, setSelectedTopics] = useState<
@@ -184,7 +191,9 @@ export default function EditBlog({
                 src={collaborator.profileUrl || ''}
                 alt={collaborator.username}
               />
-              <AvatarFallback>{collaborator.username?.charAt(0)}</AvatarFallback>
+              <AvatarFallback>
+                {collaborator.username?.charAt(0)}
+              </AvatarFallback>
             </Avatar>
           ))}
           <Button

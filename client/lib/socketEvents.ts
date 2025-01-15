@@ -14,6 +14,18 @@ export enum SocketEvents {
   // Client receives a notification
   NOTIFICATION_RECEIVED = 'notification_received',
 
+  // Client sends a notification to the server
+  SEND_NOTIFICATION = 'send_notification',
+
+  // Server confirms that the notification was successfully sent
+  NOTIFICATION_SENT = 'notification_sent',
+
+  // Client sends a request to join a room
+  ACCEPT_INVITE = 'accept_invite',
+
+  // Server confirms that the user has joined the room
+  INVITE_ACCEPTED = 'invite_accepted',
+
   // // Server broadcasts the message to the recipient
   // DELIVER_MESSAGE = "deliver_message",
 

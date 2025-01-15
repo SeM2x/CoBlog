@@ -30,6 +30,8 @@ const BlogsGetter = async ({ blogId }: { blogId?: string }) => {
     role: 'author',
   } as CoAuthor;
 
+  console.log(blog?.CoAuthors);
+  
   const invitedUsers = [] as PartialUser[];
 
   const messages = blog?.conversationId
@@ -38,7 +40,7 @@ const BlogsGetter = async ({ blogId }: { blogId?: string }) => {
   return (
     <CreateBlog
       blog={blog}
-      coAuthors={coAuthors.length ? [author, ...coAuthors] : [author]}
+      coAuthors={[author, ...coAuthors]}
       invitedUsers={invitedUsers}
       messages={messages}
     />

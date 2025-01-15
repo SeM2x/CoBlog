@@ -65,7 +65,7 @@ interface Message {
   blogId: string;
   createdAt: Date;
 
-  status: 'sent' | 'delivered' | 'read';
+  status: 'sending' | 'sent' | 'delivered' | 'read';
   type: 'text' | 'file';
   fileUrl?: string;
   fileName?: string;
