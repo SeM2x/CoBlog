@@ -2,11 +2,13 @@ import { Navbar } from '@/components/navbar';
 import { getNotifications } from '@/lib/actions/notifications';
 import React, { Suspense } from 'react';
 import ValidateToken from './validate-token';
+import SocketListener from './socket-listener';
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <ValidateToken />
+      <SocketListener />
       <Suspense fallback={null}>
         <NotificationsGetter />
       </Suspense>
