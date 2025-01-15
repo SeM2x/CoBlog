@@ -112,7 +112,7 @@ const BlogCard = ({ blog }: { blog: Blog }) => {
                 </Link>
               )}
               <DropdownMenuItem
-                className='text-red-500 hover:!text-red-500 hover:!bg-red-50'
+                className='text-red-500 hover:!text-red-500 hover:!bg-red-500/10'
                 onSelect={() => setIsDeleteDialogOpen(true)}
               >
                 <Trash2 className='mr-2 h-4 w-4' /> Delete
