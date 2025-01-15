@@ -1,6 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useOptimistic,
+  startTransition,
+} from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,6 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Message from '@/components/blog-chat/Message';
 import { Blog, CoAuthor, Message as MessageType } from '@/types';
 import { sendMessage } from '@/lib/actions/messages';
+import { useUserStore } from '@/lib/store';
 
 interface BlogChatProps {
   blog: Blog;
@@ -23,8 +30,13 @@ interface BlogChatProps {
   messages: MessageType[];
 }
 
-export function BlogChat({ messages, blog, collaborators }: BlogChatProps) {
+export function BlogChat({
+  messages: serverMessages,
+  blog,
+  collaborators,
+}: BlogChatProps) {
   const [isMinimized, setIsMinimized] = useState(false);
+  const [messages, setMessages] = useOptimistic(serverMessages);
   const [message, setMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -62,32 +74,27 @@ export function BlogChat({ messages, blog, collaborators }: BlogChatProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleSendMessage = async () => {
-    if (message.trim()) {
-      console.log(blog);
-      
-      const res = await sendMessage({
+  const user = useUserStore((state) => state.user);
+
+  const handleSendMessage = () => {
+    if (!message.trim() || !user) return;
+    setMessage('');
+    startTransition(async () => {
+      const newMessage = {
+        _id: Math.random().toString(),
+        senderId: user.id,
+        blogId: blog._id,
+        message: message.trim(),
+        createdAt: new Date(),
+        status: 'sending',
+      } as MessageType;
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      await sendMessage({
         conversationId: blog.conversationId,
         blogId: blog._id,
         message: message.trim(),
       });
-
-      console.log(res);
-
-      // const newMessage: MessageType = {
-      //   id: Date.now().toString(),
-      //   senderId: currentUser.id,
-      //   content: message.trim(),
-      //   timestamp: new Date(),
-      //   status: 'sent',
-      //   type: 'text',
-      // };
-      setMessage('');
-
-      // Simulate message status updates
-      // setTimeout(() => updateMessageStatus(newMessage.id, 'delivered'), 1000);
-      // setTimeout(() => updateMessageStatus(newMessage.id, 'read'), 3000);
-    }
+    });
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Check, CheckCheck, Paperclip } from 'lucide-react';
+import { Check, CheckCheck, Clock, Paperclip } from 'lucide-react';
 import { CoAuthor, Message as MessageType } from '@/types';
 import { format } from 'date-fns';
 import { useUserStore } from '@/lib/store';
@@ -66,6 +66,11 @@ const Message = ({
         <span>{format(msg.createdAt, 'h:mm a')}</span>
         {msg.senderId === currentUser.id && (
           <span>
+            {msg.status === 'sending' ? (
+              <Clock className='inline h-3 w-3' />
+            ) : (
+              <Check className='inline h-3 w-3' />
+            )}
             {msg.status === 'sent' && <Check className='inline h-3 w-3' />}
             {msg.status === 'delivered' && (
               <CheckCheck className='inline h-3 w-3' />
