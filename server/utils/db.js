@@ -47,8 +47,8 @@ class DBClient {
       }
       const collection = this.db.collection(collectionType);
       try {
-        details.createdAt = `${new Date().toISOString().split('.')[0]}Z`;
-        details.updatedAt = `${new Date().toISOString().split('.')[0]}Z`;
+        details.createdAt = new Date;
+        details.updatedAt = new Date;
         const result = await collection.insertOne(details);
         return result;
       } catch (err) {
@@ -91,7 +91,7 @@ class DBClient {
       const collection = this.db.collection(collectionType);
 
       if (!this.excludeUpdatedAt.includes(collectionType) && includeUpdatedAt === true) {
-        const nUpdate = { ...update.$set, updatedAt: `${new Date().toISOString().split('.')[0]}Z` };
+        const nUpdate = { ...update.$set, updatedAt: new Date() };
         update.$set = nUpdate;
       }
       const result = await collection.updateOne(filter, update);

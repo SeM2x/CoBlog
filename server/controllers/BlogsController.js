@@ -57,8 +57,9 @@ export async function getUserBlogs(req, res) {
     return res.status(200).json({ status: 'success', message: 'No more data to fetch', data: [] });
   }
 
+  cursor = cursor ? new Date(cursor) : new Date();
   const pipeline = [
-    { $match: { authorId: userId, createdAt: { $lt: cursor || new Date().toISOString() } } },
+    { $match: { authorId: userId, createdAt: { $lt: cursor } } },
     { $sort: { createdAt: -1 } },
     { $limit: limit + 1 }, // Include one more data for page info
   ];
@@ -121,7 +122,6 @@ export async function inviteUsers(req, res) {
 
   try {
     const result = await Promise.all(usersPromise);
-    console.log(result);
     if (!result.every((value) => value)) {
       return res.status(404).json({ status: 'error', message: 'Some users does not exist' });
     }
@@ -207,7 +207,7 @@ export async function publishBlog(req, res) {
     topics,
     title,
     subTopics,
-    minutesRead: minuteRead || Math.floor(Math.random() * 10),
+    minutesRead: minuteRead || Math.floor(Math.random() * (12 - 4 + 1)) + 4,
     nComments: 0,
     nShares: 0,
     nReactions: 0,
@@ -330,7 +330,7 @@ export async function manageInvitation(req, res) {
 
     // Create notification for the inviter on the invited user resp
     const notificationData = {
-      userId,
+      userId: blog.authorId,
       type: 'invite-response',
       message: `${req.user.username} ${url}ed your invite to co-write ${blog.title}`,
       read: false,
@@ -393,14 +393,14 @@ export async function updateBlogReaction(req, res) {
       return res.status(200).json({
         status: 'success',
         message: 'Reaction successfully updated.',
-        data: { userReaction: 'unlike', nLikes: blog.nLikes - 1 },
+        data: { userReaction: 'unlike', nReactions: blog.nReactions - 1 },
       });
     }
     await dbClient.updateData('blogs', { _id: blogId }, { $inc: { nReactions: 1 } });
     return res.status(200).json({
       status: 'success',
       message: 'Reaction successfully updated.',
-      data: { userReaction: 'like', nLikes: blog.nLikes + 1 },
+      data: { userReaction: 'like', nReactions: blog.nReactions + 1 },
     });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
@@ -574,7 +574,7 @@ export async function getUserFeed(req, res) {
     }
 
     const pipeline = [
-      { $match: { _id: { $nin: blogHistory } } },
+      { $match: { _id: { $nin: blogHistory }, isPublished: true  } },
       { $limit: 51 }, // Query extra data for hasNext
     ];
 
@@ -589,7 +589,7 @@ export async function getUserFeed(req, res) {
     }
     hasNext = !!result[50]; // Tracks db hasNext
     result = JSON.stringify(result);
-    await redisClient.set(`Blog_${req.user.userId}`, result, 1800); // cache feed for 30 min
+    await redisClient.set(`Blog_${req.user.userId}`, result, 900); // cache feed for 15 min
     cursor = 0; // reset cursor
     cachedBlog = result;
   }
@@ -666,4 +666,30 @@ export async function getCoAuthoredHistory(req, res) {
   }
 
   return res.status(200).json({ status: 'success', data });
+}
+
+export async function checkReactionStatus(req, res) {
+  let { blogId } = req.params;
+  try {
+    blogId = new ObjectId(blogId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect id' });
+  }
+
+  try {
+    const blog = await dbClient.findData('reactions', { blogId });
+    if (!blog) {
+      return res.status(404).json({ status: 'error', message: 'Blog not found' });
+    }
+
+    const { userId } = req.user;
+
+    let isLike = blog.reactions.some((user) => user.equals(userId));
+    return res.status(200).json({
+      status: 'success',
+      data: { isLike, isBookmark: false },
+    });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', mesage: 'Something went wrong' });
+  }
 }
