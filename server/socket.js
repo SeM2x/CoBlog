@@ -30,6 +30,8 @@ io.on('connection', (socket) => {
   });
 });
 
+module.exports = io;
+
 server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
