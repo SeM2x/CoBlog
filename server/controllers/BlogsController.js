@@ -6,6 +6,7 @@ import generateId from '../utils/uuid';
 import redisClient from '../utils/redis';
 
 const { ObjectId } = require('mongodb');
+const io = require('../socket');
 
 export async function createBlog(req, res) {
   const { title } = req.body;
@@ -160,6 +161,9 @@ export async function inviteUsers(req, res) {
       read: false,
     }));
     await Promise.all(userNotificationsPromise);
+
+    // broadcast notification
+    io.emit('notification_sent', users);
 
     return res.status(200).json({
       status: 'success',
