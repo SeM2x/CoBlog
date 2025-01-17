@@ -4,9 +4,9 @@
 import dbClient from '../utils/db';
 import generateId from '../utils/uuid';
 import redisClient from '../utils/redis';
+import { io } from '../socket';
 
 const { ObjectId } = require('mongodb');
-const io = require('../socket');
 
 export async function createBlog(req, res) {
   const { title } = req.body;
