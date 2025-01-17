@@ -61,7 +61,6 @@ const inviteCollaborator = actionClient
     try {
       const res = (await apiRequest.put(`/blogs/${blogId}/invite`, { users }))
         .data;
-      socket.emit(SocketEvents.SEND_NOTIFICATION, { blogId, users });
       return res.message;
     } catch (error) {
       throw getServerError(error);
@@ -94,7 +93,6 @@ const rejectCollaboration = actionClient
     try {
       const res = (await apiRequest.put(`/blogs/reject`, data)).data;
       await markNotificationRead(data.notificationId);
-      socket.emit(SocketEvents.SEND_NOTIFICATION, data);
       revalidatePath('/', 'layout');
       revalidatePath('/notifications');
       return res.message;
