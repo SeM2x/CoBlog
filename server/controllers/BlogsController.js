@@ -163,7 +163,8 @@ export async function inviteUsers(req, res) {
     await Promise.all(userNotificationsPromise);
 
     // broadcast notification
-    io.emit('notification_sent', users);
+    const instantNotificationData = { users, message: `${blog.authorUsername} invites you to co-write a blog: ${blog.title}` };
+    io.emit('notification_sent', instantNotificationData);
 
     return res.status(200).json({
       status: 'success',
