@@ -429,6 +429,10 @@ export async function saveBlogCurrentStatus(req, res) {
     return res.status(404).json({ status: 'error', message: 'Blog does not exist for this user' });
   }
 
+  if (blog.authorId !== req.user.userId) {
+    return res.status(404).json({ status: 'error', message: 'You dont have permission to update blog' })
+  }
+
   const {
     topics, subTopics, imagesUrl, content, title,
   } = req.body;
