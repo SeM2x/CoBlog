@@ -4,7 +4,7 @@
 import dbClient from '../utils/db';
 import generateId from '../utils/uuid';
 import redisClient from '../utils/redis';
-import { io } from '../socket';
+import { broadcastNotification } from '../socket';
 
 const { ObjectId } = require('mongodb');
 
@@ -164,7 +164,7 @@ export async function inviteUsers(req, res) {
 
     // broadcast notification
     const instantNotificationData = { users, message: `${blog.authorUsername} invites you to co-write a blog: ${blog.title}` };
-    io.emit('notification_sent', instantNotificationData);
+    broadcastNotification(instantNotificationData);
 
     return res.status(200).json({
       status: 'success',
@@ -348,6 +348,12 @@ export async function manageInvitation(req, res) {
       { _id: notificationId },
       { $set: { status: `${url}ed` } },
     );
+
+    const instantNotificationData = {
+      users: [req.user.userId],
+      message: `${req.user.username} ${url}ed your invite to co-write ${blog.title}`,
+    };
+    broadcastNotification(instantNotificationData);
 
     return res.status(200).json({ status: 'success', message: `Invite successfully ${url}ed` });
   } catch (err) {
