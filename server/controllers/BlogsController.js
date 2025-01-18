@@ -349,10 +349,8 @@ export async function manageInvitation(req, res) {
       { $set: { status: `${url}ed` } },
     );
 
-    const instantNotificationData = {
-      users: [req.user.userId],
-      message: `${req.user.username} ${url}ed your invite to co-write ${blog.title}`,
-    };
+    // broadcast notification
+    const instantNotificationData = { users: [notificationData.userId.toString()], message: notificationData.message };
     broadcastNotification(instantNotificationData);
 
     return res.status(200).json({ status: 'success', message: `Invite successfully ${url}ed` });
