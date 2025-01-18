@@ -4,6 +4,7 @@
 import dbClient from '../utils/db';
 import generateId from '../utils/uuid';
 import redisClient from '../utils/redis';
+import { broadcastNotification } from '../socket';
 
 const { ObjectId } = require('mongodb');
 
@@ -160,6 +161,10 @@ export async function inviteUsers(req, res) {
       read: false,
     }));
     await Promise.all(userNotificationsPromise);
+
+    // broadcast notification
+    const instantNotificationData = { users, message: `${blog.authorUsername} invites you to co-write a blog: ${blog.title}` };
+    broadcastNotification(instantNotificationData);
 
     return res.status(200).json({
       status: 'success',
@@ -344,6 +349,10 @@ export async function manageInvitation(req, res) {
       { $set: { status: `${url}ed` } },
     );
 
+    // broadcast notification
+    const instantNotificationData = { users: [notificationData.userId.toString()], message: notificationData.message };
+    broadcastNotification(instantNotificationData);
+
     return res.status(200).json({ status: 'success', message: `Invite successfully ${url}ed` });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'Something went wrong' });
@@ -418,6 +427,10 @@ export async function saveBlogCurrentStatus(req, res) {
   const blog = await dbClient.findData('blogs', { _id: blogId });
   if (!blog) {
     return res.status(404).json({ status: 'error', message: 'Blog does not exist for this user' });
+  }
+
+  if (blog.authorId !== req.user.userId) {
+    return res.status(404).json({ status: 'error', message: 'You dont have permission to update blog' })
   }
 
   const {
@@ -646,26 +659,51 @@ export async function getCoAuthoredHistory(req, res) {
     return res.status(400).json({ status: 'error', message: 'Incorrect id' });
   }
 
-  const sharedBlogs = await dbClient.findManyData('coauthored', { userId });
-  if (sharedBlogs.length === 0) {
-    return res.status(200).json({
-      status: 'success',
-      data: [],
-      message: 'User has no shared blogs',
-    });
-  }
-  const data = [];
-  // FInd each blogs with thier id
-  const blogPromise = sharedBlogs.map((blog) => dbClient.findData('blogs', { _id: blog.blogId }));
-  const results = await Promise.all(blogPromise);
-  for (const result of results) {
-    if (result) { // If blog is not null (deleted)
-      delete result.invitedUsers;
-      data.push(result);
-    }
+  let { cursor, limit } = req.query;
+  if (cursor === 'null') {
+    return res.status(200).json({ status: 'success', message: 'No more data to fetch', data: [] });
   }
 
-  return res.status(200).json({ status: 'success', data });
+  limit = limit ? (limit + 0) / 10 : 10;
+  cursor = cursor ? new Date(cursor) : new Date();
+  const pipeline = [
+    { $match: { userId, createdAt: { $lt: cursor } } },
+    { $sort: { createdAt: -1 } },
+    { $limit: limit + 1 }, // One more data for page pagination info
+  ];
+
+  try {
+    const sharedBlogs = await dbClient.findManyData('coauthored', pipeline, true);
+
+    const pageInfo = {
+      cursor: sharedBlogs[limit] ? sharedBlogs[limit - 1].createdAt : null,
+      hasNext: !!sharedBlogs[limit],
+    };
+
+    if (sharedBlogs.length === 0) {
+      return res.status(200).json({
+        status: 'success',
+        data: [],
+        message: 'User has no shared blogs',
+        pageInfo,
+      });
+    }
+
+    const data = [];
+    // Find each blogs with thier id
+    const blogPromise = sharedBlogs.map((blog) => dbClient.findData('blogs', { _id: blog.blogId }));
+    const results = await Promise.all(blogPromise);
+    for (const result of results) {
+      if (result) { // If blog is not null (deleted)
+        delete result.invitedUsers;
+        data.push(result);
+      }
+    }
+
+    return res.status(200).json({ status: 'success', data, pageInfo });
+  } catch(err) {
+    return res.status(500).json({ status: 'error', message: 'Someting went wrong' })
+  }
 }
 
 export async function checkReactionStatus(req, res) {
