@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint",
-    "start-server": "nodemon --exec babel-node --presets @babel/preset-env ./socket.js",
+    "start-server": "nodemon --exec babel-node --presets @babel/preset-env ./server.js",
     "dev": "nodemon --exec babel-node --presets @babel/preset-env",
     "build": "babel /CoBlog/server --out-dir /dist",
     "test": "./node_modules/.bin/mocha --require @babel/register --exit"
@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.1.1",
     "bull": "^3.16.0",
     "chai-http": "^4.3.0",
     "cors": "^2.8.5",
