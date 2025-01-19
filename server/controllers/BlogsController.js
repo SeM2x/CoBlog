@@ -78,7 +78,7 @@ export async function getUserBlogs(req, res) {
       pageInfo,
     });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -172,7 +172,7 @@ export async function inviteUsers(req, res) {
       data: { inviteCount: blog.invitedUsers.length + users.length },
     });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -228,7 +228,7 @@ export async function publishBlog(req, res) {
 
     return res.status(200).json({ status: 'success', message: 'Blog is published' });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -350,7 +350,10 @@ export async function manageInvitation(req, res) {
     );
 
     // broadcast notification
-    const instantNotificationData = { users: [notificationData.userId.toString()], message: notificationData.message };
+    const instantNotificationData = {
+      users: [notificationData.userId.toString()],
+      message: notificationData.message,
+    };
     broadcastNotification(instantNotificationData);
 
     return res.status(200).json({ status: 'success', message: `Invite successfully ${url}ed` });
@@ -412,14 +415,17 @@ export async function updateBlogReaction(req, res) {
       data: { userReaction: 'like', nReactions: blog.nReactions + 1 },
     });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
 export async function saveBlogCurrentStatus(req, res) {
   let { blogId } = req.params;
+  let { userId } = req.userId;
+
   try {
     blogId = new ObjectId(blogId);
+    userId = new ObjectId(userId)
   } catch (err) {
     return res.status(400).json({ status: 'error', message: 'Incorrect id' });
   }
@@ -429,8 +435,8 @@ export async function saveBlogCurrentStatus(req, res) {
     return res.status(404).json({ status: 'error', message: 'Blog does not exist for this user' });
   }
 
-  if (blog.authorId !== req.user.userId) {
-    return res.status(404).json({ status: 'error', message: 'You dont have permission to update blog' })
+  if (!userId.equals(blog.authorId)) {
+    return res.status(404).json({ status: 'error', message: 'You dont have permission to update blog' });
   }
 
   const {
@@ -453,7 +459,7 @@ export async function saveBlogCurrentStatus(req, res) {
     await dbClient.updateData('blogs', { _id: blogId }, { $set: details });
     return res.status(200).json({ status: 'success', message: 'Blog is published' });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -498,7 +504,7 @@ export async function blogComment(req, res) {
       data,
     });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -523,7 +529,7 @@ export async function getBlogComments(req, res) {
     const result = await dbClient.findManyData('comments', { blogId });
     return res.status(200).json({ status: 'success', data: result });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'Somethong went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -551,7 +557,7 @@ export async function getInvitationHistory(req, res) {
       { status: 'success', data: paginatedNotifications, pageInfo },
     );
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -587,7 +593,7 @@ export async function getUserFeed(req, res) {
     }
 
     const pipeline = [
-      { $match: { _id: { $nin: blogHistory }, isPublished: true  } },
+      { $match: { _id: { $nin: blogHistory }, isPublished: true } },
       { $limit: 51 }, // Query extra data for hasNext
     ];
 
@@ -701,8 +707,8 @@ export async function getCoAuthoredHistory(req, res) {
     }
 
     return res.status(200).json({ status: 'success', data, pageInfo });
-  } catch(err) {
-    return res.status(500).json({ status: 'error', message: 'Someting went wrong' })
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
