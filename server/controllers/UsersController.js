@@ -1,4 +1,5 @@
 import dbClient from '../utils/db';
+import { broadcastNotification } from '../socket'
 
 const { ObjectId } = require('mongodb');
 
@@ -116,6 +117,11 @@ export async function followUser(req, res) {
       read: false,
     };
     await dbClient.insertData('notifications', notificationData);
+
+    // broadcast notification
+    const instantNotificationData = { users: [notificationData.userId.toString()], message: notificationData.message };
+    broadcastNotification(instantNotificationData);
+
     return res.status(200).json({ status: 'success', message: 'user followed successfully' });
   } catch (err) {
     console.log(err);
