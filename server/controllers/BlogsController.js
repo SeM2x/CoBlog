@@ -421,7 +421,7 @@ export async function updateBlogReaction(req, res) {
 
 export async function saveBlogCurrentStatus(req, res) {
   let { blogId } = req.params;
-  let { userId } = req.userId;
+  let { userId } = req.user.userId;
 
   try {
     blogId = new ObjectId(blogId);
