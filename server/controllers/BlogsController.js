@@ -421,11 +421,11 @@ export async function updateBlogReaction(req, res) {
 
 export async function saveBlogCurrentStatus(req, res) {
   let { blogId } = req.params;
-  let { userId } = req.user.userId;
+  let { userId } = req.user;
 
   try {
     blogId = new ObjectId(blogId);
-    userId = new ObjectId(userId)
+    userId = new ObjectId(userId);
   } catch (err) {
     return res.status(400).json({ status: 'error', message: 'Incorrect id' });
   }
@@ -435,7 +435,7 @@ export async function saveBlogCurrentStatus(req, res) {
     return res.status(404).json({ status: 'error', message: 'Blog does not exist for this user' });
   }
 
-  if (!userId.equals(blog.authorId)) {
+  if (!(userId.equals(blog.authorId))) {
     return res.status(404).json({ status: 'error', message: 'You dont have permission to update blog' });
   }
 
