@@ -68,6 +68,7 @@ blogRouter.put('/:blogId/save', saveBlogCurrentStatus);
 blogRouter.post('/:blogId/comment', blogComment);
 blogRouter.get('/:blogId/comments', getBlogComments);
 blogRouter.get('/:blogId/react', checkReactionStatus);
+blogRouter.get('/:userId/blogs', getUserBlogs);
 
 // Manages all messages routes
 messageRouter.post('/create', createMessage);
