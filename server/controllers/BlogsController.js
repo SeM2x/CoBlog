@@ -50,7 +50,18 @@ export async function suggestTopics(req, res) {
 }
 
 export async function getUserBlogs(req, res) {
-  const userId = new ObjectId(req.user.userId);
+  let userId = req.params.userId;
+  // check if user id is provided, default to client id.
+  if (userId) {
+    try {
+      userId = new ObjectId(req.user.userId);
+    } catch(err) {
+      return res.status(400).json({ status: 'error', message: 'incorrect id'});
+    }
+  } else {
+    userId = req.user.userId;
+  }
+
   let { cursor, limit } = req.query;
   limit = limit ? (limit + 0) / 10 : 10;
 
@@ -74,7 +85,7 @@ export async function getUserBlogs(req, res) {
 
     return res.status(200).json({
       status: 'success',
-      data: pageInfo.hasNext ? result.slice(0, -1) : result,
+      data: result.slice(0, limit),
       pageInfo,
     });
   } catch (err) {
