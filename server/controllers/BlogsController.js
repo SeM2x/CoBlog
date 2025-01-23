@@ -800,3 +800,65 @@ export async function getOtherUsersBlogs(req, res) {
     return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
+
+export async function userViewHistory(req, res) {
+  let { userId } = req.user;
+  userId = new ObjectId(userId);
+
+  let { cursor, limit } = req.query;
+  limit = limit ? (limit + 0) / 10 : 10;
+  cursor = cursor ? (cursor + 0) / 10 : 0;
+
+  try {
+    const result = await dbClient.findData('viewshistory', { userId });
+    if (!result) {
+      return res.status(404).json({ status: 'error', message: 'User does not exist' });
+    }
+
+    // Paginate resp
+    const endIdx = cursor + limit;
+    const paginatedBlogs = result.blogHistory.slice(cursor, endIdx);
+    const pageInfo = {
+      cursor: result.blogHistory[endIdx] ? endIdx : null,
+      hasNext: !!result.blogHistory[endIdx],
+    };
+
+    if (!paginatedBlogs[0]) {
+      return res.status(200).json({ status: 'success', data: [], pageInfo });
+    }
+
+    const viewsHistoryPromise = paginatedBlogs.map((blogId) => dbClient.findData('blogs', { _id: blogId }));
+    Promise.all(viewsHistoryPromise)
+      .then((results) => {
+        const resp = results.map((blog) => ({
+          id: blog._id,
+          title: blog.title,
+          content: blog.content,
+          author: {
+            id: blog.authorId,
+            username: blog.authorUsername,
+            profileUrl: blog.authorProfileUrl,
+          },
+          CoAuthors: blog.CoAuthors,
+          status: blog.status,
+          topics: blog.topics,
+          subTopics: blog.subTopics,
+          minutesRead: blog.minutesRead,
+          nComments: blog.nComments,
+          nLikes: blog.nLikes,
+          nShares: blog.nShares,
+          nReactions: blog.nReactions,
+          imagesUrl: blog.imagesUrl,
+          createdAt: blog.createdAt,
+          updatedAt: blog.updatedAt,
+        }));
+        return res.status(200).json({ status: 'success', data: resp, pageInfo });
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.status(500).json({ status: 'error', message: 'something went wrong' });
+      });
+  } catch (err) {
+    return res.status(500).json({ status: 'success', message: 'Something went wrong' });
+  }
+}
