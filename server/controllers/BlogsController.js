@@ -868,3 +868,64 @@ export async function userViewHistory(req, res) {
     return res.status(500).json({ status: 'success', message: 'Something went wrong' });
   }
 }
+
+export async function getOtherCoBlogs(req, res) {
+  let { userId } = req.params;
+  try {
+    userId = new ObjectId(userId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect id' });
+  }
+
+  const pipeline = [
+    { $match: { userId } },
+    { $sort: { createdAt: -1 } },
+  ];
+
+  try {
+    const sharedBlogs = await dbClient.findManyData('coauthored', pipeline, true);
+
+    if (sharedBlogs.length === 0) {
+      return res.status(200).json({
+        status: 'success',
+        data: [],
+        message: 'User has no shared blogs',
+      });
+    }
+
+    const data = [];
+    // Find each blogs with thier id
+    const blogPromise = sharedBlogs.map((blog) => dbClient.findData('blogs', { _id: blog.blogId }));
+    const blogs = await Promise.all(blogPromise);
+    for (const blog of blogs) {
+      if (blog && blog.isPublished) { // If blog is not null (deleted) and is published
+        let result = {
+          id: blog._id,
+          title: blog.title,
+          content: blog.content,
+          author: {
+            id: blog.authorId,
+            username: blog.authorUsername,
+            profileUrl: blog.authorProfileUrl,
+          },
+          CoAuthors: blog.CoAuthors,
+          status: blog.status,
+          topics: blog.topics,
+          subTopics: blog.subTopics,
+          minutesRead: blog.minutesRead,
+          nComments: blog.nComments,
+          nLikes: blog.nLikes,
+          nShares: blog.nShares,
+          nReactions: blog.nReactions,
+          imagesUrl: blog.imagesUrl,
+          createdAt: blog.createdAt,
+          updatedAt: blog.updatedAt,
+        };
+        data.push(result);
+      }
+    }
+    return res.status(200).json({ status: 'success', data });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  }
+}
