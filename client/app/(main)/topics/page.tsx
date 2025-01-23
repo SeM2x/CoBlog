@@ -20,6 +20,8 @@ import {
   Globe,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAction } from 'next-safe-action/hooks';
+import { updateProfile } from '@/lib/actions/users';
 
 interface Subtopic {
   name: string;
@@ -107,16 +109,20 @@ export default function SelectTopicsPage() {
 
   const router = useRouter();
 
+  const { execute, isPending } = useAction(updateProfile, {
+    onSuccess: () => {
+      router.push('/dashboard');
+      toast({
+        title: 'Topics Saved',
+        description: 'Your selected topics have been saved successfully.',
+      });
+    },
+  });
+
   const handleSubmit = async () => {
     console.log('Selected topics:', selectedTopics);
     console.log('Selected subtopics:', selectedSubtopics);
-    toast({
-      title: 'Topics Saved',
-      description: 'Your selected topics have been saved successfully.',
-    });
-    router.push('/dashboard');
-    // TODO: Implement API call to save selected topics and subtopics
-    // Redirect to dashboard or next step
+    execute({ topics: selectedTopics, subtopics: selectedSubtopics });
   };
 
   if (isLoading) {
@@ -188,6 +194,7 @@ export default function SelectTopicsPage() {
       <div className='sticky bottom-0 py-4 bg-inherit'>
         <div className='w-full sm:w-fit min-w-52 rounded-lg bg-background mx-auto space-x-1 shadow'>
           <Button
+            loading={isPending}
             size='lg'
             onClick={handleSubmit}
             disabled={
@@ -195,7 +202,7 @@ export default function SelectTopicsPage() {
             }
             className='w-full'
           >
-           Get Started
+            Get Started
           </Button>
         </div>
       </div>

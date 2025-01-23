@@ -8,11 +8,13 @@ import storageRequest from '../utils/storageRequest';
 import { PartialUser, Profile } from '@/types';
 
 const profileSchema = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
-  bio: z.string(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  bio: z.string().optional(),
   profileUrl: z.string().optional(),
-  profilePicture: z.any(),
+  profilePicture: z.any().optional(),
+  topics: z.array(z.string()).optional(),
+  subtopics: z.array(z.string()).optional(),
 });
 
 const updateProfile = actionClient
@@ -28,7 +30,7 @@ const updateProfile = actionClient
 
         data.profileUrl = url;
       }
-      //console.log(data);
+      console.log(data);
 
       await apiRequest.put('/users/profile', data);
       return { success: true, profileUrl: data.profileUrl };
