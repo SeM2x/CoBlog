@@ -50,18 +50,7 @@ export async function suggestTopics(req, res) {
 }
 
 export async function getUserBlogs(req, res) {
-  let userId = req.params.userId;
-  // check if user id is provided, default to client id.
-  if (userId) {
-    try {
-      userId = new ObjectId(req.user.userId);
-    } catch(err) {
-      return res.status(400).json({ status: 'error', message: 'incorrect id'});
-    }
-  } else {
-    userId = req.user.userId;
-  }
-
+  const userId = new ObjectId(req.user.userId);
   let { cursor, limit } = req.query;
   limit = limit ? (limit + 0) / 10 : 10;
 
@@ -85,7 +74,7 @@ export async function getUserBlogs(req, res) {
 
     return res.status(200).json({
       status: 'success',
-      data: result.slice(0, limit),
+      data: pageInfo.hasNext ? result.slice(0, -1) : result,
       pageInfo,
     });
   } catch (err) {
@@ -746,5 +735,68 @@ export async function checkReactionStatus(req, res) {
     });
   } catch (err) {
     return res.status(500).json({ status: 'error', mesage: 'Something went wrong' });
+  }
+}
+
+export async function getOtherUsersBlogs(req, res) {
+  let { userId } = req.params;
+
+  try {
+    userId = new ObjectId(userId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect id' });
+  }
+
+  let { cursor, limit } = req.query;
+  limit = limit ? (limit + 0) / 10 : 10;
+
+  if (cursor === 'null') {
+    return res.status(200).json({ status: 'success', message: 'No more data to fetch', data: [] });
+  }
+
+  cursor = cursor ? new Date(cursor) : new Date();
+  const pipeline = [
+    { $match: { authorId: userId, isPublished: true, createdAt: { $lt: cursor } } },
+    { $sort: { createdAt: -1 } },
+    { $limit: limit + 1 }, // Include one more data for page info
+  ];
+
+  try {
+    const result = await dbClient.findManyData('blogs', pipeline, true);
+    const pageInfo = {
+      cursor: result[limit] ? result[limit - 1].createdAt : null,
+      hasNext: !!result[limit],
+    };
+
+    const blogs = result.map((blog) => ({
+      id: blog._id,
+      title: blog.title,
+      content: blog.content,
+      author: {
+        id: blog.authorId,
+        username: blog.authorUsername,
+        profileUrl: blog.authorProfileUrl,
+      },
+      CoAuthors: blog.CoAuthors,
+      status: blog.status,
+      topics: blog.topics,
+      subTopics: blog.subTopics,
+      minutesRead: blog.minutesRead,
+      nComments: blog.nComments,
+      nLikes: blog.nLikes,
+      nShares: blog.nShares,
+      nReactions: blog.nReactions,
+      imagesUrl: blog.imagesUrl,
+      createdAt: blog.createdAt,
+      updatedAt: blog.updatedAt,
+    }));
+
+    return res.status(200).json({
+      status: 'success',
+      data: pageInfo.hasNext ? blogs.slice(0, -1) : blogs,
+      pageInfo,
+    });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
