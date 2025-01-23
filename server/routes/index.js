@@ -10,7 +10,7 @@ import {
   suggestTopics, getUserBlogs, createBlog, inviteUsers, publishBlog,
   getBlogById, manageInvitation, deleteBlog, updateBlogReaction, getUserFeed,
   saveBlogCurrentStatus, blogComment, getBlogComments, getCoAuthoredHistory,
-  getInvitationHistory, checkReactionStatus, getOtherUsersBlogs,
+  getInvitationHistory, checkReactionStatus, getOtherUsersBlogs, userViewHistory
 } from '../controllers/BlogsController';
 import { createMessage, getAllMessages, getMessageById } from '../controllers/MessagesController';
 
@@ -69,6 +69,7 @@ blogRouter.post('/:blogId/comment', blogComment);
 blogRouter.get('/:blogId/comments', getBlogComments);
 blogRouter.get('/:blogId/react', checkReactionStatus);
 blogRouter.get('/:userId/blogs', getOtherUsersBlogs);
+blogRouter.get('/blog_history', userViewHistory);
 
 // Manages all messages routes
 messageRouter.post('/create', createMessage);
