@@ -13,8 +13,12 @@ const profileSchema = z.object({
   bio: z.string().optional(),
   profileUrl: z.string().optional(),
   profilePicture: z.any().optional(),
-  topics: z.array(z.string()).optional(),
-  subtopics: z.array(z.string()).optional(),
+  preference: z
+    .object({
+      topics: z.array(z.string()).optional(),
+      subtopics: z.array(z.string()).optional(),
+    })
+    .optional(),
 });
 
 const updateProfile = actionClient

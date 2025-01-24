@@ -81,8 +81,11 @@ export default function ProfilePage() {
   const { execute, isPending } = useAction(updateProfile, {
     onSettled: ({ input, result: { data } }) => {
       if (data?.success) {
-        updateUser({ ...input, profileUrl: data.profileUrl });
-        updateLocalUser({ ...input, profileUrl: data.profileUrl });
+        const { preference, ...info } = input;
+        console.log(preference);
+
+        updateUser({ ...info, profileUrl: data.profileUrl });
+        updateLocalUser({ ...info, profileUrl: data.profileUrl });
 
         setIsEditProfileOpen(false);
         toast({
@@ -254,7 +257,7 @@ export default function ProfilePage() {
                     </div>
                     <DialogFooter>
                       <Button type='submit' loading={isPending}>
-                        {isPending? 'Saving':'Save changes'}
+                        {isPending ? 'Saving' : 'Save changes'}
                       </Button>
                     </DialogFooter>
                   </form>

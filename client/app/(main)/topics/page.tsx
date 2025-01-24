@@ -122,7 +122,9 @@ export default function SelectTopicsPage() {
   const handleSubmit = async () => {
     console.log('Selected topics:', selectedTopics);
     console.log('Selected subtopics:', selectedSubtopics);
-    execute({ topics: selectedTopics, subtopics: selectedSubtopics });
+    execute({
+      preference: { topics: selectedTopics, subtopics: selectedSubtopics },
+    });
   };
 
   if (isLoading) {
