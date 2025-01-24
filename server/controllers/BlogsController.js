@@ -4,7 +4,7 @@
 import dbClient from '../utils/db';
 import generateId from '../utils/uuid';
 import redisClient from '../utils/redis';
-import { broadcastNotification } from '../socket';
+import { broadcastNotification, broadcastPublishedBlog } from '../socket';
 
 const { ObjectId } = require('mongodb');
 
@@ -226,6 +226,19 @@ export async function publishBlog(req, res) {
     await dbClient.updateData('blogs', { _id: blogId }, { $set: details });
     await dbClient.insertData('reactions', { blogId, reactions: [] });
 
+    if (blog.CoAuthors > 0) {
+      const users = blog.CoAuthors.map((user) => ({
+        id: user.id
+      }))
+
+      const instantNotificationData = {
+        blogId,
+        users,
+      }
+
+      broadcastPublishedBlog(instantNotificationData);
+    }
+    
     return res.status(200).json({ status: 'success', message: 'Blog is published' });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
