@@ -7,10 +7,16 @@ const usePublish = ({
   blogId,
   title,
   content,
+  onSuccess,
+  topics,
+  subtopics,
 }: {
   blogId?: string;
   title: string;
   content: string;
+  onSuccess?: () => void;
+  topics: string[]; 
+  subtopics: string[];
 }) => {
   const router = useRouter();
   const { execute: executePublish, isPending: isPublishPending } = useAction(
@@ -19,6 +25,7 @@ const usePublish = ({
       onSuccess: ({ data }) => {
         toast({ title: data });
         router.push(`/blogs/${blogId}`);
+        if (onSuccess) onSuccess();
       },
       onError: ({ error: { serverError } }) => {
         if (serverError) toast({ title: serverError, variant: 'destructive' });
@@ -32,8 +39,8 @@ const usePublish = ({
       blogId,
       title,
       content,
-      topics: [],
-      subtopics: [],
+      topics,
+      subtopics,
     };
     console.log('data', data);
     executePublish(data);

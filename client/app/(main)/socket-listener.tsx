@@ -5,10 +5,14 @@ import invalidate from '@/lib/actions/invalidate';
 import { SocketEvents } from '@/lib/socketEvents';
 import { useUserStore } from '@/lib/store';
 import socket from '@/socket';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 const SocketListener = () => {
   const user = useUserStore((state) => state.user);
+  const pathname = usePathname();
+  const params = useParams();
+  const router = useRouter();
 
   useEffect(() => {
     if (!user) return;
@@ -39,7 +43,26 @@ const SocketListener = () => {
         }
       }
     );
-  }, [user]);
+
+    socket.on(SocketEvents.BLOG_PUBLISHED, (data) => {
+      if (
+        pathname.includes('/edit-blog') &&
+        params.id === data.blogId &&
+        data.users.map((user: { id: string }) => user.id).includes(user.id)
+      ) {
+        toast({ title: 'Blog was published!' });
+        router.push(`/blogs/${data.blogId}`);
+      }
+    });
+
+    return () => {
+      socket.off(SocketEvents.CONNECT);
+      socket.off(SocketEvents.MESSAGE_SENT);
+      socket.off(SocketEvents.INVITE_ACCEPTED);
+      socket.off(SocketEvents.NOTIFICATION_SENT);
+      socket.off(SocketEvents.BLOG_PUBLISHED);
+    };
+  }, [user, params, pathname, router]);
   return null;
 };
 

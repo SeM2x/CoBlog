@@ -21,32 +21,18 @@ interface Topic {
   label: string;
 }
 
-const topics: Topic[] = [
-  { value: 'react', label: 'React' },
-  { value: 'nextjs', label: 'Next.js' },
-  { value: 'typescript', label: 'TypeScript' },
-  { value: 'javascript', label: 'JavaScript' },
-  { value: 'nodejs', label: 'Node.js' },
-  { value: 'express', label: 'Express' },
-  { value: 'mongodb', label: 'MongoDB' },
-  { value: 'postgresql', label: 'PostgreSQL' },
-  { value: 'graphql', label: 'GraphQL' },
-  { value: 'aws', label: 'AWS' },
-  { value: 'docker', label: 'Docker' },
-  { value: 'kubernetes', label: 'Kubernetes' },
-  { value: 'ci-cd', label: 'CI/CD' },
-  { value: 'testing', label: 'Testing' },
-  { value: 'security', label: 'Security' },
-];
-
 interface TopicSelectorProps {
   selectedTopics?: Topic[];
   setSelectedTopics: (topics: Topic[]) => void;
+  topics: Topic[];
+  title?: string;
 }
 
 export function TopicSelector({
   selectedTopics = [],
   setSelectedTopics,
+  topics,
+  title,
 }: TopicSelectorProps) {
   const [open, setOpen] = useState(false);
 
@@ -67,7 +53,11 @@ export function TopicSelector({
     <div className='space-y-2'>
       <div className='flex flex-wrap gap-2'>
         {selectedTopics.map((topic) => (
-          <Badge key={topic.value} variant='secondary' className='text-sm flex-1 flex justify-between'>
+          <Badge
+            key={topic.value}
+            variant='secondary'
+            className='text-sm flex-1 flex justify-between text-nowrap'
+          >
             {topic.label}
             <Button
               variant='ghost'
@@ -81,9 +71,13 @@ export function TopicSelector({
         ))}
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button variant='outline' size='sm' className='h-8 border-dashed flex-1'>
+            <Button
+              variant='outline'
+              size='sm'
+              className='h-8 border-dashed flex-1'
+            >
               <Plus className='mr-2 h-4 w-4' />
-              Add topic
+              {title || 'Add topic'}
             </Button>
           </PopoverTrigger>
           <PopoverContent className='w-[200px] p-0'>
