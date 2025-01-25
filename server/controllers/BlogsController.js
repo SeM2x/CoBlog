@@ -59,8 +59,14 @@ export async function getUserBlogs(req, res) {
   }
 
   cursor = cursor ? new Date(cursor) : new Date();
+  const match = { authorId: userId, createdAt: { $lt: cursor } };
+  const { published } = req.query;
+  if (published === 'false') {
+    match.isPublished = false;
+  }
+
   const pipeline = [
-    { $match: { authorId: userId, createdAt: { $lt: cursor } } },
+    { $match: match },
     { $sort: { createdAt: -1 } },
     { $limit: limit + 1 }, // Include one more data for page info
   ];
@@ -78,7 +84,7 @@ export async function getUserBlogs(req, res) {
       pageInfo,
     });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -172,7 +178,7 @@ export async function inviteUsers(req, res) {
       data: { inviteCount: blog.invitedUsers.length + users.length },
     });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -241,7 +247,7 @@ export async function publishBlog(req, res) {
 
     return res.status(200).json({ status: 'success', message: 'Blog is published' });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -428,14 +434,17 @@ export async function updateBlogReaction(req, res) {
       data: { userReaction: 'like', nReactions: blog.nReactions + 1 },
     });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
 export async function saveBlogCurrentStatus(req, res) {
   let { blogId } = req.params;
+  let { userId } = req.user;
+
   try {
     blogId = new ObjectId(blogId);
+    userId = new ObjectId(userId);
   } catch (err) {
     return res.status(400).json({ status: 'error', message: 'Incorrect id' });
   }
@@ -445,7 +454,8 @@ export async function saveBlogCurrentStatus(req, res) {
     return res.status(404).json({ status: 'error', message: 'Blog does not exist for this user' });
   }
 
-  if (blog.authorId !== req.user.userId) {
+
+  if (!(userId.equals(blog.authorId))) {
     return res.status(404).json({ status: 'error', message: 'You dont have permission to update blog' });
   }
 
@@ -469,7 +479,7 @@ export async function saveBlogCurrentStatus(req, res) {
     await dbClient.updateData('blogs', { _id: blogId }, { $set: details });
     return res.status(200).json({ status: 'success', message: 'Blog is published' });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -514,7 +524,7 @@ export async function blogComment(req, res) {
       data,
     });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -539,7 +549,7 @@ export async function getBlogComments(req, res) {
     const result = await dbClient.findManyData('comments', { blogId });
     return res.status(200).json({ status: 'success', data: result });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'Somethong went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -567,7 +577,7 @@ export async function getInvitationHistory(req, res) {
       { status: 'success', data: paginatedNotifications, pageInfo },
     );
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: 'something went wrong' });
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }
 
@@ -603,7 +613,7 @@ export async function getUserFeed(req, res) {
     }
 
     const pipeline = [
-      { $match: { _id: { $nin: blogHistory } } },
+      { $match: { _id: { $nin: blogHistory }, isPublished: true } },
       { $limit: 51 }, // Query extra data for hasNext
     ];
 
@@ -618,7 +628,7 @@ export async function getUserFeed(req, res) {
     }
     hasNext = !!result[50]; // Tracks db hasNext
     result = JSON.stringify(result);
-    await redisClient.set(`Blog_${req.user.userId}`, result, 1800); // cache feed for 30 min
+    await redisClient.set(`Blog_${req.user.userId}`, result, 900); // cache feed for 15 min
     cursor = 0; // reset cursor
     cachedBlog = result;
   }
@@ -675,26 +685,51 @@ export async function getCoAuthoredHistory(req, res) {
     return res.status(400).json({ status: 'error', message: 'Incorrect id' });
   }
 
-  const sharedBlogs = await dbClient.findManyData('coauthored', { userId });
-  if (sharedBlogs.length === 0) {
-    return res.status(200).json({
-      status: 'success',
-      data: [],
-      message: 'User has no shared blogs',
-    });
-  }
-  const data = [];
-  // FInd each blogs with thier id
-  const blogPromise = sharedBlogs.map((blog) => dbClient.findData('blogs', { _id: blog.blogId }));
-  const results = await Promise.all(blogPromise);
-  for (const result of results) {
-    if (result) { // If blog is not null (deleted)
-      delete result.invitedUsers;
-      data.push(result);
-    }
+  let { cursor, limit } = req.query;
+  if (cursor === 'null') {
+    return res.status(200).json({ status: 'success', message: 'No more data to fetch', data: [] });
   }
 
-  return res.status(200).json({ status: 'success', data });
+  limit = limit ? (limit + 0) / 10 : 10;
+  cursor = cursor ? new Date(cursor) : new Date();
+  const pipeline = [
+    { $match: { userId, createdAt: { $lt: cursor } } },
+    { $sort: { createdAt: -1 } },
+    { $limit: limit + 1 }, // One more data for page pagination info
+  ];
+
+  try {
+    const sharedBlogs = await dbClient.findManyData('coauthored', pipeline, true);
+
+    const pageInfo = {
+      cursor: sharedBlogs[limit] ? sharedBlogs[limit - 1].createdAt : null,
+      hasNext: !!sharedBlogs[limit],
+    };
+
+    if (sharedBlogs.length === 0) {
+      return res.status(200).json({
+        status: 'success',
+        data: [],
+        message: 'User has no shared blogs',
+        pageInfo,
+      });
+    }
+
+    const data = [];
+    // Find each blogs with thier id
+    const blogPromise = sharedBlogs.map((blog) => dbClient.findData('blogs', { _id: blog.blogId }));
+    const results = await Promise.all(blogPromise);
+    for (const result of results) {
+      if (result) { // If blog is not null (deleted)
+        delete result.invitedUsers;
+        data.push(result);
+      }
+    }
+
+    return res.status(200).json({ status: 'success', data, pageInfo });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  }
 }
 
 export async function checkReactionStatus(req, res) {
@@ -720,5 +755,191 @@ export async function checkReactionStatus(req, res) {
     });
   } catch (err) {
     return res.status(500).json({ status: 'error', mesage: 'Something went wrong' });
+  }
+}
+
+export async function getOtherUsersBlogs(req, res) {
+  let { userId } = req.params;
+
+  try {
+    userId = new ObjectId(userId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect id' });
+  }
+
+  let { cursor, limit } = req.query;
+  limit = limit ? (limit + 0) / 10 : 10;
+
+  if (cursor === 'null') {
+    return res.status(200).json({ status: 'success', message: 'No more data to fetch', data: [] });
+  }
+
+  cursor = cursor ? new Date(cursor) : new Date();
+  const pipeline = [
+    { $match: { authorId: userId, isPublished: true, createdAt: { $lt: cursor } } },
+    { $sort: { createdAt: -1 } },
+    { $limit: limit + 1 }, // Include one more data for page info
+  ];
+
+  try {
+    const result = await dbClient.findManyData('blogs', pipeline, true);
+    const pageInfo = {
+      cursor: result[limit] ? result[limit - 1].createdAt : null,
+      hasNext: !!result[limit],
+    };
+
+    const blogs = result.map((blog) => ({
+      id: blog._id,
+      title: blog.title,
+      content: blog.content,
+      author: {
+        id: blog.authorId,
+        username: blog.authorUsername,
+        profileUrl: blog.authorProfileUrl,
+      },
+      CoAuthors: blog.CoAuthors,
+      status: blog.status,
+      topics: blog.topics,
+      subTopics: blog.subTopics,
+      minutesRead: blog.minutesRead,
+      nComments: blog.nComments,
+      nLikes: blog.nLikes,
+      nShares: blog.nShares,
+      nReactions: blog.nReactions,
+      imagesUrl: blog.imagesUrl,
+      createdAt: blog.createdAt,
+      updatedAt: blog.updatedAt,
+    }));
+
+    return res.status(200).json({
+      status: 'success',
+      data: pageInfo.hasNext ? blogs.slice(0, -1) : blogs,
+      pageInfo,
+    });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
+  }
+}
+
+export async function userViewHistory(req, res) {
+  let { userId } = req.user;
+  userId = new ObjectId(userId);
+
+  let { cursor, limit } = req.query;
+  limit = limit ? (limit + 0) / 10 : 10;
+  cursor = cursor ? (cursor + 0) / 10 : 0;
+
+  try {
+    const result = await dbClient.findData('viewshistory', { userId });
+    if (!result) {
+      return res.status(404).json({ status: 'error', message: 'User does not exist' });
+    }
+
+    // Paginate resp
+    const endIdx = cursor + limit;
+    const paginatedBlogs = result.blogHistory.slice(cursor, endIdx);
+    const pageInfo = {
+      cursor: result.blogHistory[endIdx] ? endIdx : null,
+      hasNext: !!result.blogHistory[endIdx],
+    };
+
+    if (!paginatedBlogs[0]) {
+      return res.status(200).json({ status: 'success', data: [], pageInfo });
+    }
+
+    const viewsHistoryPromise = paginatedBlogs.map((blogId) => dbClient.findData('blogs', { _id: blogId }));
+    Promise.all(viewsHistoryPromise)
+      .then((results) => {
+        const resp = results.map((blog) => ({
+          id: blog._id,
+          title: blog.title,
+          content: blog.content,
+          author: {
+            id: blog.authorId,
+            username: blog.authorUsername,
+            profileUrl: blog.authorProfileUrl,
+          },
+          CoAuthors: blog.CoAuthors,
+          status: blog.status,
+          topics: blog.topics,
+          subTopics: blog.subTopics,
+          minutesRead: blog.minutesRead,
+          nComments: blog.nComments,
+          nLikes: blog.nLikes,
+          nShares: blog.nShares,
+          nReactions: blog.nReactions,
+          imagesUrl: blog.imagesUrl,
+          createdAt: blog.createdAt,
+          updatedAt: blog.updatedAt,
+        }));
+        return res.status(200).json({ status: 'success', data: resp, pageInfo });
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.status(500).json({ status: 'error', message: 'something went wrong' });
+      });
+  } catch (err) {
+    return res.status(500).json({ status: 'success', message: 'Something went wrong' });
+  }
+}
+
+export async function getOtherCoBlogs(req, res) {
+  let { userId } = req.params;
+  try {
+    userId = new ObjectId(userId);
+  } catch (err) {
+    return res.status(400).json({ status: 'error', message: 'Incorrect id' });
+  }
+
+  const pipeline = [
+    { $match: { userId } },
+    { $sort: { createdAt: -1 } },
+  ];
+
+  try {
+    const sharedBlogs = await dbClient.findManyData('coauthored', pipeline, true);
+
+    if (sharedBlogs.length === 0) {
+      return res.status(200).json({
+        status: 'success',
+        data: [],
+        message: 'User has no shared blogs',
+      });
+    }
+
+    const data = [];
+    // Find each blogs with thier id
+    const blogPromise = sharedBlogs.map((blog) => dbClient.findData('blogs', { _id: blog.blogId }));
+    const blogs = await Promise.all(blogPromise);
+    for (const blog of blogs) {
+      if (blog && blog.isPublished) { // If blog is not null (deleted) and is published
+        let result = {
+          id: blog._id,
+          title: blog.title,
+          content: blog.content,
+          author: {
+            id: blog.authorId,
+            username: blog.authorUsername,
+            profileUrl: blog.authorProfileUrl,
+          },
+          CoAuthors: blog.CoAuthors,
+          status: blog.status,
+          topics: blog.topics,
+          subTopics: blog.subTopics,
+          minutesRead: blog.minutesRead,
+          nComments: blog.nComments,
+          nLikes: blog.nLikes,
+          nShares: blog.nShares,
+          nReactions: blog.nReactions,
+          imagesUrl: blog.imagesUrl,
+          createdAt: blog.createdAt,
+          updatedAt: blog.updatedAt,
+        };
+        data.push(result);
+      }
+    }
+    return res.status(200).json({ status: 'success', data });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Something went wrong' });
   }
 }

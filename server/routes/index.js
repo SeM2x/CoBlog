@@ -10,7 +10,8 @@ import {
   suggestTopics, getUserBlogs, createBlog, inviteUsers, publishBlog,
   getBlogById, manageInvitation, deleteBlog, updateBlogReaction, getUserFeed,
   saveBlogCurrentStatus, blogComment, getBlogComments, getCoAuthoredHistory,
-  getInvitationHistory, checkReactionStatus,
+  getInvitationHistory, checkReactionStatus, getOtherUsersBlogs, userViewHistory,
+  getOtherCoBlogs,
 } from '../controllers/BlogsController';
 import { createMessage, getAllMessages, getMessageById } from '../controllers/MessagesController';
 
@@ -59,6 +60,7 @@ blogRouter.get('/me', getUserBlogs);
 blogRouter.post('/create', createBlog);
 blogRouter.put('/:blogId/invite', inviteUsers);
 blogRouter.put('/:blogId/publish', publishBlog);
+blogRouter.get('/blog_history', userViewHistory);
 blogRouter.get('/feed', getUserFeed);
 blogRouter.get('/:blogId', getBlogById);
 blogRouter.put('/accept|reject', manageInvitation);
@@ -68,6 +70,8 @@ blogRouter.put('/:blogId/save', saveBlogCurrentStatus);
 blogRouter.post('/:blogId/comment', blogComment);
 blogRouter.get('/:blogId/comments', getBlogComments);
 blogRouter.get('/:blogId/react', checkReactionStatus);
+blogRouter.get('/:userId/blogs', getOtherUsersBlogs);
+blogRouter.get('/:userId/co-authored', getOtherCoBlogs);
 
 // Manages all messages routes
 messageRouter.post('/create', createMessage);

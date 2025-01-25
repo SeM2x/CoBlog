@@ -10,16 +10,31 @@ import { Search } from 'lucide-react';
 import { Blog } from '@/types';
 import BlogCard from './blog-card';
 
-export default function Blogs({ blogs }: { blogs: Blog[] }) {
+export default function Blogs({
+  blogs,
+  coblogs,
+}: {
+  blogs?: Blog[];
+  coblogs?: Blog[];
+}) {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredBlogs = blogs.filter(
-    (blog) =>
-      (activeTab === 'all' || blog.status === activeTab) &&
-      (blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        blog.content.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredBlogs =
+    blogs?.filter(
+      (blog) =>
+        (activeTab === 'all' || blog.status === activeTab) &&
+        (blog.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          blog.content?.toLowerCase().includes(searchQuery.toLowerCase()))
+    ) || [];
+
+  const filteredCoblogs =
+    coblogs?.filter(
+      (blog) =>
+        activeTab === 'co-authored' &&
+        (blog.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          blog.content?.toLowerCase().includes(searchQuery.toLowerCase()))
+    ) || [];
 
   return (
     <>
@@ -27,6 +42,7 @@ export default function Blogs({ blogs }: { blogs: Blog[] }) {
         <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
           <TabsList>
             <TabsTrigger value='all'>All</TabsTrigger>
+            <TabsTrigger value='co-authored'>Co-Authored</TabsTrigger>
             <TabsTrigger value='published'>Published</TabsTrigger>
             <TabsTrigger value='draft'>Drafts</TabsTrigger>
           </TabsList>
@@ -43,10 +59,10 @@ export default function Blogs({ blogs }: { blogs: Blog[] }) {
       </div>
 
       <div className='space-y-4'>
-        {filteredBlogs.length === 0 ? (
+        {[...filteredBlogs, ...filteredCoblogs].length === 0 ? (
           <div className='w-fit m-auto'>No blogs found</div>
         ) : (
-          filteredBlogs.map((blog) => <BlogCard key={blog._id} blog={blog} />)
+          [...filteredBlogs, ...filteredCoblogs].map((blog) => <BlogCard key={blog._id} blog={blog} />)
         )}
       </div>
     </>
