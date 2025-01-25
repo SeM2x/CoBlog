@@ -232,7 +232,7 @@ export async function publishBlog(req, res) {
     await dbClient.updateData('blogs', { _id: blogId }, { $set: details });
     await dbClient.insertData('reactions', { blogId, reactions: [] });
 
-    if (blog.CoAuthors > 0) {
+    if (blog.CoAuthors.length > 0) {
       const users = blog.CoAuthors.map((user) => ({
         id: user.id,
       }));
