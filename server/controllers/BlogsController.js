@@ -228,17 +228,17 @@ export async function publishBlog(req, res) {
 
     if (blog.CoAuthors > 0) {
       const users = blog.CoAuthors.map((user) => ({
-        id: user.id
-      }))
+        id: user.id,
+      }));
 
       const instantNotificationData = {
         blogId,
         users,
-      }
+      };
 
       broadcastPublishedBlog(instantNotificationData);
     }
-    
+
     return res.status(200).json({ status: 'success', message: 'Blog is published' });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: 'something went wrong' });
@@ -363,7 +363,10 @@ export async function manageInvitation(req, res) {
     );
 
     // broadcast notification
-    const instantNotificationData = { users: [notificationData.userId.toString()], message: notificationData.message };
+    const instantNotificationData = {
+      users: [notificationData.userId.toString()],
+      message: notificationData.message,
+    };
     broadcastNotification(instantNotificationData);
 
     return res.status(200).json({ status: 'success', message: `Invite successfully ${url}ed` });
@@ -443,7 +446,7 @@ export async function saveBlogCurrentStatus(req, res) {
   }
 
   if (blog.authorId !== req.user.userId) {
-    return res.status(404).json({ status: 'error', message: 'You dont have permission to update blog' })
+    return res.status(404).json({ status: 'error', message: 'You dont have permission to update blog' });
   }
 
   const {
