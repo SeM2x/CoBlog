@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useTheme } from 'next-themes';
 
 const FeatureCard = ({
   icon,
@@ -72,6 +73,12 @@ const FeatureCard = ({
 
 export default function LandingPage() {
   const [activeTab, setActiveTab] = useState('write');
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    setTheme('dark');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className='min-h-screen bg-background'>
@@ -351,7 +358,7 @@ export default function LandingPage() {
         </div>
       </section>
       {/* Call-to-Action Section */}
-      <section className='py-20 px-4 bg-primary text-primary-foreground'>
+      <section className='py-20 px-4 bg-primary/60 dark:bg-primary/75 text-primary-foreground'>
         <div className='container mx-auto text-center'>
           <h2 className='text-3xl font-bold mb-6'>
             Ready to Transform Your Content Creation?
