@@ -7,10 +7,6 @@ export function initSocket(socketInstance) {
       io.emit('message_sent', details);
     });
 
-    // socket.on('publish_blog', (details) => {
-    //   io.emit('blog_published', details);
-    // });
-
     socket.on('accept_invite', (details) => {
       io.emit('invite_accepted', details);
     });
