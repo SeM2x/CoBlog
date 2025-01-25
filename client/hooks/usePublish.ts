@@ -7,10 +7,12 @@ const usePublish = ({
   blogId,
   title,
   content,
+  onSuccess,
 }: {
   blogId?: string;
   title: string;
   content: string;
+  onSuccess?: () => void;
 }) => {
   const router = useRouter();
   const { execute: executePublish, isPending: isPublishPending } = useAction(
@@ -19,6 +21,7 @@ const usePublish = ({
       onSuccess: ({ data }) => {
         toast({ title: data });
         router.push(`/blogs/${blogId}`);
+        if (onSuccess) onSuccess();
       },
       onError: ({ error: { serverError } }) => {
         if (serverError) toast({ title: serverError, variant: 'destructive' });

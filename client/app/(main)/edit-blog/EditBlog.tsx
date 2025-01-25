@@ -28,12 +28,9 @@ import {
 import InviteModal from './InviteModal';
 import DeleteModal from './DeleteModal';
 import PermissionsModal from './PermissionsModal';
-import { useAction } from 'next-safe-action/hooks';
-import { saveBlog } from '@/lib/actions/blogs';
 import { toast } from '@/hooks/use-toast';
-import { TopicSelector } from './TopicsSelector';
 import { useRouter } from 'next/navigation';
-import usePublish from '@/hooks/usePublish';
+import { PublishBlogModal } from './PublishBlogModal';
 
 export default function EditBlog({
   blog,
@@ -61,37 +58,6 @@ export default function EditBlog({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blog]);
-  const { handlePublish, isPublishPending } = usePublish({
-    blogId: blog?._id,
-    title,
-    content,
-  });
-
-  const { execute: executeSave, isPending: isSavePending } = useAction(
-    saveBlog,
-    {
-      onSuccess: ({ data }) => {
-        toast({ title: data });
-        router.push(`/blogs/${blog?._id}`);
-      },
-      onError: ({ error: { serverError } }) => {
-        if (serverError) toast({ title: serverError, variant: 'destructive' });
-      },
-    }
-  );
-
-  const handleSave = () => {
-    if (!blog) return;
-    const data = {
-      blogId: blog?._id,
-      title,
-      content,
-      topics: [],
-      subtopics: [],
-    };
-    console.log('data', data);
-    executeSave(data);
-  };
 
   const user = useUserStore((state) => state.user);
 
@@ -181,6 +147,9 @@ export default function EditBlog({
 
   console.log(blog?.content, content);
 
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [coverImage, setCoverImage] = useState<string | null>(null);
+
   return (
     <div className='relative min-h-screen border container mx-auto px-4 py-8 max-w-4xl space-y-4'>
       <div className='flex gap-4 flex-col sm:flex-row sm:justify-between sm:items-center'>
@@ -206,27 +175,9 @@ export default function EditBlog({
           </Button>
         </div>
         <div className='flex items-center space-x-4'>
-          {blog?.status === 'published' ? (
-            <Button
-              disabled={
-                !content ||
-                !title ||
-                (content === blog.content && title === blog.title)
-              }
-              onClick={handleSave}
-              loading={isSavePending}
-            >
-              Save & Publish
-            </Button>
-          ) : (
-            <Button
-              disabled={!content || !title}
-              onClick={handlePublish}
-              loading={isPublishPending}
-            >
-              Publish
-            </Button>
-          )}
+          <Button onClick={() => setIsPublishModalOpen(true)}>
+            {blog?.status === 'published' ? 'Save & Publish' : 'Publish'}
+          </Button>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' size='icon'>
@@ -261,10 +212,6 @@ export default function EditBlog({
           </DropdownMenu>
         </div>
       </div>
-      <TopicSelector
-        selectedTopics={selectedTopics}
-        setSelectedTopics={setSelectedTopics}
-      />
       <div className='space-y-2'>
         {provider && doc && (
           <TipTapEditor
@@ -301,6 +248,20 @@ export default function EditBlog({
         collaborators={collaborators}
         handleRemoveCollaborator={handleRemoveCollaborator}
         handleRoleChange={handleRoleChange}
+      />
+      <PublishBlogModal
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+        title={title}
+        content={content}
+        selectedTopics={selectedTopics}
+        setSelectedTopics={setSelectedTopics}
+        coverImage={coverImage}
+        setCoverImage={setCoverImage}
+        onPublish={() => {
+          setIsPublishModalOpen(false);
+        }}
+        blog={blog}
       />
     </div>
   );
