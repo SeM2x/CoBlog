@@ -18,6 +18,8 @@ import { saveBlog } from '@/lib/actions/blogs';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { topics } from '@/lib/mock';
+import { useState } from 'react';
 
 interface PublishBlogModalProps {
   isOpen: boolean;
@@ -44,6 +46,10 @@ export function PublishBlogModal({
   onPublish,
   blog,
 }: PublishBlogModalProps) {
+  const [selectedSubtopics, setSelectedSubtopics] = useState<
+    { value: string; label: string }[]
+  >([]);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -59,6 +65,8 @@ export function PublishBlogModal({
     blogId: blog?._id,
     title,
     content,
+    topics: selectedTopics.map((topic) => topic.value),
+    subtopics: selectedSubtopics.map((subtopic) => subtopic.value),
     onSuccess: onPublish,
   });
 
@@ -100,8 +108,24 @@ export function PublishBlogModal({
 
         <CardContent className='space-y-4 pt-4'>
           <TopicSelector
+            topics={topics.map((topic) => ({
+              value: topic._id,
+              label: topic.name,
+            }))}
             selectedTopics={selectedTopics}
             setSelectedTopics={setSelectedTopics}
+          />
+          <TopicSelector
+            topics={topics
+              .map((topic) => topic.subtopics)
+              .flat()
+              .map((subtopic) => ({
+                value: subtopic.slug,
+                label: subtopic.name,
+              }))}
+            selectedTopics={selectedSubtopics}
+            setSelectedTopics={setSelectedSubtopics}
+            title='Add subtopic'
           />
         </CardContent>
 

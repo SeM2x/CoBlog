@@ -96,4 +96,271 @@ const mockUsers: PartialUser[] = [
   },
 ];
 
-export { notifications, mockUsers };
+const topics = [
+  {
+    _id: '676eab6593a2e4d673dd1cdc',
+    name: 'Technology',
+    subtopics: [
+      {
+        name: 'Artificial Intelligence',
+        slug: 'ai',
+      },
+      {
+        name: 'Machine Learning',
+        slug: 'ml',
+      },
+      {
+        name: 'Data Science',
+        slug: 'data-science',
+      },
+      {
+        name: 'Cybersecurity',
+        slug: 'cybersecurity',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1cdd',
+    name: 'Programming',
+    subtopics: [
+      {
+        name: 'Python',
+        slug: 'python',
+      },
+      {
+        name: 'C++',
+        slug: 'cpp',
+      },
+      {
+        name: 'JavaScript',
+        slug: 'javascript',
+      },
+      {
+        name: 'Rust',
+        slug: 'rust',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1cde',
+    name: 'Design',
+    subtopics: [
+      {
+        name: 'UI/UX',
+        slug: 'ui-ux',
+      },
+      {
+        name: 'Graphic Design',
+        slug: 'graphic-design',
+      },
+      {
+        name: 'Web Design',
+        slug: 'web-design',
+      },
+      {
+        name: 'Product Design',
+        slug: 'product-design',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1cdf',
+    name: 'Business',
+    subtopics: [
+      {
+        name: 'Entrepreneurship',
+        slug: 'entrepreneurship',
+      },
+      {
+        name: 'Marketing',
+        slug: 'marketing',
+      },
+      {
+        name: 'Finance',
+        slug: 'finance',
+      },
+      {
+        name: 'Business Strategy',
+        slug: 'business-strategy',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1ce0',
+    name: 'Health & Wellness',
+    subtopics: [
+      {
+        name: 'Nutrition',
+        slug: 'nutrition',
+      },
+      {
+        name: 'Exercise',
+        slug: 'exercise',
+      },
+      {
+        name: 'Mental Health',
+        slug: 'mental-health',
+      },
+      {
+        name: 'Healthy Living',
+        slug: 'healthy-living',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1ce1',
+    name: 'Lifestyle',
+    subtopics: [
+      {
+        name: 'Travel',
+        slug: 'travel',
+      },
+      {
+        name: 'Fashion',
+        slug: 'fashion',
+      },
+      {
+        name: 'Hobbies',
+        slug: 'hobbies',
+      },
+      {
+        name: 'Home Decor',
+        slug: 'home-decor',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1ce2',
+    name: 'Science',
+    subtopics: [
+      {
+        name: 'Physics',
+        slug: 'physics',
+      },
+      {
+        name: 'Chemistry',
+        slug: 'chemistry',
+      },
+      {
+        name: 'Biology',
+        slug: 'biology',
+      },
+      {
+        name: 'Astronomy',
+        slug: 'astronomy',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1ce3',
+    name: 'Entertainment',
+    subtopics: [
+      {
+        name: 'Movies',
+        slug: 'movies',
+      },
+      {
+        name: 'Music',
+        slug: 'music',
+      },
+      {
+        name: 'TV Shows',
+        slug: 'tv-shows',
+      },
+      {
+        name: 'Gaming',
+        slug: 'gaming',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1ce4',
+    name: 'Education',
+    subtopics: [
+      {
+        name: 'Online Learning',
+        slug: 'online-learning',
+      },
+      {
+        name: 'STEM Education',
+        slug: 'stem-education',
+      },
+      {
+        name: 'Language Learning',
+        slug: 'language-learning',
+      },
+      {
+        name: 'Higher Education',
+        slug: 'higher-education',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1ce5',
+    name: 'Sports',
+    subtopics: [
+      {
+        name: 'Football',
+        slug: 'football',
+      },
+      {
+        name: 'Basketball',
+        slug: 'basketball',
+      },
+      {
+        name: 'Tennis',
+        slug: 'tennis',
+      },
+      {
+        name: 'Cricket',
+        slug: 'cricket',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1ce6',
+    name: 'Politics',
+    subtopics: [
+      {
+        name: 'Government',
+        slug: 'government',
+      },
+      {
+        name: 'Elections',
+        slug: 'elections',
+      },
+      {
+        name: 'International Relations',
+        slug: 'international-relations',
+      },
+      {
+        name: 'Political Theory',
+        slug: 'political-theory',
+      },
+    ],
+  },
+  {
+    _id: '676eab6593a2e4d673dd1ce7',
+    name: 'Art',
+    subtopics: [
+      {
+        name: 'Painting',
+        slug: 'painting',
+      },
+      {
+        name: 'Sculpture',
+        slug: 'sculpture',
+      },
+      {
+        name: 'Photography',
+        slug: 'photography',
+      },
+      {
+        name: 'Modern Art',
+        slug: 'modern-art',
+      },
+    ],
+  },
+];
+
+export { notifications, mockUsers, topics };
