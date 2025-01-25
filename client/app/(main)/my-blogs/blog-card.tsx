@@ -47,6 +47,8 @@ const BlogCard = ({ blog }: { blog: Blog }) => {
     blogId: blog._id,
     title: blog.title,
     content: blog.content,
+    topics: [],
+    subtopics: [],
   });
 
   return (
