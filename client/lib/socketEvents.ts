@@ -26,6 +26,7 @@ export enum SocketEvents {
   // Server confirms that the user has joined the room
   INVITE_ACCEPTED = 'invite_accepted',
 
+  BLOG_PUBLISHED = 'blog_published',
   // // Server broadcasts the message to the recipient
   // DELIVER_MESSAGE = "deliver_message",
 
