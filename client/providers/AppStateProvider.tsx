@@ -31,9 +31,10 @@ export const AppStateProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     if (user) return;
 
-    session.update();
-
-    if (session.status !== 'authenticated') return;
+    if (session.status !== 'authenticated') {
+      session.update();
+      return;
+    }
 
     const localUser = getLocalUser();
     if (localUser) {

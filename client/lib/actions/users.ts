@@ -5,6 +5,7 @@ import { actionClient } from '../safe-action';
 import apiRequest from '../utils/apiRequest';
 import { AxiosError } from 'axios';
 import storageRequest from '../utils/storageRequest';
+import { PartialUser, Profile } from '@/types';
 
 const profileSchema = z.object({
   firstName: z.string(),
@@ -53,4 +54,68 @@ const uploadImage = async (formData: FormData) => {
   }
 };
 
-export { updateProfile };
+const getUsers = actionClient
+  .schema(z.string())
+  .action(async ({ parsedInput: username }) => {
+    const res = (await apiRequest.get(`/users/search?username=${username}`))
+      .data;
+    return res.data as PartialUser[];
+  });
+
+const getUserProfile = async (userId: string) => {
+  try {
+    const res = (await apiRequest.get(`/users/${userId}/profile`)).data;
+    return res.data as Profile;
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+  }
+};
+
+const getUserFollowings = async (userId: string) => {
+  try {
+    const res = (await apiRequest.get(`/users/${userId}/followings`)).data;
+    console.log(res.data);
+    return res.data as PartialUser[];
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+  }
+};
+
+const getUserFollowers = async (userId: string) => {
+  try {
+    const res = (await apiRequest.get(`/users/${userId}/followers`)).data;
+    return res.data as PartialUser[];
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+  }
+};
+
+const followUser = async (userId: string) => {
+  try {
+    await apiRequest.put(`/users/${userId}/follow`);
+    return { success: true };
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+    return { success: false };
+  }
+};
+
+const unfollowUser = async (userId: string) => {
+  try {
+    await apiRequest.put(`/users/${userId}/unfollow`);
+    return { success: true };
+  } catch (error) {
+    console.log((error as AxiosError).response?.data);
+    return { success: false };
+  }
+};
+
+export {
+  updateProfile,
+  getUsers,
+  getUserProfile,
+  followUser,
+  unfollowUser,
+  getUserFollowers,
+  getUserFollowings,
+};
