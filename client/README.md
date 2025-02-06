@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CoBlog Frontend
+
+This is the frontend application for CoBlog, a collaborative blogging platform. It's built with Next.js and uses modern web technologies to provide a smooth and interactive user experience.
+
+## Technologies Used
+
+- [Next.js](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [Framer Motion](https://www.framer.com/motion/)
+- [TipTap](https://tiptap.dev/)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js (v14 or later)
+- npm or yarn
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Navigate to the client directory:
+   \`\`\`
+   cd client
+   \`\`\`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies:
+   \`\`\`
+   npm install
+   \`\`\`
+   or
+   \`\`\`
+   yarn install
+   \`\`\`
+
+3. Set up environment variables:
+   - Create a \`.env.local\` file in the root of the client directory
+   - Add necessary environment variables (see [example.env](/client/example.env))
+
+4. Start the development server:
+   \`\`\`
+   npm run dev
+   \`\`\`
+   or
+   \`\`\`
+   yarn dev
+   \`\`\`
+
+5. Open \`http://localhost:3000\` in your browser to see the application.
+
+## Project Structure
+
+- \`/components\`: Reusable React components
+- \`/app\`: Next.js pages and API routes
+- \`/styles\`: Global styles and Tailwind CSS configuration
+- \`/lib\`: Utility functions and custom hooks
+- \`/public\`: Static assets
+
+## Available Scripts
+
+- \`npm run dev\`: Starts the development server
+- \`npm run build\`: Builds the app for production
+- \`npm start\`: Runs the built app in production mode
+- \`npm run lint\`: Runs the linter to check for code quality issues
+- \`npm run test\`: Runs the test suite
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+To learn more about the technologies used in this project, check out the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://reactjs.org/docs/getting-started.html)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- [Framer Motion Documentation](https://www.framer.com/api/motion/)
+- [TipTap Documentation](https://tiptap.dev/docs/introduction)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
