@@ -5,7 +5,12 @@ import apiRequest from '../utils/apiRequest';
 import { AxiosError } from 'axios';
 import { AuthError } from 'next-auth';
 import { actionClient } from '../safe-action';
-import { LoginFormSchema, SignupFormSchema } from '../form-validation/auth';
+import {
+  ForgotPasswordSchema,
+  LoginFormSchema,
+  ResetPasswordSchema,
+  SignupFormSchema,
+} from '../form-validation/auth';
 
 const register = actionClient
   .schema(SignupFormSchema)
@@ -84,4 +89,40 @@ const validateToken = async () => {
   }
 };
 
-export { register, login, validateToken };
+const sendResetEmail = actionClient
+  .schema(ForgotPasswordSchema)
+  .action(async ({ parsedInput: data }) => {
+    try {
+      throw new Error();
+      const res = await apiRequest.post('/auth/forgot-password', data);
+      return { message: res.data.message };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          message: error.response?.data.message,
+        };
+      }
+      throw new Error('Not implemented');
+      return { message: 'Something went wrong' };
+    }
+  });
+
+const resetPassword = actionClient
+  .schema(ResetPasswordSchema)
+  .action(async ({ parsedInput: data }) => {
+    try {
+      throw new Error();
+      const res = await apiRequest.post('/auth/reset-password', data);
+      return { message: res.data.message };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          message: error.response?.data.message,
+        };
+      }
+      throw new Error('Not implemented');
+      return { message: 'Something went wrong' };
+    }
+  });
+
+export { register, login, validateToken, sendResetEmail, resetPassword };

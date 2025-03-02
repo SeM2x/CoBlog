@@ -33,4 +33,18 @@ const LoginFormSchema = z.object({
   rememberMe: z.boolean().optional(),
 });
 
-export { SignupFormSchema, LoginFormSchema };
+const ForgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+const ResetPasswordSchema = z.object({
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  token: z.string().optional(),
+});
+
+export {
+  SignupFormSchema,
+  LoginFormSchema,
+  ForgotPasswordSchema,
+  ResetPasswordSchema,
+};
