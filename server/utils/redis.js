@@ -1,5 +1,6 @@
 /* eslint-disable consistent-return */
 
+import { hash } from 'crypto';
 import redis from 'redis';
 import { promisify } from 'util';
 
@@ -44,10 +45,31 @@ class RedisClient {
   async del(key) {
     const asyncDel = promisify(this.redisClient.del).bind(this.redisClient);
     try {
-      const resp = await asyncDel(key);
-      console.log(resp);
+      await asyncDel(key);
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  async setHash(key, exp, ...value) {
+    const asyncSetHash = promisify(this.redisClient.hSet).bind(this.redisClient);
+    const asyncSetExp = promisify(this.redisClient.expire).bind(this.redisClient);
+
+    try {
+      await asyncSetHash(key, ...value);
+      await asyncSetExp(key, exp)
+    } catch (err) {
+      console.log(`An error occured: ${err}`)
+    }
+  }
+
+  async getHashField(key) {
+    const asyncGetHashField = promisify(this.redisClient.hGet).bind(this.redisClient);
+    try {
+      const hashFields = asyncGetHashField(key)
+      return hashFields
+    } catch (err) {
+      console.log(`An error occured: ${err}`)
     }
   }
 }
