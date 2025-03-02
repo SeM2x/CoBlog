@@ -11,6 +11,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { validateEmailToken } from '@/lib/actions/auth';
+import { Loader } from 'lucide-react';
 
 export default function EmailValidationPage() {
   const router = useRouter();
@@ -27,10 +29,9 @@ export default function EmailValidationPage() {
         return;
       }
       try {
-        // Call your backend endpoint with the token
-        // e.g., await validateEmailToken(token);
+        await validateEmailToken(token);
         setStatus('success');
-      } catch (error) {
+      } catch {
         setStatus('error');
       }
     }
@@ -45,11 +46,16 @@ export default function EmailValidationPage() {
             Email Validation
           </CardTitle>
           <CardDescription className='text-center'>
-            {status === 'pending'
-              ? 'Validating your email...'
-              : status === 'success'
-              ? 'Your email has been successfully validated!'
-              : 'Validation failed. Please try again or contact support.'}
+            {status === 'pending' ? (
+              <div className='flex items-center justify-center space-x-2'>
+                <Loader className='w-6 h-6 animate-spin' />
+                <span>Validating your email...</span>
+              </div>
+            ) : status === 'success' ? (
+              'Your email has been successfully validated!'
+            ) : (
+              'Validation failed. Please try again or contact support.'
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>

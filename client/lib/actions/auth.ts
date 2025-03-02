@@ -125,4 +125,20 @@ const resetPassword = actionClient
     }
   });
 
-export { register, login, validateToken, sendResetEmail, resetPassword };
+const validateEmailToken = async (token: string) => {
+  try {
+    const res = await apiRequest.post('/auth/verify-email', { token });
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export {
+  register,
+  login,
+  validateToken,
+  sendResetEmail,
+  resetPassword,
+  validateEmailToken,
+};
