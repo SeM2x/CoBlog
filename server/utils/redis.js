@@ -52,7 +52,7 @@ class RedisClient {
   }
 
   async setHash(key, exp, ...value) {
-    const asyncSetHash = promisify(this.redisClient.hSet).bind(this.redisClient);
+    const asyncSetHash = promisify(this.redisClient.hset).bind(this.redisClient);
     const asyncSetExp = promisify(this.redisClient.expire).bind(this.redisClient);
 
     try {
@@ -64,7 +64,7 @@ class RedisClient {
   }
 
   async getHashField(key) {
-    const asyncGetHashField = promisify(this.redisClient.hGet).bind(this.redisClient);
+    const asyncGetHashField = promisify(this.redisClient.hgetall).bind(this.redisClient);
     try {
       const hashFields = asyncGetHashField(key)
       return hashFields
