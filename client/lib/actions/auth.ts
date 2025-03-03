@@ -11,6 +11,7 @@ import {
   ResetPasswordSchema,
   SignupFormSchema,
 } from '../form-validation/auth';
+import { z } from 'zod';
 
 const register = actionClient
   .schema(SignupFormSchema)
@@ -125,14 +126,23 @@ const resetPassword = actionClient
     }
   });
 
-const validateEmailToken = async (token: string) => {
-  try {
-    const res = await apiRequest.post('/auth/verify-email', { token });
-    return res.data;
-  } catch (error) {
-    throw error;
-  }
-};
+const validateEmail = actionClient
+  .schema(z.string().nonempty())
+  .action(async ({ parsedInput: data }) => {
+    try {
+      throw new Error();
+      const res = await apiRequest.post('/auth/reset-password', data);
+      return { message: res.data.message };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          message: error.response?.data.message,
+        };
+      }
+      throw new Error('Not implemented');
+      return { message: 'Something went wrong' };
+    }
+  });
 
 export {
   register,
@@ -140,5 +150,5 @@ export {
   validateToken,
   sendResetEmail,
   resetPassword,
-  validateEmailToken,
+  validateEmail,
 };

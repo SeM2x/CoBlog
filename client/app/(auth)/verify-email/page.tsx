@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -11,62 +11,69 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { validateEmailToken } from '@/lib/actions/auth';
-import { Loader } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { CodeInput } from '@/components/CodeInput'; // import the new component
+import { validateEmail } from '@/lib/actions/auth'; // adjust your API call accordingly
+import { useAction } from 'next-safe-action/hooks';
+import { toast } from '@/hooks/use-toast';
 
 export default function EmailValidationPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
-  const [status, setStatus] = useState<'pending' | 'success' | 'error'>(
-    'pending'
-  );
 
-  useEffect(() => {
-    async function validateEmail() {
-      if (!token) {
-        setStatus('error');
-        return;
-      }
-      try {
-        await validateEmailToken(token);
-        setStatus('success');
-      } catch {
-        setStatus('error');
-      }
-    }
-    validateEmail();
-  }, [token]);
+  const [code, setCode] = useState('');
+  const [error, setError] = useState<string>();
+
+  const { execute, isPending } = useAction(validateEmail, {
+    onSuccess: () => {
+      toast({
+        description: 'Email verified successfully!',
+      });
+      router.push('/');
+    },
+    onError: ({ error: { serverError } }) => {
+      toast({ variant: 'destructive', description: serverError });
+      setError(serverError);
+    },
+  });
+
+  async function onSubmit() {
+    if (code.length !== 6) return;
+    execute(code);
+  }
 
   return (
-    <div className='flex items-center justify-center min-h-screen bg-light-bg dark:bg-dark-bg'>
-      <Card className='w-full max-w-md'>
+    <div className='flex items-center justify-center min-h-screen bg-light-bg dark:bg-dark-bg px-4'>
+      <Card className='w-full max-w-md shadow-lg'>
         <CardHeader className='space-y-1'>
-          <CardTitle className='text-2xl font-bold text-center'>
-            Email Validation
-          </CardTitle>
-          <CardDescription className='text-center'>
-            {status === 'pending' ? (
-              <div className='flex items-center justify-center space-x-2'>
-                <Loader className='w-6 h-6 animate-spin' />
-                <span>Validating your email...</span>
-              </div>
-            ) : status === 'success' ? (
-              'Your email has been successfully validated!'
-            ) : (
-              'Validation failed. Please try again or contact support.'
-            )}
+          <div className='flex items-center justify-between space-x-2'>
+            <Button variant='ghost' size='icon' onClick={() => router.back()}>
+              <ArrowLeft className='w-4 h-4' />
+            </Button>
+            <CardTitle className='text-2xl font-bold'>
+              Email Validation
+            </CardTitle>
+            <div />
+          </div>
+          <CardDescription className='text-center text-sm text-light-secondary dark:text-dark-secondary'>
+            Enter the 6-digit code sent to your email
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Optionally, add more info or instructions here */}
+          <div className='space-y-6'>
+            <CodeInput length={6} onChange={(val) => setCode(val)} />
+            <div className='text-center text-sm text-light-secondary dark:text-dark-secondary'>
+              {code.length < 6 && 'Please enter the complete 6-digit code.'}
+              {error && <p className='text-destructive'>{error}</p>}
+            </div>
+          </div>
         </CardContent>
         <CardFooter className='flex justify-center'>
           <Button
-            onClick={() => router.push('/dashboard')}
-            disabled={status !== 'success'}
+            onClick={onSubmit}
+            disabled={code.length !== 6 || isPending}
+            loading={isPending}
           >
-            Go to Dashboard
+            Validate Code
           </Button>
         </CardFooter>
       </Card>
