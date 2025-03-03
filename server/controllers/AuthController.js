@@ -104,16 +104,18 @@ export async function resetPassword(req, res) {
   }
 
   const key = `user:${email}`
-  const user = await redisClient.getHashFields(key);
+  const user = await redisClient.getHashField(key);
+
   if (!user) {
-    return res.json(400).json({ status: 'error', message: 'User does not request a password reset'});
+    return res.status(401).json({ status: 'error', message: 'Token timeout, request a new one'});
   }
 
-  if (!user.verified === true) {
-    return res.json(400).json({ status: 'error', message: 'Unable to reset user password'})
+  if (user.verified === 'false') {
+    return res.status(401).json({ status: 'error', message: 'Unable to reset user password' });
   }
 
-  await dbClient.updateData('users', { email }, { password })
+  const hashData = hashPassword(password);
+  await dbClient.updateData('users', { email }, { $set: { Password: hashData.hash, 'metadata.salt': hashData.salt  } });
 
   //delete Token from redis
   return res.status(200).json({ status: 'success', message: 'Password reset successful, try login' })
@@ -123,15 +125,23 @@ export async function resetPassword(req, res) {
 export async function validateToken(req, res) {
   const { email, token } = req.body;
 
-  const key = `user:${email}`
-  const user = await redisClient.getHashFields(`user:${email}`);
   if (!token || !email) {
     return res.status(400).json({ status: 'error', message: 'Token and Email is required' })
   }
+
+  const key = `user:${email}`
+  const user = await redisClient.getHashField(`user:${email}`);
+  if (!user) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Token is either expired or not requested'
+    });
+  }
+
   if (token === user.token) {
     await redisClient.setHash(key, 60, 'verified', true) // Change time
     return res.status(200).json({
-      status: success,
+      status: 'success',
       validated: true,
       message: 'OTP verification successful, proceed to changing password'
     });
