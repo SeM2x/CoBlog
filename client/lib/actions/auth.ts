@@ -6,7 +6,7 @@ import { AxiosError } from 'axios';
 import { AuthError } from 'next-auth';
 import { actionClient } from '../safe-action';
 import {
-  ForgotPasswordSchema,
+  EmailSchema,
   LoginFormSchema,
   ResetPasswordSchema,
   SignupFormSchema,
@@ -28,7 +28,7 @@ const register = actionClient
         await apiRequest.post('/auth/sign_in', { email, password })
       ).data;
 
-      const token = loginResponse?.data?.token;
+      const token = loginResponse?.token;
       await signIn('credentials', { token, redirect: false });
 
       return { user: loginResponse.data };
@@ -90,21 +90,18 @@ const validateToken = async () => {
   }
 };
 
-const sendResetEmail = actionClient
-  .schema(ForgotPasswordSchema)
-  .action(async ({ parsedInput: data }) => {
+const sendOTP = actionClient
+  .schema(EmailSchema)
+  .action(async ({ parsedInput: { email } }) => {
     try {
-      throw new Error();
-      const res = await apiRequest.post('/auth/forgot-password', data);
-      return { message: res.data.message };
+      const res = await apiRequest.post(`/otp/send?phoneNumber=%2B${email}`);
+      return { ok: true, data: res.data };
     } catch (error) {
       if (error instanceof AxiosError) {
-        return {
-          message: error.response?.data.message,
-        };
+        console.log(error.response?.data);
+        return { ok: false, status: error.status };
       }
-      throw new Error('Not implemented');
-      return { message: 'Something went wrong' };
+      throw error;
     }
   });
 
@@ -126,10 +123,12 @@ const resetPassword = actionClient
     }
   });
 
-const validateEmail = actionClient
+const verifyOtp = actionClient
   .schema(z.string().nonempty())
   .action(async ({ parsedInput: data }) => {
     try {
+      console.log(data);
+
       throw new Error();
       const res = await apiRequest.post('/auth/reset-password', data);
       return { message: res.data.message };
@@ -139,16 +138,9 @@ const validateEmail = actionClient
           message: error.response?.data.message,
         };
       }
-      throw new Error('Not implemented');
+      //throw new Error('Not implemented');
       return { message: 'Something went wrong' };
     }
   });
 
-export {
-  register,
-  login,
-  validateToken,
-  sendResetEmail,
-  resetPassword,
-  validateEmail,
-};
+export { register, login, validateToken, resetPassword, verifyOtp, sendOTP };
