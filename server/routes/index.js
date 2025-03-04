@@ -37,9 +37,9 @@ router.get('/stats', getStats);
 // Manages all Auth routes
 authRouter.post('/create_account', createUserAccount);
 authRouter.post('/sign_in', userSignIn);
-authRouter.post('/forget_password', generateResetToken);
+authRouter.post('/request_token', generateResetToken);
 authRouter.post('/validate_token', validateToken);
-authRouter.put('/update_password', resetPassword);
+authRouter.put('/reset_password', resetPassword);
 
 // Manages all Users routes
 userRouter.get('/:id/profile', getUserProfileById);
