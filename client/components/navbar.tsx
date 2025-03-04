@@ -12,7 +12,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, User, LogOut, Menu, PenSquare, Sun, Moon } from 'lucide-react';
+import {
+  Search,
+  User,
+  LogOut,
+  Menu,
+  PenSquare,
+  Sun,
+  Moon,
+  FileText,
+  FilePenLine,
+  Settings,
+  CircleHelp,
+} from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DialogTitle } from '@/components/ui/dialog';
 import { signOut } from 'next-auth/react';
@@ -26,9 +38,32 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
-    { name: 'Dashboard', href: '/dashboard' },
-    { name: 'My Blogs', href: '/my-blogs' },
-    { name: 'Create Blog', href: '/new-blog' },
+    {
+      name: 'Profile',
+      href: '/profile',
+      icon: <User className='mr-2 h-4 w-4' />,
+    },
+    {
+      name: 'My Blogs',
+      href: '/my-blogs',
+      icon: <FileText className='mr-2 h-4 w-4' />,
+    },
+    {
+      name: 'Create Blog',
+      href: '/new-blog',
+      icon: <FilePenLine className='mr-2 h-4 w-4' />,
+    },
+    { separator: true },
+    {
+      name: 'Settings',
+      href: '/settings',
+      icon: <Settings className='mr-2 h-4 w-4' />,
+    },
+    {
+      name: 'Help',
+      href: '/help',
+      icon: <CircleHelp className='mr-2 h-4 w-4' />,
+    },
   ];
 
   const user = useUserStore((state) => state.user);
@@ -77,7 +112,7 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
             </Button>
           </Link>
           <NotificationsMenu notifications={notifications} />
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant='ghost' className='relative h-9 w-9 rounded-full'>
                 <Avatar className='h-9 w-9 border'>
@@ -90,33 +125,25 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className='w-56' align='end' forceMount>
-              <DropdownMenuItem asChild>
-                <Link href='/profile'>
-                  <User className='mr-2 h-4 w-4' />
-                  <span>Profile</span>
-                </Link>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              >
-                {theme === 'dark' ? (
-                  <Sun className='mr-2 h-4 w-4' />
+              {navItems.map((item, index) =>
+                item.separator ? (
+                  <DropdownMenuSeparator key={index} />
                 ) : (
-                  <Moon className='mr-2 h-4 w-4' />
-                )}
-                <span>{theme === 'dark' ? 'Light' : 'Dark'} mode</span>
-              </DropdownMenuItem>
+                  <DropdownMenuItem key={item.name} asChild>
+                    <Link href={item.href!}>
+                      {item.icon}
+                      <span>{item.name}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )
+              )}
               <DropdownMenuSeparator />
-              {navItems.map((item) => (
-                <DropdownMenuItem key={item.name} asChild>
-                  <Link href={item.href}>{item.name}</Link>
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}>
-                <LogOut className='mr-2 h-4 w-4 text-red-500' />
-                <span className='text-red-500'>Log out</span>
+              <DropdownMenuItem
+                onClick={() => signOut()}
+                className='hover:!text-red-500'
+              >
+                <LogOut className='mr-2 h-4 w-4' />
+                <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -145,16 +172,19 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
                     />
                   </div>
 
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className='text-sm font-medium text-light-primary dark:text-dark-primary hover:text-primary'
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
+                  {navItems.map(
+                    (item) =>
+                      !item.separator && (
+                        <Link
+                          key={item.name}
+                          href={item.href!}
+                          className='text-sm font-medium text-light-primary dark:text-dark-primary hover:text-primary'
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          {item.name}
+                        </Link>
+                      )
+                  )}
                 </div>
                 <div className='flex flex-col space-y-2'>
                   <Button
