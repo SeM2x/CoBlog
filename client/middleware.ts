@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server';
 import { auth } from './auth';
 
+const unAuthenticatedPaths = [
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/verify-email',
+];
+
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
-  const isOnLoginPage = req.nextUrl.pathname.startsWith('/login');
-  const isOnRegisterPage = req.nextUrl.pathname.startsWith('/register');
-  const isOnPasswordResetPage =
-    req.nextUrl.pathname.startsWith('/password-reset');
+  const isOnUnAuthenticatedPage = unAuthenticatedPaths.some((path) =>
+    req.nextUrl.pathname.startsWith(path)
+  );
 
   if (req.nextUrl.pathname === '/') {
     if (isLoggedIn) {
@@ -16,7 +22,7 @@ export default auth((req) => {
     }
   }
 
-  if (isOnLoginPage || isOnRegisterPage || isOnPasswordResetPage) {
+  if (isOnUnAuthenticatedPage) {
     if (isLoggedIn) {
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
