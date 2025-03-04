@@ -18,8 +18,6 @@ import {
   LogOut,
   Menu,
   PenSquare,
-  Sun,
-  Moon,
   FileText,
   FilePenLine,
   Settings,
@@ -31,8 +29,8 @@ import { signOut } from 'next-auth/react';
 import NotificationsMenu from './notifications-menu';
 import { useUserStore } from '@/lib/store';
 import { Notification } from '@/types';
-import { useTheme } from 'next-themes';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Separator } from './ui/separator';
 
 export function Navbar({ notifications }: { notifications?: Notification[] }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -67,8 +65,6 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
   ];
 
   const user = useUserStore((state) => state.user);
-
-  const { theme, setTheme } = useTheme();
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -113,7 +109,7 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
           </Link>
           <NotificationsMenu notifications={notifications} />
           <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className='hidden md:flex'>
               <Button variant='ghost' className='relative h-9 w-9 rounded-full'>
                 <Avatar className='h-9 w-9 border'>
                   <AvatarImage
@@ -168,48 +164,39 @@ export function Navbar({ notifications }: { notifications?: Notification[] }) {
                     <Search className='absolute left-2 top-2.5 h-4 w-4 text-light-secondary dark:text-dark-secondary' />
                     <Input
                       placeholder='Search blogs, tags, or users...'
-                      className='pl-8'
+                      className='pl-8 mb-4'
                     />
                   </div>
 
-                  {navItems.map(
-                    (item) =>
-                      !item.separator && (
-                        <Link
-                          key={item.name}
-                          href={item.href!}
-                          className='text-sm font-medium text-light-primary dark:text-dark-primary hover:text-primary'
-                          onClick={() => setIsMenuOpen(false)}
+                  {navItems.map((item, index) =>
+                    item.separator ? (
+                      <Separator key={index} />
+                    ) : (
+                      <Link
+                        key={item.name}
+                        href={item.href!}
+                        className='flex text-sm font-medium text-light-primary dark:text-dark-primary hover:text-primary'
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Button
+                          className='w-full gap-0 justify-start'
+                          variant='ghost'
                         >
-                          {item.name}
-                        </Link>
-                      )
+                          {item.icon}
+                          <span>{item.name}</span>
+                        </Button>
+                      </Link>
+                    )
                   )}
                 </div>
-                <div className='flex flex-col space-y-2'>
-                  <Button
-                    onClick={() =>
-                      setTheme(theme === 'dark' ? 'light' : 'dark')
-                    }
-                    variant='secondary'
-                    className='mt-auto'
-                  >
-                    {theme === 'dark' ? (
-                      <Sun className='mr-2 h-4 w-4' />
-                    ) : (
-                      <Moon className='mr-2 h-4 w-4' />
-                    )}
-                    {theme === 'dark' ? 'Light' : 'Dark'} mode
-                  </Button>
-                  <Button
-                    onClick={() => signOut()}
-                    variant='ghost'
-                    className='!text-red-500 hover:!bg-red-50'
-                  >
-                    <LogOut className='mr-2 h-4 w-4' />
-                    Log out
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => signOut()}
+                  variant='secondary'
+                  className='hover:!text-red-500 hover:!bg-red-500/15'
+                >
+                  <LogOut className='mr-2 h-4 w-4' />
+                  Log out
+                </Button>
               </div>
             </SheetContent>
           </Sheet>
