@@ -64,9 +64,9 @@ const BlogCard = ({ post }: { post: FeedPost }) => {
             <div className='flex space-x-4'>
               <LikeButton
                 className='text-muted-foreground hover:text-primary'
-                nReactions={post.nReactions}
+                initialReactions={{ like: 10, enjoyable: 2 }}
                 blogId={post.id}
-                isLiked={post.isLike}
+                userReaction={post.isLike ? 'like' : null}
               />
 
               <Button

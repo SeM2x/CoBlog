@@ -152,9 +152,9 @@ export default function BlogDetailsPage({
           <div className='flex space-x-4'>
             <LikeButton
               blogId={blog._id}
-              nReactions={blog.nReactions}
+              initialReactions={{ like: 10, enjoyable: 2 }}
+              userReaction={isLiked ? 'like' : null}
               variant='text'
-              isLiked={isLiked}
             />
             <Button variant='ghost' size='sm'>
               <MessageCircle className='w-4 h-4 mr-2' />
