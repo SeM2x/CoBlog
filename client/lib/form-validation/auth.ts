@@ -33,7 +33,7 @@ const LoginFormSchema = z.object({
   rememberMe: z.boolean().optional(),
 });
 
-const ForgotPasswordSchema = z.object({
+const EmailSchema = z.object({
   email: z.string().email('Invalid email address'),
 });
 
@@ -42,9 +42,4 @@ const ResetPasswordSchema = z.object({
   token: z.string().optional(),
 });
 
-export {
-  SignupFormSchema,
-  LoginFormSchema,
-  ForgotPasswordSchema,
-  ResetPasswordSchema,
-};
+export { SignupFormSchema, LoginFormSchema, EmailSchema, ResetPasswordSchema };

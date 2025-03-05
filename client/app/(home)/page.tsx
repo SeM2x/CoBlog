@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useTheme } from 'next-themes';
 
 const FeatureCard = ({
   icon,
@@ -73,12 +72,6 @@ const FeatureCard = ({
 
 export default function LandingPage() {
   const [activeTab, setActiveTab] = useState('write');
-  const { setTheme } = useTheme();
-
-  useEffect(() => {
-    setTheme('dark');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div className='min-h-screen bg-background'>

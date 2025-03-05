@@ -6,11 +6,12 @@ import { AxiosError } from 'axios';
 import { AuthError } from 'next-auth';
 import { actionClient } from '../safe-action';
 import {
-  ForgotPasswordSchema,
+  EmailSchema,
   LoginFormSchema,
   ResetPasswordSchema,
   SignupFormSchema,
 } from '../form-validation/auth';
+import { z } from 'zod';
 
 const register = actionClient
   .schema(SignupFormSchema)
@@ -27,7 +28,7 @@ const register = actionClient
         await apiRequest.post('/auth/sign_in', { email, password })
       ).data;
 
-      const token = loginResponse?.data?.token;
+      const token = loginResponse?.token;
       await signIn('credentials', { token, redirect: false });
 
       return { user: loginResponse.data };
@@ -89,12 +90,14 @@ const validateToken = async () => {
   }
 };
 
-const sendResetEmail = actionClient
-  .schema(ForgotPasswordSchema)
+const verifyAccount = actionClient
+  .schema(z.string().nonempty())
   .action(async ({ parsedInput: data }) => {
     try {
+      console.log(data);
+
       throw new Error();
-      const res = await apiRequest.post('/auth/forgot-password', data);
+      const res = await apiRequest.post('/auth/verify_account', data);
       return { message: res.data.message };
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -102,7 +105,42 @@ const sendResetEmail = actionClient
           message: error.response?.data.message,
         };
       }
-      throw new Error('Not implemented');
+      //throw new Error('Not implemented');
+      return { message: 'Something went wrong' };
+    }
+  });
+
+const sendOTP = actionClient
+  .schema(EmailSchema)
+  .action(async ({ parsedInput: { email } }) => {
+    try {
+      const res = await apiRequest.post(`/auth/request_token`, { email });
+      return { ok: true, data: res.data };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        console.log(error.response?.data);
+        return { ok: false, status: error.status };
+      }
+      throw error;
+    }
+  });
+
+const verifyOtp = actionClient
+  .schema(z.string().nonempty())
+  .action(async ({ parsedInput: data }) => {
+    try {
+      console.log(data);
+
+      throw new Error();
+      const res = await apiRequest.post('/auth/validate_token', data);
+      return { message: res.data.message };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          message: error.response?.data.message,
+        };
+      }
+      //throw new Error('Not implemented');
       return { message: 'Something went wrong' };
     }
   });
@@ -112,7 +150,7 @@ const resetPassword = actionClient
   .action(async ({ parsedInput: data }) => {
     try {
       throw new Error();
-      const res = await apiRequest.post('/auth/reset-password', data);
+      const res = await apiRequest.post('/auth/password_reset', data);
       return { message: res.data.message };
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -125,20 +163,12 @@ const resetPassword = actionClient
     }
   });
 
-const validateEmailToken = async (token: string) => {
-  try {
-    const res = await apiRequest.post('/auth/verify-email', { token });
-    return res.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
 export {
   register,
   login,
   validateToken,
-  sendResetEmail,
   resetPassword,
-  validateEmailToken,
+  verifyOtp,
+  sendOTP,
+  verifyAccount,
 };

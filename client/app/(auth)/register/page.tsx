@@ -58,7 +58,7 @@ export default function RegisterPage() {
       if (data?.user) {
         setLocalUser(data?.user);
         setUser(data?.user);
-        router.push('/topics');
+        router.push('/verify-email');
       }
       if (data?.message) {
         setError(data?.message);
