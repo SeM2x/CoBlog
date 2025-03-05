@@ -156,7 +156,6 @@ ${siteUrl}`;
 
   try {
     const result = await sendEmail(user.email, subject, plainText, htmlText);
-    console.log(result)
   } catch (err) {
     console.log(err);
     return false
@@ -278,7 +277,6 @@ ${siteUrl}`;
 
     try {
         const result = await sendEmail(user.email, subject, plainText, htmlText);
-        console.log(result);
     } catch(err) {
         console.log(err);
         return false
