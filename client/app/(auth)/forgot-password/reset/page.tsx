@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -23,7 +23,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Eye, EyeOff } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
 import { resetPassword } from '@/lib/actions/auth';
 import { toast } from '@/hooks/use-toast';
@@ -48,8 +48,7 @@ export default function ResetPasswordPage() {
     error: boolean;
   } | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const [email, setEmail] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof ResetPasswordSchema>>({
     resolver: zodResolver(ResetPasswordSchema),
@@ -72,8 +71,12 @@ export default function ResetPasswordPage() {
   });
 
   async function onSubmit(values: z.infer<typeof ResetPasswordSchema>) {
-    execute({ password: values.password, token: token || '' });
+    execute({ password: values.password, email: email || '' });
   }
+
+  useEffect(() => {
+    setEmail(sessionStorage.getItem('email'));
+  }, []);
 
   return (
     <div className='flex items-center justify-center min-h-screen bg-light-bg dark:bg-dark-bg px-4'>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 const useCountdown = (initialSeconds: number) => {
   const [seconds, setSeconds] = useState(initialSeconds);
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;

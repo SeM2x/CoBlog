@@ -4,15 +4,15 @@ import CountdownTimer from '@/components/common/CountdownTimer';
 import useCountdown from '@/hooks/useCountdown';
 import { useAction } from 'next-safe-action/hooks';
 import { toast } from '@/hooks/use-toast';
-import { sendOTP } from '@/lib/actions/auth';
+import { generateOTP } from '@/lib/actions/auth';
 
 type ResendButtonProps = {
   email: string;
 };
 const ResendButton = ({ email }: ResendButtonProps) => {
-  const { seconds, isActive, handleResend } = useCountdown(60);
+  const { seconds, isActive, handleResend } = useCountdown(300);
 
-  const { execute } = useAction(sendOTP, {
+  const { execute } = useAction(generateOTP, {
     onSuccess: ({ data }) => {
       if (data?.ok) {
         console.log(data.data.message);
