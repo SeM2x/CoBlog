@@ -51,8 +51,8 @@ export async function createUserAccount(req, res) {
   }
 
   // Check if user with same username exists
-  const usernameExist = await dbClient.findData('users', { username });
-  if (usernameExist) {
+  const usernameExists = await dbClient.findData('users', { username });
+  if (usernameExists && usernameExists.metadata.isVerified) {
     return res.status(409).json({ status: 'error', message: 'Username already exists' });
   }
 
@@ -64,6 +64,11 @@ export async function createUserAccount(req, res) {
     Password: hashData.hash,
     username,
     metadata: { isVerified: false, salt: hashData.salt }
+  }
+
+  const userData = {
+    email: user.email,
+    username: user.username
   }
 
    // Update unverified user data with new data
@@ -80,7 +85,7 @@ export async function createUserAccount(req, res) {
   try {
 
     await redisClient.setHash(key, exp + 1, 'email', email, 'verified', false, 'token', token) // (exp + 1) for email delivery
-    await sendAuthenticationOTP(userData, token, exp) // Send Authentication Email
+    await sendAuthenticationOTP(userData, token, exp / 60) // Send Authentication Email
   } catch(err) {
     console.log(err)
     return res.status(500).json({ status: 'error', message: 'Something went wrong'})
@@ -163,7 +168,7 @@ export async function resetPassword(req, res) {
     return res.status(400).json({status: 'error', message: 'Email and Password is required'})
   }
 
-  const key = `user:${email}`
+  const key = `user:reset:${email}`
   const user = await redisClient.getHashField(key);
 
   if (!user) {
@@ -178,6 +183,7 @@ export async function resetPassword(req, res) {
   await dbClient.updateData('users', { email }, { $set: { Password: hashData.hash, 'metadata.salt': hashData.salt  } });
 
   //delete Token from redis
+
   return res.status(200).json({ status: 'success', message: 'Password reset successful, Proceed to login' })
 }
 
@@ -189,7 +195,7 @@ export async function validateToken(req, res) {
     return res.status(400).json({ status: 'error', message: 'Token and Email is required' })
   }
 
-  const key = `user:$reset{email}`
+  const key = `user:reset:${email}`
   const user = await redisClient.getHashField(key);
   if (!user) {
     return res.status(401).json({
@@ -240,7 +246,7 @@ export async function generateResetToken(req, res) {
   
   try {
     await redisClient.setHash(key, exp + 1, 'email', email, 'verified', false, 'token', token) // (exp + 1) for email delivery
-    await sendVerificationOTP(userData, token, exp) // Send email with token
+    await sendVerificationOTP(userData, token, exp / 60) // Send email with token
   } catch (err) {
     console.log(err)
     return res.status(500).json({ status: 'error', message: 'Something went wrong, request token generation again' })
