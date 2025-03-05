@@ -4,25 +4,26 @@ import { generateOTP } from '../utils/uuid';
 import { sendAuthenticationOTP, sendVerificationOTP } from '../services/EmailServices';
 
 import { hashPassword, isPassword } from '../utils/hashUtils';
+import e from 'express';
 
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const createAccount = async (email) => {
-  const newUserData = {
+  const UserData = {
     bio: null,
     followerCount: 0,
     followingCount: 0,
     postCount: 0,
     viewsCount: 0,
-    metadata: {
-      status: 'active', modeOfAuth: 'password', isVerified: true,
-    },
+    "metadata.modeOfAuth": 'password',
+    "metadata.status": 'active',
+    "metadata.isVerified": true,
     preference: {},
   };
 
   try {
-    const newUser = await dbClient.updateData('users', { email }, { $set: newUserData } );
+    const newUser = await dbClient.updateData('users', { email }, { $set: UserData } );
     await dbClient.insertData('followings', { userId: newUser.insertedId, followings: [] });
     await dbClient.insertData('followers', { userId: newUser.insertedId, followers: [] });
     await dbClient.insertData('viewshistory', { userId: newUser.insertedId });
@@ -105,12 +106,14 @@ export async function verifyUserAccount(req, res) {
   }
 
   if (token === user.token) {
-    const accountCretated = await createAccount(email);
-    if (accountCretated) {
-      return res.status(201).json({ status: 'success', validated: true, message: 'Account verified successfully, proceed to login' })
+    try {
+      const accountCreated = await createAccount(email);
+      if (accountCreated) {
+        return res.status(201).json({ status: 'success', validated: true, message: 'Account verified successfully, proceed to login' })
+      }
+    } catch (err) {
+      return res.status(500).json({ status: 'error', message: 'Something went wrong' })
     }
-
-    return res.status(500).json({ status: 'error', message: 'Something went wrong' })
   }
 
   return res.status(404).json({ status: 'error', validated: false, message: 'Invalid OTP' })
@@ -175,7 +178,7 @@ export async function resetPassword(req, res) {
   await dbClient.updateData('users', { email }, { $set: { Password: hashData.hash, 'metadata.salt': hashData.salt  } });
 
   //delete Token from redis
-  return res.status(200).json({ status: 'success', message: 'Password reset successful, try login' })
+  return res.status(200).json({ status: 'success', message: 'Password reset successful, Proceed to login' })
 }
 
 // Check if OTP is correct
@@ -187,7 +190,7 @@ export async function validateToken(req, res) {
   }
 
   const key = `user:$reset{email}`
-  const user = await redisClient.getHashField(`user:${email}`);
+  const user = await redisClient.getHashField(key);
   if (!user) {
     return res.status(401).json({
       status: 'error',
