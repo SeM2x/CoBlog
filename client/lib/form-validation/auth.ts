@@ -38,8 +38,8 @@ const EmailSchema = z.object({
 });
 
 const ResetPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  token: z.string().optional(),
 });
 
 export { SignupFormSchema, LoginFormSchema, EmailSchema, ResetPasswordSchema };

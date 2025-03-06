@@ -1,5 +1,5 @@
 import { getStatus, getStats } from '../controllers/AppController';
-import { createUserAccount, userSignIn } from '../controllers/AuthController';
+import { createUserAccount, userSignIn, resetPassword, validateToken, generateResetToken, verifyUserAccount } from '../controllers/AuthController';
 import {
   getUserProfileById, followUser, unfollowUser, getUserFollowers,
   getUserFollowings, editUserData, searchUser,
@@ -37,6 +37,10 @@ router.get('/stats', getStats);
 // Manages all Auth routes
 authRouter.post('/create_account', createUserAccount);
 authRouter.post('/sign_in', userSignIn);
+authRouter.post('/request_token', generateResetToken);
+authRouter.post('/validate_token', validateToken);
+authRouter.put('/reset_password', resetPassword);
+authRouter.post('/verify_account', verifyUserAccount);
 
 // Manages all Users routes
 userRouter.get('/:id/profile', getUserProfileById);
