@@ -67,8 +67,8 @@ export async function createUserAccount(req, res) {
   }
 
   const userData = {
-    email: user.email,
-    username: user.username
+    email: newUserData.email,
+    username: newUserData.username
   }
 
    // Update unverified user data with new data
@@ -114,6 +114,8 @@ export async function verifyUserAccount(req, res) {
     try {
       const accountCreated = await createAccount(email);
       if (accountCreated) {
+        // Deleta Token After verification
+        await redisClient.del(key);
         return res.status(201).json({ status: 'success', validated: true, message: 'Account verified successfully, proceed to login' })
       }
     } catch (err) {
@@ -179,10 +181,15 @@ export async function resetPassword(req, res) {
     return res.status(401).json({ status: 'error', message: 'Unable to reset user password' });
   }
 
-  const hashData = hashPassword(password);
-  await dbClient.updateData('users', { email }, { $set: { Password: hashData.hash, 'metadata.salt': hashData.salt  } });
+  try {
+    const hashData = hashPassword(password);
+    await dbClient.updateData('users', { email }, { $set: { Password: hashData.hash, 'metadata.salt': hashData.salt  } });
 
-  //delete Token from redis
+    //delete Token from redis
+    await redisClient.del(key);
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: 'Something went wrong, try again' });
+  }
 
   return res.status(200).json({ status: 'success', message: 'Password reset successful, Proceed to login' })
 }
