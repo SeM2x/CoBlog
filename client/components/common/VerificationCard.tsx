@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ const VerificationCard = ({
   title?: string;
   description?: string;
 }) => {
+  const [email, setEmail] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const [error, setError] = useState<string>();
 
@@ -35,15 +36,19 @@ const VerificationCard = ({
   const { execute, isPending } = useAction(verifyOtp, {
     onSuccess,
     onError: ({ error: { serverError } }) => {
-      toast({ variant: 'destructive', description: serverError as string });
-      setError(serverError as string);
+      toast({ variant: 'destructive', description: serverError });
+      setError(serverError);
     },
   });
 
   async function onSubmit() {
     if (code.length !== 6) return;
-    execute(code);
+    execute({ token: code, email: email || '' });
   }
+
+  useEffect(() => {
+    setEmail(sessionStorage.getItem('email'));
+  }, []);
   return (
     <Card className='w-full max-w-md shadow-lg'>
       <CardHeader className='space-y-1'>
@@ -86,7 +91,7 @@ const VerificationCard = ({
         </Button>
         <div className='flex space-x-1 text-sm '>
           <p>Didn’t get a code?</p>
-          <ResendButton email='email@email.com' />
+          <ResendButton email={email || ''} />
         </div>
       </CardFooter>
     </Card>

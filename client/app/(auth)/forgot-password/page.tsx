@@ -23,7 +23,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAction } from 'next-safe-action/hooks';
-import { sendOTP } from '@/lib/actions/auth';
+import { generateOTP } from '@/lib/actions/auth';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { EmailSchema } from '@/lib/form-validation/auth';
@@ -42,11 +42,10 @@ export default function ForgotPasswordPage() {
 
   const router = useRouter();
 
-  const { execute, isPending } = useAction(sendOTP, {
+  const { execute, isPending } = useAction(generateOTP, {
     onSuccess: () => {
-      router.push(
-        '/forgot-password/verification?email=' + form.getValues().email
-      );
+      router.push('/forgot-password/verification');
+      sessionStorage.setItem('email', form.getValues().email);
       // setMessage({
       //   error: false,
       //   content:
