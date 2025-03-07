@@ -22,10 +22,12 @@ const VerificationCard = ({
   onSuccess,
   title,
   description,
+  type = 'verify',
 }: {
   onSuccess: () => void;
   title?: string;
   description?: string;
+  type?: 'verify' | 'reset';
 }) => {
   const [email, setEmail] = useState<string | null>(null);
   const [code, setCode] = useState('');
@@ -35,15 +37,25 @@ const VerificationCard = ({
 
   const { execute, isPending } = useAction(verifyOtp, {
     onSuccess,
-    onError: ({ error: { serverError } }) => {
-      toast({ variant: 'destructive', description: serverError });
+    onError: ({ error: { validationErrors, serverError } }) => {
+      toast({
+        variant: 'destructive',
+        description:
+          serverError ||
+          (validationErrors?.email?._errors &&
+            validationErrors.email._errors[0]),
+      });
       setError(serverError);
     },
   });
 
   async function onSubmit() {
     if (code.length !== 6) return;
-    execute({ token: code, email: email || '' });
+    execute({
+      token: code,
+      email: email || '',
+      type: type === 'verify' ? 'verify_account' : 'validate_token',
+    });
   }
 
   useEffect(() => {

@@ -17,6 +17,7 @@ export default function EmailValidationPage() {
         title='OTP Verification'
         description=' If an account exists for that email, you will receive a code
             shortly.'
+        type='reset'
       />
     </div>
   );

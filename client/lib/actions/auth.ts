@@ -12,6 +12,7 @@ import {
   SignupFormSchema,
 } from '../form-validation/auth';
 import { z } from 'zod';
+import handleError from '../utils/handleError';
 
 const register = actionClient
   .schema(SignupFormSchema)
@@ -23,19 +24,24 @@ const register = actionClient
       ).data;
       console.log(registerResponse);
 
-      const { email, password } = data;
-      const loginResponse = (
-        await apiRequest.post('/auth/sign_in', { email, password })
-      ).data;
+      // const { email, password } = data;
+      // const loginResponse = (
+      //   await apiRequest.post('/auth/sign_in', { email, password })
+      // ).data;
 
-      const token = loginResponse?.token;
-      await signIn('credentials', { token, redirect: false });
+      // const token = loginResponse?.token;
+      // await signIn('credentials', { token, redirect: false });
 
-      return { user: loginResponse.data };
+      return {
+        success: true,
+        email: data.email,
+        message: registerResponse.message,
+      };
     } catch (error) {
       if (error instanceof AxiosError) {
         console.log(error.response?.data);
         return {
+          success: false,
           message:
             (error.response?.data?.message as string) || 'Something went wrong',
         };
@@ -90,26 +96,6 @@ const validateToken = async () => {
   }
 };
 
-const verifyAccount = actionClient
-  .schema(z.string().nonempty())
-  .action(async ({ parsedInput: data }) => {
-    try {
-      console.log(data);
-
-      throw new Error();
-      const res = await apiRequest.post('/auth/verify_account', data);
-      return { message: res.data.message };
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        return {
-          message: error.response?.data.message,
-        };
-      }
-      //throw new Error('Not implemented');
-      return { message: 'Something went wrong' };
-    }
-  });
-
 const generateOTP = actionClient
   .schema(EmailSchema)
   .action(async ({ parsedInput: { email } }) => {
@@ -117,26 +103,25 @@ const generateOTP = actionClient
       const res = await apiRequest.post(`/auth/request_token`, { email });
       return { ok: true, data: res.data };
     } catch (error) {
-      // if (error instanceof AxiosError) {
-      //   return { ok: false, status: error.status };
-      // }
-      throw error;
+      handleError(error);
     }
   });
 
 const verifyOtp = actionClient
   .schema(
-    z.object({ email: z.string().nonempty(), token: z.string().nonempty() })
+    z.object({
+      email: z.string().nonempty('An Error Occurred.'),
+      token: z.string().nonempty(),
+      type: z.enum(['verify_account', 'validate_token']),
+    })
   )
   .action(async ({ parsedInput: data }) => {
     try {
-      const res = await apiRequest.post('/auth/validate_token', data);
+      const { type, ...info } = data;
+      const res = await apiRequest.post(`/auth/${type}`, info);
       return { message: res.data.message };
     } catch (error) {
-      if (error instanceof AxiosError) {
-        throw Error(error.response?.data.message);
-      }
-      throw Error('Something went wrong');
+      handleError(error);
     }
   });
 
@@ -163,5 +148,4 @@ export {
   resetPassword,
   verifyOtp,
   generateOTP,
-  verifyAccount,
 };

@@ -28,9 +28,10 @@ import { Eye, EyeOff } from 'lucide-react';
 import { register } from '@/lib/actions/auth';
 import { SignupFormSchema } from '@/lib/form-validation/auth';
 import { useAction } from 'next-safe-action/hooks';
-import { setLocalUser } from '@/lib/utils/local-storage';
-import { useUserStore } from '@/lib/store';
+// import { setLocalUser } from '@/lib/utils/local-storage';
+// import { useUserStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
+import { toast } from '@/hooks/use-toast';
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -50,17 +51,19 @@ export default function RegisterPage() {
     },
   });
 
-  const setUser = useUserStore((state) => state.setUser);
+  // const setUser = useUserStore((state) => state.setUser);
   const router = useRouter();
 
   const { execute, isPending } = useAction(register, {
     onSettled: ({ result: { data } }) => {
-      if (data?.user) {
-        setLocalUser(data?.user);
-        setUser(data?.user);
+      if (data?.message && data.success) {
+        // setLocalUser(data?.user);
+        // setUser(data?.user);
+        toast({ description: data?.message });
+        sessionStorage.setItem('email', data?.email || '');
         router.push('/verify-email');
       }
-      if (data?.message) {
+      if (data?.message && !data.success) {
         setError(data?.message);
       }
     },
