@@ -1,6 +1,6 @@
 import { authenticate } from './middlewares/authenticate';
 
-import { fileUpload } from './controller/FilesController';
+import { UploadUserAvatar } from './controller/FilesController';
 
 const express = require('express');
 const cors = require('cors');
