@@ -43,7 +43,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
     }
     timeoutRef.current = setTimeout(() => {
       setShowReactions(true);
-    }, 150);
+    }, 350);
   };
 
   const handleHideReactions = () => {
@@ -64,6 +64,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   }, []);
 
   const handleReaction = async (reaction: ReactionType) => {
+    handleHideReactions();
     if (userReaction === reaction) {
       setUserReaction(null);
       setReactionCounts((prev) => ({
@@ -93,7 +94,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   );
   const CurrentIcon = userReaction
     ? reactionIcons[userReaction].icon
-    : reactionIcons.like.icon;
+    : reactionIcons.clap.icon;
 
   return (
     <div
@@ -109,7 +110,8 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         onClick={() => {
           if (userReaction) {
             setUserReaction(null);
-          } else handleReaction('like');
+          } else handleReaction('clap');
+          handleHideReactions();
         }}
         aria-label='React to blog post'
       >
@@ -117,7 +119,9 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
           <CurrentIcon
             className={cn(
               'w-5 h-5',
-              userReaction && reactionIcons[userReaction].color
+              userReaction && reactionIcons[userReaction].color,
+              !userReaction &&
+                'fill-accent-foreground stroke-accent-foreground border-accent-foreground'
             )}
           />
         </motion.div>

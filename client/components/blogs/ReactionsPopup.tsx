@@ -2,7 +2,8 @@
 
 import type React from 'react';
 import { motion } from 'framer-motion';
-import { Book, Lightbulb, Coffee, Heart, Star, Pen } from 'lucide-react';
+import { Lightbulb, PartyPopper, Laugh, Heart } from 'lucide-react';
+import ClapIcon from '@/assets/clap-icon.svg';
 import {
   Tooltip,
   TooltipContent,
@@ -11,12 +12,11 @@ import {
 } from '@/components/ui/tooltip';
 
 export type ReactionType =
+  | 'clap'
   | 'like'
+  | 'funny'
   | 'insightful'
-  | 'inspiring'
-  | 'enjoyable'
-  | 'favorite'
-  | 'wellWritten';
+  | 'celebrate';
 
 interface ReactionIcon {
   icon: React.ElementType;
@@ -25,16 +25,23 @@ interface ReactionIcon {
 }
 
 export const reactionIcons: Record<ReactionType, ReactionIcon> = {
+  clap: {
+    icon: ClapIcon,
+    label: 'Clap',
+    color: 'fill-primary stroke-primary border-primary',
+  },
   like: { icon: Heart, label: 'Like', color: 'text-red-500' },
+  funny: { icon: Laugh, label: 'Funny', color: 'text-lime-500' },
   insightful: {
     icon: Lightbulb,
     label: 'Insightful',
     color: 'text-yellow-500',
   },
-  inspiring: { icon: Book, label: 'Inspiring', color: 'text-blue-500' },
-  enjoyable: { icon: Coffee, label: 'Enjoyable', color: 'text-orange-500' },
-  favorite: { icon: Star, label: 'Favorite', color: 'text-purple-500' },
-  wellWritten: { icon: Pen, label: 'Well Written', color: 'text-green-500' },
+  celebrate: {
+    icon: PartyPopper,
+    label: 'Celebrate',
+    color: 'text-pink-500',
+  },
 };
 
 interface ReactionsPopupProps {
@@ -70,8 +77,12 @@ const ReactionsPopup: React.FC<ReactionsPopupProps> = ({
                   onClick={() => onReact(key as ReactionType)}
                 >
                   <Icon
-                    className={`w-5 h-5 ${color} ${
-                      currentReaction === key ? 'fill-current' : ''
+                    className={`w-5 h-5 ${
+                      currentReaction === key
+                        ? color
+                        : key === 'clap'
+                        ? 'fill-accent-foreground stroke-accent-foreground  border-accent-foreground'
+                        : 'text-accent-foreground'
                     }`}
                   />
                 </motion.button>
