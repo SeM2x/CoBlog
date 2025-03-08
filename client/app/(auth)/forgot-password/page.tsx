@@ -22,37 +22,43 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { ForgotPasswordSchema } from '@/lib/form-validation/auth';
 import { useAction } from 'next-safe-action/hooks';
-import { sendResetEmail } from '@/lib/actions/auth';
+import { sendOTP } from '@/lib/actions/auth';
 import { ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { EmailSchema } from '@/lib/form-validation/auth';
 
 export default function ForgotPasswordPage() {
   const [message, setMessage] = useState<{
     content: string;
     error: boolean;
   } | null>(null);
-  const form = useForm<z.infer<typeof ForgotPasswordSchema>>({
-    resolver: zodResolver(ForgotPasswordSchema),
+  const form = useForm<z.infer<typeof EmailSchema>>({
+    resolver: zodResolver(EmailSchema),
     defaultValues: {
       email: '',
     },
   });
 
-  const { execute, isPending } = useAction(sendResetEmail, {
+  const router = useRouter();
+
+  const { execute, isPending } = useAction(sendOTP, {
     onSuccess: () => {
-      setMessage({
-        error: false,
-        content:
-          'If an account exists for that email, you will receive reset instructions shortly.',
-      });
+      router.push(
+        '/forgot-password/verification?email=' + form.getValues().email
+      );
+      // setMessage({
+      //   error: false,
+      //   content:
+      //     'If an account exists for that email, you will receive reset instructions shortly.',
+      // });
     },
     onError: ({ error: { serverError } }) => {
       if (serverError) setMessage({ error: true, content: serverError });
     },
   });
 
-  async function onSubmit(values: z.infer<typeof ForgotPasswordSchema>) {
+  async function onSubmit(values: z.infer<typeof EmailSchema>) {
     execute(values);
   }
 
