@@ -13,6 +13,6 @@ app.use(authenticate);
 
 app.use('/images', express.static('/home/ubuntu/storage'));
 
-app.post('/images/upload', fileUpload);
+app.post('/images/avatar_upload', UploadUserAvatar);
 
 app.listen(3000, () => console.log('Storage server started'));
