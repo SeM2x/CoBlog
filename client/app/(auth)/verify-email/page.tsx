@@ -11,7 +11,7 @@ export default function EmailValidationPage() {
     toast({
       description: 'Email verified successfully!',
     });
-    router.push('/');
+    router.push('/login');
   };
 
   return (
