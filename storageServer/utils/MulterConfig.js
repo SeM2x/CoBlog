@@ -1,12 +1,13 @@
-const { ObjectId } = require('mongodb');
 const multer = require('multer');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
+export const MulterError = multer.MulterError;
+
 // Storage config
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, `/home/ubuntu/${file.fieldname}/storage`);
+    cb(null, `/home/ubuntu/storage/${file.fieldname}/`);
   },
   filename(req, file, cb) {
     let fname;
