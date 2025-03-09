@@ -1,12 +1,14 @@
+import { avatarUpload, MulterError } from '../utils/MulterConfig'
+
+const { ObjectId } = require('mongodb');
 const fs = require('fs').promises;
-const avatarUpload = require('utils/MulterConfig')
 const dbClient = require('../utils/storageDb');
 const serverName = process.env.STORAGE_SERVER_URL;
 
 export function UploadUserAvatar(req, res) {
   avatarUpload(req, res, async (err) => {
     const userId = new ObjectId(req.user.userId);
-    if (err instanceof multer.MulterError) {
+    if (err instanceof MulterError) {
       return res.status(400).json({ status: 'error', message: 'File must not exceed 2MB' });
     }
     if (req.fileError) {
@@ -19,13 +21,15 @@ export function UploadUserAvatar(req, res) {
       }
 
       details.userId = userId;
-      details.profileUrl = `${serverName}${req.localFileName}`;
+      details.profileUrl = `${serverName}media/avatar/${req.localFileName}`;
 
       // Check if a user already have avatar uploaded
       const query = await dbClient.findData('storage', { userId, fieldname: 'avatar' });
       if (query) {
+        if (query.filename !== details.filename) {
+          await fs.unlink(query.path) // delete existing file with diff ext
+	}
         await dbClient.deleteData('storage', { userId, fieldname: 'avatar' });
-        await fs.unlink(query.localFileName) // delete existing file if exist
       }
 
       await dbClient.insertData('storage', details);
